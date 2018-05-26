@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "MinGW",
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "C:/MinGW/bin/gcc.exe",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/include",
+                "C:/.hunter/_Base/9cfab9c/0b5ade2/b52a7fb/Install/include"
+            ],
+            "defines": [],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/include",
+                    "C:/.hunter/_Base/9cfab9c/0b5ade2/b52a7fb/Install/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

@@ -53,7 +53,10 @@ build
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/c_cpp_properties.json
 .history
 
 
 # End of https://www.gitignore.io/api/c++,cmake,visualstudiocode
+
+stage/

@@ -4,8 +4,22 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 namespace chipimgproc { 
+
 const char* depth(const cv::Mat& image);
-void info(const cv::Mat& image);
+
+template<class OS>
+void info(OS& os, const cv::Mat& image)
+{
+    os       << "- dims       " << image.dims         << std::endl
+             << "- rows       " << image.rows         << " elems" << std::endl
+             << "- cols       " << image.cols         << " elems" << std::endl
+             << "- total      " << image.total()      << " elems" << std::endl
+             << "- channels   " << image.channels()   << std::endl
+             << "- elemSize   " << image.elemSize()   << " bytes" << std::endl
+             << "- elemSize1  " << image.elemSize1()  << " bytes" << std::endl
+             << "- depth      " << depth(image)       << std::endl;
+}
+
 constexpr double cmax(std::int32_t depth)
 {
     switch (depth)
@@ -114,34 +128,5 @@ void mat_copy (
 cv::Mat gray_log( const cv::Mat& in, float trim_rate = 0.0 );
 
 bool imwrite(const boost::filesystem::path& fname, const cv::Mat src, float trim_rate );
-// template <class FUNC, class... ARGS>
-// void cv_imshow(
-//       int16_t delay
-//     , FUNC&& func
-//     , ARGS&&... args
-//     , bool active = true
-// )
-// {
-//     if (active and delay >= 0)
-//     {
-//         auto image = func(args...);
-//         cv::imshow("verbose", image);
-//         cv::waitKey(delay);
-//     }
-// }
-// 
-// template <class FUNC, class... ARGS>
-// auto cv_imshow(
-//       const std::string& name    
-//     , FUNC&& func
-//     , bool active = true
-// )
-// {
-//     if (active )
-//     {
-//         auto image = func();
-//         cv::imwrite( name, image );
-//     }
-// }
 
 }
