@@ -13,58 +13,14 @@ struct MarkerBased {
         cv::Mat image;
         std::vector<cv::Point> feats;
     };
-    MarkerBased( int row, int col, int vert_off, int hor_off) 
+    MarkerBased( int row, int col) 
     : row_(row)
     , col_(col)
-    , vert_off_( vert_off )
-    , hor_off_(hor_off)
     {}
 
     using FeatureExtractor = std::function<
         std::vector<cv::Point>(const cv::Mat& )
     >;
-    auto get_full_w(const std::vector<cv::Mat>& ims) {
-        int width = 0;
-        std::vector<int> hor_st_pos;
-        for ( int j = 0; j < col_; j ++ ) {
-            hor_st_pos.push_back( width );
-            auto& im = ims.at( j );
-            width += im.cols;
-            width -= hor_off_;
-        }
-        width += hor_off_;
-        return cv::Mat(cv::Size(width + 100, ims.at(0).cols + 100), ims.at(0).type());
-    }
-    auto get_full_wh( const std::vector<cv::Mat>& ims ) {
-        if( ims.size() != row_ * col_) {
-            throw std::logic_error(
-                "the image number not match specified parameter"
-            );
-
-        }
-        int height = 0;
-        int width = 0;
-        std::vector<int> hor_st_pos;
-        std::vector<int> vert_st_pos;
-
-        for ( int j = 0; j < col_; j ++ ) {
-            hor_st_pos.push_back( width );
-            auto& im = ims.at( j );
-            width += im.cols;
-            width -= hor_off_;
-        }
-        width += hor_off_;
-
-        for ( int i = 0; i < row_; i ++ ) {
-            vert_st_pos.push_back(height);
-            auto& im = ims.at( col_* i );
-            height += im.rows;
-            height -= vert_off_;
-        }
-        height += vert_off_;
-        cv::Mat res(cv::Size(width* 1.1, height*1.1), ims.at(0).type());
-        return res;
-    } 
     void overlap_stitch( 
         cv::Mat& target, 
         std::vector<cv::Rect>& t_rects, 
@@ -283,8 +239,6 @@ struct MarkerBased {
 private:
     int row_;
     int col_;
-    int vert_off_;
-    int hor_off_;
 };
 
 }}

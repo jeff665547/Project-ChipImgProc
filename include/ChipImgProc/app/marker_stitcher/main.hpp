@@ -16,8 +16,6 @@ struct Parameters
     std::string img_list_file_path;
     int x;
     int y;
-    int v_off;
-    int h_off;
     std::string output_image_path;
     std::string marker_path;
 };
@@ -34,8 +32,6 @@ public:
             ("im_list,l"    , po::value<std::string>()->required()  , "image list going to be stitiched, the order must follow Z shape walk.")
             ("x_axis,x"     , po::value<int>()->required()          , "number of images along x axis")
             ("y_axis,y"     , po::value<int>()->required()          , "number of images along y axis")
-            ("ver_off,v"    , po::value<int>()->required()          , "vertical offset between images")
-            ("hor_off,z"    , po::value<int>()->required()          , "horizontal offset between images")
             ("output,o"     , po::value<std::string>()->required()  , "output image path")
             ("marker,m"     , po::value<std::string>()->required()  , "marker image path")
         ;
@@ -49,8 +45,6 @@ public:
         get_parameter ("im_list"     , img_list_file_path);
         get_parameter ("x_axis"      , x);
         get_parameter ("y_axis"      , y);
-        get_parameter ("ver_off"     , v_off);
-        get_parameter ("hor_off"     , h_off);
         get_parameter ("output"      , output_image_path);
         get_parameter ("marker"      , marker_path);
     }
@@ -142,13 +136,6 @@ class Main
         }
         return res;
     }
-    // void direct_stitch() {
-    //     auto image_list = get_images();
-    //     cpt::algorithm::stitch::DirectStitch ds(args_.y, args_.x, args_.v_off, args_.h_off);
-    //     cv::Mat out = ds(image_list);
-    //     auto opath = boost::filesystem::path(args_.output_image_path);
-    //     cv::imwrite(opath.string(), out); // TODO: .tiff protected
-    // }
     cv::Mat_<float> match_template(cv::Mat img, cv::Mat marker) {
         cv::Mat_<float> sm(
             img.rows - marker.rows + 1,
@@ -235,7 +222,7 @@ class Main
                 i++;
             }
         }
-        stitch::MarkerBased ms(args_.y, args_.x, args_.v_off, args_.h_off);
+        stitch::MarkerBased ms(args_.y, args_.x);
         cv::Mat out = ms(imgs, feats, 3, 3);
         cv::imwrite(args_.output_image_path, out);
     }
