@@ -1,50 +1,41 @@
-set(namespace "${PROJECT_NAME}::")
+screw_cmake_package_config_initial()
+include(GNUInstallDirs)
 
-install( 
-    TARGETS ${exe_targets} ${test_targets} ${lib_targets}
-    EXPORT ${PROJECT_NAME}-targets
+write_basic_package_version_file(
+    "${version_config}" COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    "cmake/Config.cmake.in"
+    "${project_config}"
+    INSTALL_DESTINATION "${config_install_dir}"
+)
+install(TARGETS ${exe_targets} ${lib_targets} ${test_targets}
+    EXPORT "${targets_export_name}"
     BUNDLE DESTINATION . COMPONENT Runtime
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Library
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Library
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT Runtime
+)
+install(
+    DIRECTORY include
+    DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Headers
+)
+install(
+    FILES       "${project_config}" "${version_config}"
+    DESTINATION "${config_install_dir}"
 )
 
-install( FILES ${PUBLIC_HEADERS}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    COMPONENT Headers
+install(
+    EXPORT      "${targets_export_name}"
+    NAMESPACE   "${namespace}"
+    DESTINATION "${config_install_dir}"
 )
-
-# GNUInstallDirs "DATADIR" wrong here; CMake search path wants "share".
-set(BIOVOLTRON_CMAKECONFIG_INSTALL_DIR "share/cmake/${PROJECT_NAME}" CACHE STRING "install path for summitConfig.cmake")
-
-if (NOT CMAKE_VERSION VERSION_LESS 3.0)
-  export(EXPORT ${PROJECT_NAME}-targets
-         FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
+if(INSTALL_DEPS)
+    configure_file(cmake/bundle.cmake.in ${CMAKE_BINARY_DIR}/bundle.cmake @ONLY)
+    install(
+        SCRIPT ${CMAKE_BINARY_DIR}/bundle.cmake
+        COMPONENT Dependencies
+    )
 endif()
-configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-                              "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-                              INSTALL_DESTINATION ${BIOVOLTRON_CMAKECONFIG_INSTALL_DIR})
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-                                 VERSION ${${PROJECT_NAME}_VERSION}
-                                 COMPATIBILITY AnyNewerVersion)
-install(
-    EXPORT ${PROJECT_NAME}-targets
-    NAMESPACE ${namespace}
-    DESTINATION ${BIOVOLTRON_CMAKECONFIG_INSTALL_DIR}
-    COMPONENT TargetFiles
-)
-install(
-    FILES 
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-        DESTINATION ${BIOVOLTRON_CMAKECONFIG_INSTALL_DIR}
-    COMPONENT ConfigFiles
-)
-screw_get_bits(BITS)
-# bin and runtime dir setting goes here, this is for bundle
-unset(BITS)
-configure_file(cmake/bundle.cmake.in ${CMAKE_BINARY_DIR}/bundle.cmake @ONLY)
-install(
-    SCRIPT ${CMAKE_BINARY_DIR}/bundle.cmake
-    COMPONENT Runtime
-)
+screw_cmake_package_config_finish()

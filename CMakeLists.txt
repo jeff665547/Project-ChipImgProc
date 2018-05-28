@@ -17,9 +17,6 @@ project(ChipImgProc LANGUAGES C CXX)
 hunter_add_package(Screw)
 find_package( Screw CONFIG REQUIRED )
 
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
 include(cmake/version.cmake)
 include(cmake/options.cmake)
 include(cmake/dependencies.cmake)
