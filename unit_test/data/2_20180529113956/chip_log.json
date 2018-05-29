@@ -1,0 +1,87 @@
+{
+  "camera_h_size": 1011.1940298507462,
+  "camera_w_size": 1262.6865671641792,
+  "channels": [
+    {
+      "camera_delay_time": 1,
+      "exposure_time_abs": 250,
+      "filter": 0,
+      "gain": 0,
+      "name": "White8",
+      "pixel_format": "Mono8"
+    }
+  ],
+  "chip": {
+    "fov": {
+      "cols": 2,
+      "h_d": 814,
+      "mask": "resource/lmarker_mask.tif",
+      "mask_src_type": "auto",
+      "rows": 2,
+      "w_d": 814,
+      "x_i": 612.3433,
+      "y_i": 623.597015
+    },
+    "name": "zion22",
+    "spec": {
+      "h": 2400,
+      "location_marker": {
+        "h": 290,
+        "template": "resource/maze.tif",
+        "w": 290
+      },
+      "name": "zion",
+      "shooting_marker": {
+        "position": {
+          "col": 5,
+          "h": 130,
+          "h_d": 407,
+          "row": 5,
+          "w": 130,
+          "w_d": 407,
+          "x_i": 140,
+          "y_i": 152
+        },
+        "type": "regular_matrix"
+      },
+      "w": 2400
+    }
+  },
+  "horizontal_overlap": 448.6865671641792,
+  "image_height": 1011.1940298507462,
+  "image_prefix": "",
+  "image_width": 1262.6865671641792,
+  "location_marker": {
+    "x": 7489.375,
+    "y": 18824.0625
+  },
+  "scan_end": "2018/05/29 11:40:31",
+  "scan_start": "2018/05/29 11:39:56",
+  "shoot_locs": [
+    {
+      "x": 7464.6875,
+      "y": 18947.5,
+      "z": 5026.25
+    },
+    {
+      "x": 8278.75,
+      "y": 18954.6875,
+      "z": 5019.0625
+    },
+    {
+      "x": 7457.5,
+      "y": 19761.5625,
+      "z": 5027.8125
+    },
+    {
+      "x": 8271.5625,
+      "y": 19768.75,
+      "z": 5021.875
+    }
+  ],
+  "top_level_dir": "D:/summit_daemon_capture/DEMO5-113-TW-6\\2_20180529113956",
+  "vertical_overlap": 197.19402985074623,
+  "zi_diff": 8.75,
+  "zi_max": 5027.8125,
+  "zi_min": 5019.0625
+}
