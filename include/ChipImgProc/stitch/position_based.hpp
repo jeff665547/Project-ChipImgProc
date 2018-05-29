@@ -1,6 +1,7 @@
 #pragma once
 #include <ChipImgProc/utils.h>
-namespace chipimgproc{
+#include <iostream>
+namespace chipimgproc{ namespace stitch{
 
 struct PositionBased {
     PositionBased( int row, int col ) 
@@ -20,6 +21,13 @@ struct PositionBased {
         }
         auto w_h = get_full_w_h(imgs, st_ps);
         cv::Mat res(w_h.y, w_h.x, imgs.at(0).type());
+        for( int i = 0; i < imgs.size(); i ++ ) {
+            auto& min_p = st_ps.at(i);
+            auto& img_i = imgs.at(i);
+            cv::Rect region(min_p.x, min_p.y, img_i.cols, img_i.rows);
+            img_i.copyTo(res(region));
+        }
+        return res;
     }
 private:
     cv::Point_<int> get_full_w_h( 
@@ -54,4 +62,4 @@ private:
     int col_;
 };
 
-}
+}}
