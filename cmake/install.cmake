@@ -22,6 +22,10 @@ install(
     DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Headers
 )
 install(
+    DIRECTORY unit_test/data
+    DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Tests
+)
+install(
     FILES       "${project_config}" "${version_config}"
     DESTINATION "${config_install_dir}"
 )

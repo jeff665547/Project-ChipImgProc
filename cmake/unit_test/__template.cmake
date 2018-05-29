@@ -4,8 +4,8 @@ target_link_libraries(
     ${__screw_target}
     GTest::gtest 
     GTest::main
-    ${OpenCV_LIBS}
-    Boost::system
+    Nucleona::Nucleona
+    ChipImgProc-utils
 )
 target_include_directories(${__screw_target} PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
