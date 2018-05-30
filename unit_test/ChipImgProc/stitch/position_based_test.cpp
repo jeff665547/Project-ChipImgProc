@@ -79,10 +79,10 @@ TEST(position_based_stitch, real_data_test) {
     auto img_base = nucleona::test::data_dir() / "2_20180529113956";
     std::cout << img_base << std::endl;
     std::vector<cv::Mat> imgs;
-    imgs.push_back(cv::imread((img_base / "0-0-0.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "0-0-1.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "0-1-0.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "0-1-1.tiff").string()));
+    imgs.push_back(gray(cv::imread((img_base / "0-0-0.tiff").string())));
+    imgs.push_back(gray(cv::imread((img_base / "0-0-1.tiff").string())));
+    imgs.push_back(gray(cv::imread((img_base / "0-1-0.tiff").string())));
+    imgs.push_back(gray(cv::imread((img_base / "0-1-1.tiff").string())));
 
     std::vector<cv::Point_<int>> st_ps;
     st_ps.emplace_back(   19 ,    0 );
