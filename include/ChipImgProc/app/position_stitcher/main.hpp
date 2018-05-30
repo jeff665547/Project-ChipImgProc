@@ -9,15 +9,15 @@
 #include <stdexcept>
 #include <Nucleona/algo/split.hpp>
 #include <Nucleona/format/csv_parser.hpp>
+#include <ChipImgProc/stitch/utils.h>
 namespace chipimgproc {
 namespace app {
 namespace position_stitcher{
 struct Parameters
 {
     std::string img_pos_list_file_path;
-    int x;
-    int y;
     std::string output_image_path;
+    int cali_max;
 };
 
 class OptionParser : public Parameters, public nucleona::app::cli::OptionParser
@@ -29,10 +29,9 @@ public:
         po::options_description desc("Allowed options");
         desc.add_options()
             ("help,h"       , "show help message")
-            ("im_list,l"    , po::value<std::string>()->required()  , "image list going to be stitiched, the order must follow Z shape walk.")
-            ("x_axis,x"     , po::value<int>()->required()          , "number of images along x axis")
-            ("y_axis,y"     , po::value<int>()->required()          , "number of images along y axis")
-            ("output,o"     , po::value<std::string>()->required()  , "output image path")
+            ("im_list,l"    , po::value<std::string>()->required()  , "Image list going to be stitiched, the order must follow Z shape walk.")
+            ("cali_max,c"   , po::value<std::string>()->required()  , "Fine calibration max range.")
+            ("output,o"     , po::value<std::string>()->required()  , "Output image path")
         ;
         po::store(po::parse_command_line(argc, argv, desc), vm);
         if(argc == 1 or vm.count("help"))
@@ -41,10 +40,9 @@ public:
             std::exit(1);
         }
         po::notify(vm);
-        get_parameter ("im_list"     , img_pos_list_file_path);
-        get_parameter ("x_axis"      , x);
-        get_parameter ("y_axis"      , y);
-        get_parameter ("output"      , output_image_path);
+        get_parameter ("im_list"     , img_pos_list_file_path   );
+        get_parameter ("cali_max"    , cali_max                 );
+        get_parameter ("output"      , output_image_path        );
     }
 };
 
@@ -100,10 +98,11 @@ class Main
         return params;
     }
     void operator()() {
-        // auto imgs = get_images();
-        // stitch::PositionBased pb(args_.y, args_.x);
-        // cv::Mat out = pb(imgs.imgs, imgs.pos);
-        // cv::imwrite(args_.output_image_path, out);
+        auto imgs = get_images();
+        stitch::PositionBased pb;
+        auto cali_st_p = pb(imgs.imgs, imgs.pos, args_.cali_max);
+        auto out = stitch::add(imgs.imgs, cali_st_p);
+        cv::imwrite(args_.output_image_path, out);
     }
 };
 
