@@ -100,10 +100,10 @@ class Main
         return params;
     }
     void operator()() {
-        auto imgs = get_images();
-        stitch::PositionBased pb(args_.y, args_.x);
-        cv::Mat out = pb(imgs.imgs, imgs.pos);
-        cv::imwrite(args_.output_image_path, out);
+        // auto imgs = get_images();
+        // stitch::PositionBased pb(args_.y, args_.x);
+        // cv::Mat out = pb(imgs.imgs, imgs.pos);
+        // cv::imwrite(args_.output_image_path, out);
     }
 };
 

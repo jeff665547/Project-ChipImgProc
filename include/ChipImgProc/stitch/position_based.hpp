@@ -4,14 +4,11 @@
 namespace chipimgproc{ namespace stitch{
 
 struct PositionBased {
-    PositionBased( int row, int col ) 
-    : row_ ( row )
-    , col_ ( col )
-    {}
 
-    cv::Mat operator()(
+    std::vector<cv::Point_<int>> operator()(
         const std::vector<cv::Mat>& imgs,
-        const std::vector<cv::Point_<int>>& st_ps
+        const std::vector<cv::Point_<int>>& st_ps,
+        int cali_max
     ) {
         if( imgs.size() != st_ps.size()) {
             throw std::runtime_error(
@@ -19,132 +16,143 @@ struct PositionBased {
                 __FILE__ + ":" + std::to_string(__LINE__)
             );
         }
-        auto w_h = get_full_w_h(imgs, st_ps);
-        // std::vector<cv::Mat> layers;
-        cv::Mat res(w_h.y + 500, w_h.x + 500, imgs.at(0).type());
-        // cv::Mat tmp(w_h.y, w_h.x, imgs.at(0).type());
-        // int from_to[2];
-        bool first = true;
-        cv::Rect last_region;
+        std::vector<cv::Point_<int>> cali_st_ps;
         for( int i = 0; i < imgs.size(); i ++ ) {
-            // cv::Mat layer( w_h.y, w_h.x, imgs.at(0).type());
             auto& min_p = st_ps.at(i);
             auto& img_i = imgs.at(i);
-            cv::Rect region(min_p.x + 50, min_p.y + 50, img_i.cols, img_i.rows);
-            if(!first) {
-                std::cout << "last_region: " << last_region << std::endl;
-                std::cout << "region: " << region << std::endl;
-                auto inter = last_region & region;
-                std::cout << "inter: " << inter << std::endl;
-                cv::Rect base_region(inter);
-                cv::Rect obj_region(
-                    inter.x - region.x + 50, 
-                    inter.y - region.y + 50, 
-                    inter.width - 100, 
-                    inter.height - 100
-                );
-                std::cout << "base_region: " << base_region << std::endl;
-                std::cout << "obj_region: " << obj_region << std::endl;
-                cv::Mat base = res(base_region);
-                cv::Mat obj = img_i(obj_region); // TODO:
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-                cv::Mat scores(base.rows - obj.rows + 1, base.cols - obj.cols + 1, CV_32F);
-                cv::matchTemplate(base, obj, scores, cv::TM_CCORR_NORMED);
-                cv::imwrite("obj_" + std::to_string(i) + ".tiff", obj);
-                cv::imwrite("base_" + std::to_string(i) + ".tiff", base);
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-
-                double val;
-                cv::Point loc;
-                cv::minMaxLoc(scores, nullptr, &val, nullptr, &loc);
-                std::cout << "loc: " << loc << std::endl;
-                std::cout << "val: " << val << std::endl;
-                // cv::imwrite("score_" + std::to_string(i) + ".tiff", scores);
-                cv::imwrite(
-                    "obj_add_base_" + std::to_string(i) + ".tiff", 
-                    add(base(cv::Rect(loc.x, loc.y, obj.cols, obj.rows)), obj)
-                );
-
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-                region.x = base_region.x + loc.x - obj_region.x;
-                region.y = base_region.y + loc.y - obj_region.y;
-                std::cout << "region: " << region << std::endl;
+            cv::Rect region(min_p.x + cali_max, min_p.y + cali_max, img_i.cols, img_i.rows);
+            if(!cali_st_ps.empty()) {
+                std::vector<OverlapRes> possible_cali_p;
+                for( int i = 0; i < cali_st_ps.size(); i ++ ) {
+                    auto overlap_res(
+                        overlap(
+                            imgs.at(i), cali_st_ps.at(i), 
+                            img_i, cv::Point_<int>(region.x, region.y),
+                            cali_max
+                        )
+                    );
+                    possible_cali_p.push_back(overlap_res);
+                }
+                auto vote_res = vote_cali_rect(possible_cali_p);
+                cali_st_ps.emplace_back(vote_res.x, vote_res.y);
+                region.x = vote_res.x;
+                region.y = vote_res.y;
+                // basic_stitch(img_i, res, region, i);
+            } else {
+                cali_st_ps.emplace_back(region.x, region.y);
+                // img_i.copyTo(res(region));
             }
-            basic_stitch(img_i, res, region, i);
-            
-            // res.copyTo(tmp);
-            // img_i.copyTo(tmp(region));
-            // from_to[0] = i % 3;
-            // from_to[1] = (i + 2) % 3;
-            // cv::mixChannels(&tmp, 1, &res, 1, from_to, 1);
-            // img_i.copyTo(layer(region));
-            // layers.push_back(layer);
-            last_region = region;
-            first = false;
         }
-        // cv::merge(layers.data(), layers.size(), res);
-        return res;
+        // auto final_region = get_full_w_h(imgs, cali_st_ps);
+        // return res(final_region);
+        return cali_st_ps;
     }
 private:
-    cv::Mat score_img( const cv::Mat& s ) {
-        
-    }
-    cv::Mat add(const cv::Mat& a, const cv::Mat& b ) {
-        cv::Mat res;
-        cv::addWeighted(a, 0.5, b, 0.5, 0, res);
+    struct OverlapRes {
+        cv::Rect cali_inter_on_base;
+        cv::Rect cali_b_on_base;
+    };
+    cv::Rect vote_cali_rect( const std::vector<OverlapRes>& candi_rects ) {
+        double sum_weight(0);
+        double sum_x(0);
+        double sum_y(0);
+        double sum_w(0);
+        double sum_h(0);
+        for(auto&& r : candi_rects ) {
+            double weight = r.cali_inter_on_base.area();
+            sum_x += ( weight * r.cali_b_on_base.x );
+            sum_y += ( weight * r.cali_b_on_base.y );
+            sum_w += ( weight * r.cali_b_on_base.width );
+            sum_h += ( weight * r.cali_b_on_base.height );
+            sum_weight += weight;
+        }
+        cv::Rect res(
+            sum_x / sum_weight,
+            sum_y / sum_weight,
+            sum_w / sum_weight,
+            sum_h / sum_weight
+        );
+        std::cout << "vote_cali_rect return: " << res << std::endl;
         return res;
     }
-    void basic_stitch( 
+    OverlapRes overlap( 
+        const cv::Mat& a, 
+        const cv::Point_<int>& a_on_base_p,
+        const cv::Mat& b, 
+        const cv::Point_<int>& b_on_base_p,
+        const int& b_shrink
+    ) {
+        cv::Rect a_on_base(
+            a_on_base_p.x,
+            a_on_base_p.y,
+            a.cols,
+            a.rows
+        );
+        cv::Rect b_on_base(
+            b_on_base_p.x,
+            b_on_base_p.y,
+            b.cols,
+            b.rows
+        );
+        auto inter_on_base( a_on_base & b_on_base );
+        if( inter_on_base.empty() ) {
+            return {inter_on_base, b_on_base};
+        }
+        cv::Rect inter_on_a(
+            inter_on_base.x - a_on_base.x,
+            inter_on_base.y - a_on_base.y,
+            inter_on_base.width,
+            inter_on_base.height
+        );
+        cv::Rect inter_on_b_shrinked(
+            inter_on_base.x - b_on_base.x + b_shrink,
+            inter_on_base.y - b_on_base.y + b_shrink,
+            inter_on_base.width - ( b_shrink * 2 ),
+            inter_on_base.height -( b_shrink * 2 )
+        );
+        cv::Mat scores(
+            inter_on_a.height - inter_on_b_shrinked.height + 1, 
+            inter_on_a.width - inter_on_b_shrinked.width + 1, 
+            CV_32F
+        );
+        cv::matchTemplate(
+            a(inter_on_a), 
+            b(inter_on_b_shrinked), 
+            scores, 
+            cv::TM_CCORR_NORMED
+        );
+        double val;
+        cv::Point loc;
+        cv::minMaxLoc(scores, nullptr, &val, nullptr, &loc);
+        cv::Rect cali_inter_on_base(
+            inter_on_base.x + loc.x - b_shrink,
+            inter_on_base.y + loc.y - b_shrink,
+            inter_on_base.width,
+            inter_on_base.height
+        );
+        cv::Rect cali_b_on_base(
+            cali_inter_on_base.x - inter_on_b_shrinked.x + b_shrink,
+            cali_inter_on_base.y - inter_on_b_shrinked.y + b_shrink,
+            b_on_base.width,
+            b_on_base.height
+        );
+        return { cali_inter_on_base, cali_b_on_base };
+    }
+    static void basic_stitch( 
         const cv::Mat& obj, 
         cv::Mat& base, 
         const cv::Rect& region,
         int i 
     ) {
-        // int from_to[] = { i % 3, (i + 1) % 3};
-        cv::Mat tmp(base.rows, base.cols, base.type());
-        obj.copyTo(tmp(region));
-        // cv::mixChannels(&tmp, 1, &base, 1, from_to, 1);
-        // cv::imwrite("mixed_" + std::to_string(i) + ".tiff", base);
         // obj.copyTo(base(region));
-        cv::Mat res;
         cv::Mat overlap;
-        cv::addWeighted(base(region), 0.5, tmp(region), 0.5, 0, overlap);
-        cv::addWeighted(base, 1, tmp, 1, 0, res);
-        // cv::add(base, tmp, res);
-        overlap.copyTo(res(region));
-        base = res;
-
+        // cv::addWeighted(tmp(region), 0.5, obj, 0.5, 0, overlap);
+        cv::add(base(region), obj, overlap);
+        cv::imwrite("overlap_" + std::to_string(i) + ".tiff", overlap);
+        overlap.copyTo(base(region));
     }
-    cv::Point_<int> get_full_w_h( 
-        const std::vector<cv::Mat>& imgs, 
-        const std::vector<cv::Point_<int>>& st_ps
-    ) {
-        cv::Point_<int> min(
-            std::numeric_limits<int>::max(),
-            std::numeric_limits<int>::max()
-        ); 
-        cv::Point_<int> max(
-            std::numeric_limits<int>::min(),
-            std::numeric_limits<int>::min()
-        );
-        for ( int i = 0; i < imgs.size(); i ++ ) {
-            auto curr_min = st_ps.at(i);
-            cv::Point_<int> curr_max( 
-                curr_min.x + imgs.at(i).cols,
-                curr_min.y + imgs.at(i).rows
-            );
-            if( min.x > curr_min.x ) min.x = curr_min.x;
-            if( min.y > curr_min.y ) min.y = curr_min.y;
-            if( max.x < curr_max.x ) max.x = curr_max.x;
-            if( max.y < curr_max.y ) max.y = curr_max.y;
-        }
-        return cv::Point_<int>( 
-            max.x - min.x,
-            max.y - min.y
-        );
-    }
-    int row_;
-    int col_;
+    // int row_;
+    // int col_;
 };
 
 }}
