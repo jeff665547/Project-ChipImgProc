@@ -19,11 +19,12 @@ install(TARGETS ${exe_targets} ${lib_targets} ${test_targets}
 )
 install(
     DIRECTORY include
-    DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Headers
+    DESTINATION . 
+    COMPONENT Headers
 )
 install(
     DIRECTORY unit_test/data
-    DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Tests
+    DESTINATION unit_test COMPONENT Tests
 )
 install(
     FILES       "${project_config}" "${version_config}"
