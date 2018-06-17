@@ -129,4 +129,10 @@ cv::Mat gray_log( const cv::Mat& in, float trim_rate = 0.0 );
 
 bool imwrite(const boost::filesystem::path& fname, const cv::Mat src, float trim_rate );
 
+cv::Mat_<std::uint16_t> viewable(
+    const cv::Mat& m, 
+    float ltrim = 0.05, 
+    float rtrim = 0.05
+);
+
 }

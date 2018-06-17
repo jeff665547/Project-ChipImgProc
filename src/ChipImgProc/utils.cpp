@@ -84,4 +84,25 @@ bool imwrite(const boost::filesystem::path& fname, const cv::Mat src, float trim
     return cv::imwrite(fname.string(), img);
 }
 
+cv::Mat_<std::uint16_t> viewable(
+    const cv::Mat& m, 
+    float ltrim, 
+    float rtrim
+) {
+    cv::Mat_<std::uint16_t> tmp;
+    switch(m.depth()) {
+        case CV_16U:
+            tmp = m.clone();
+            break;
+        case CV_8U:
+            m.convertTo(tmp, CV_16U, 256);
+            break;
+        default:
+            throw std::runtime_error("not support depth: " + std::string(depth(m)));
+    }
+    trim_outlier(tmp, 0.05, 0.05);
+    cv::Mat_<std::uint16_t> res = tmp.clone();
+    cv::normalize( tmp, res, 0, 65535, cv::NORM_MINMAX );
+    return res;
+}
 }

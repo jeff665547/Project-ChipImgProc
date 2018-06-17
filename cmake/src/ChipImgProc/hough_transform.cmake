@@ -1,0 +1,2 @@
+screw_extend_template()
+target_compile_definitions(${__screw_target} PUBLIC OPENCV_TRAITS_ENABLE_DEPRECATED)

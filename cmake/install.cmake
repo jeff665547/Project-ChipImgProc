@@ -22,10 +22,12 @@ install(
     DESTINATION . 
     COMPONENT Headers
 )
-install(
-    DIRECTORY unit_test/data
-    DESTINATION unit_test COMPONENT Tests
-)
+if(BUILD_TESTS)
+    install(
+        DIRECTORY unit_test/data
+        DESTINATION unit_test COMPONENT Tests
+    )
+endif()
 install(
     FILES       "${project_config}" "${version_config}"
     DESTINATION "${config_install_dir}"
