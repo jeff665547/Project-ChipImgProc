@@ -65,7 +65,7 @@ class Estimate
     template<class T>
     static decltype(auto) get_value( const std::atomic<T>& v ) { return v.load(std::memory_order_relaxed); }
     template<class T>
-    static auto min_entropy( cv::Mat_<T>& m )
+    static auto min_entropy( cv::Mat_<T>& m, std::ostream& msg )
     {
         cv::Point res;
         FLOAT res_val(std::numeric_limits<FLOAT>::max());
@@ -97,7 +97,7 @@ class Estimate
                 }
             }
         }
-        cpt::dbg << res_val << std::endl;
+        msg << res_val << std::endl;
         return res;
     }
 
@@ -117,9 +117,9 @@ class Estimate
      *  @param v_hough           Show the histogram
      */
     auto operator()( 
-          cv::Mat&                  in_src
+          const cv::Mat&            in_src
         , const bool&               has_grid_img
-        , cv::Mat&                  grid_img
+        , const cv::Mat&            grid_img
         , const FLOAT&              min_theta
         , const FLOAT&              max_theta 
         , const FLOAT&              steps
@@ -138,9 +138,7 @@ class Estimate
     {
         cv::Mat src = sample ( has_grid_img ? grid_img.clone() : in_src.clone() );
         if(v_sample) {
-            cv::Mat tmp = trim_outlier(src, 0.05, 0.05);
-            cv::normalize(tmp, tmp, 0, 1, cv::NORM_MINMAX, CV_16U);
-            v_sample(tmp);
+            v_sample(src);
         }
 
         HoughTransform<FLOAT> hough_transform( min_theta, max_theta, steps );
@@ -212,7 +210,7 @@ class Estimate
             v_edges(src);
         }
         auto hist = hough_transform( src );
-        cv::Point loc = min_entropy( hist );
+        cv::Point loc = min_entropy( hist, msg );
         // double val;
         // cv::minMaxLoc(hist, nullptr, &val, nullptr, &loc);
         auto theta = hough_transform.unitvecs()[loc.y].theta - 90.0;
