@@ -5,6 +5,7 @@
 // #include <CCD/utility/tune_scope.hpp>
 #include <Nucleona/parallel/thread_pool.hpp>
 #include <Nucleona/range/irange.hpp>
+#include <iostream>
 namespace chipimgproc
 {
 template<class FLOAT>
@@ -61,6 +62,7 @@ struct HoughTransform
           :                rho(0   , rows, tmin_)
         );
         cv::Mat_<std::atomic<FLOAT>> hist = cv::Mat_<std::atomic<FLOAT>>::zeros(unitvecs_.size(), rmax - rmin + 1);
+        chipimgproc::info(std::cout, hist);
         const auto thread_num = 4;
         {
             // ::LightTuneScope<LightTuneScopeNoPool> timer("hough_transform");
@@ -85,10 +87,25 @@ struct HoughTransform
                                     );
                                 }
                 });
-
-
             }
             thread_pool.flush();
+
+            // for ( int r = 0; r < img.rows; r ++ ) {
+            //     for (auto c = 0; c != img.cols; ++c) {
+            //         if (img.template at<uint8_t>(r, c) > 127){ // and (std::rand() & 0x4) == 0)
+            //             for (auto& u: unitvecs_ )
+            //             {
+            //                 auto hi = std::round((u.theta     - tmin_) / tstep_);
+            //                 auto hj = std::round((u.rho(c, r) - rmin)          );
+            //                 auto v = hist( hi, hj ).load( std::memory_order_acquire );
+            //                 hist(hi, hj).compare_exchange_weak( v, v + 1.0
+            //                     , std::memory_order_release
+            //                     , std::memory_order_relaxed 
+            //                 );
+            //             }
+            //         }
+            //     }
+            // }
         }
         
         return hist;

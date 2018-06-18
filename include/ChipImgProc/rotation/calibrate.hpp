@@ -32,13 +32,13 @@ struct Calibrate
             , const std::function<void(const cv::Mat&)>& v_result = nullptr
         )
         {
-                auto& src = in_src;
-                cv::Point2f center(src.cols >> 1, src.rows >> 1);
-                auto mat = cv::getRotationMatrix2D(center, theta, 1.0);
-                cv::warpAffine(src, src, mat, src.size());
-                if(v_result) {
-                    v_result(src);
-                }
+            auto& src = in_src;
+            cv::Point2f center(src.cols >> 1, src.rows >> 1);
+            auto mat = cv::getRotationMatrix2D(center, theta, 1.0);
+            cv::warpAffine(src, src, mat, src.size());
+            if(v_result) {
+                v_result(src);
+            }
         }
 };
 }}

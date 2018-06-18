@@ -16,6 +16,11 @@ namespace chipimgproc
 template<class FLOAT>
 struct Gridding
 {
+    struct Result {
+        std::uint16_t feature_rows, feature_cols;
+        std::vector<cv::Rect> tiles;
+        std::vector<std::uint32_t> gl_x, gl_y;
+    };
     // using FLOAT = float;
     template <int32_t dim, int32_t lg2nfft>
     auto fit_sinewave(
@@ -97,17 +102,18 @@ struct Gridding
      *  @param  verbose Set to false if no image shown are needed ( will override other "v_" prefix variable ), else set to true.
      *  @return grid rows, grid cols, grid tiles ( a rectangle set )
      */
-    auto operator()( 
-          cv::Mat& in_src
-        , double max_intvl 
+    Result operator()( 
+          const cv::Mat&            in_src
+        , double                    max_intvl 
+        , std::ostream&             msg                 = nucleona::stream::null_out
         , const std::function<
             void(const cv::Mat&)
-          >& v_result               = nullptr
+          >&                        v_result            = nullptr
     )
     {
         auto src = in_src.clone();
-        auto x = fit_sinewave<0,18>(src, max_intvl);
-        auto y = fit_sinewave<1,18>(src, max_intvl);
+        auto x = fit_sinewave<0,18>(src, max_intvl, msg);
+        auto y = fit_sinewave<1,18>(src, max_intvl, msg);
     
         std::vector<cv::Rect> tiles;
         for (decltype(y.size()) j = 1; j != y.size(); ++j)
@@ -132,8 +138,8 @@ struct Gridding
         std::uint16_t feature_rows = y.size() - 1;
         std::uint16_t feature_cols = x.size() - 1;
     
-        // out << "feature rows = " << feature_rows << '\n';
-        // out << "feature cols = " << feature_cols << '\n';
+        msg << "feature rows = " << feature_rows << '\n';
+        msg << "feature cols = " << feature_cols << '\n';
     
         // draw gridding result
         if(v_result) {
@@ -147,11 +153,7 @@ struct Gridding
             }
             v_result(debug_img);
         }
-        struct {
-            std::uint16_t feature_rows, feature_cols;
-            std::vector<cv::Rect> tiles;
-            std::vector<std::uint32_t> gl_x, gl_y;
-        } res { 
+        Result res { 
               feature_rows
             , feature_cols 
             , std::move( tiles )

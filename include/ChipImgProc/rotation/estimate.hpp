@@ -192,16 +192,25 @@ class Estimate
                 cv::filter2D(src, src, -1, south);
             }
             src = cv::max(src, 0);
-            cv::normalize(src, src, 0.0, 255.0, cv::NORM_MINMAX, CV_8U);
+            {
+                cv::Mat tmp;
+                cv::normalize(src, tmp, 0.0, 255.0, cv::NORM_MINMAX, CV_8U);
+                src = tmp;
+            }
+            chipimgproc::info(std::cout, src);
 
             cv::Mat unused;
             auto thres = cv::threshold(src, unused, 0.0, 255.0, cv::THRESH_BINARY | cv::THRESH_OTSU);
             cv::threshold( src, src, thres * 0.8, 255.0, cv::THRESH_BINARY );
+            chipimgproc::info(std::cout, src);
         }
         else
         {
-            cv::normalize(src, src, 0.0, 255.0, cv::NORM_MINMAX, CV_8U);
-
+            {
+                cv::Mat tmp;
+                cv::normalize(src, tmp, 0.0, 255.0, cv::NORM_MINMAX, CV_8U);
+                src = tmp;
+            }
             cv::Mat unused;
             auto thres = cv::threshold(src, unused, 0.0, 255.0, cv::THRESH_BINARY | cv::THRESH_OTSU);
             cv::Canny(src, src, thres * 0.95, cv::saturate_cast<uint8_t>(thres * 1.0));
@@ -210,7 +219,9 @@ class Estimate
             v_edges(src);
         }
         auto hist = hough_transform( src );
+        chipimgproc::info(std::cout, src);
         cv::Point loc = min_entropy( hist, msg );
+        chipimgproc::info(std::cout, src);
         // double val;
         // cv::minMaxLoc(hist, nullptr, &val, nullptr, &loc);
         auto theta = hough_transform.unitvecs()[loc.y].theta - 90.0;
@@ -218,7 +229,11 @@ class Estimate
         msg << "theta = " << theta << '\n';
 
         if(v_hough) {
-            cv::normalize(hist, hist, 0.0, 1.0, cv::NORM_MINMAX, hist.depth());
+            {
+                cv::Mat tmp;
+                cv::normalize(hist, tmp, 0.0, 1.0, cv::NORM_MINMAX, hist.depth());
+                hist = tmp;
+            }
             cv::line(hist, cv::Point(0, loc.y), cv::Point(hist.cols-1, loc.y), cv::Scalar(1.0));
             v_hough(hist);
         }
