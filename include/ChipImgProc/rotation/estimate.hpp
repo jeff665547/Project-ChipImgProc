@@ -224,18 +224,22 @@ class Estimate
         chipimgproc::info(std::cout, src);
         // double val;
         // cv::minMaxLoc(hist, nullptr, &val, nullptr, &loc);
-        auto theta = hough_transform.unitvecs()[loc.y].theta - 90.0;
+        auto theta = hough_transform.unitvecs()[loc.y].theta;
 
         msg << "theta = " << theta << '\n';
 
         if(v_hough) {
+            cv::Mat tmp(hist.rows, hist.cols, CV_16UC1);
+            hist.forEach([&tmp](auto& p, const int* pos){
+                tmp.at<std::uint16_t>(pos[0], pos[1]) = p.load();
+            });
             {
-                cv::Mat tmp;
-                cv::normalize(hist, tmp, 0.0, 1.0, cv::NORM_MINMAX, hist.depth());
-                hist = tmp;
+                cv::Mat tmp2;
+                cv::normalize(tmp, tmp2, 0, 65535, cv::NORM_MINMAX, CV_16UC1);
+                tmp = tmp2;
             }
-            cv::line(hist, cv::Point(0, loc.y), cv::Point(hist.cols-1, loc.y), cv::Scalar(1.0));
-            v_hough(hist);
+            cv::line(tmp, cv::Point(0, loc.y), cv::Point(hist.cols-1, loc.y), cv::Scalar(65535));
+            v_hough(tmp);
         }
         return theta;
     }

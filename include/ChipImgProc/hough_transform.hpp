@@ -55,17 +55,23 @@ struct HoughTransform
         const auto rmin = std::floor(
             (tmax_ > 90.0)? rho(cols, 0, tmax_): 0.0
         );
+        // const auto rmin = -50;
         const FLOAT rmax = std::ceil(
             (tmax_ < tmid)? rho(cols, rows, tmax_)
           : (tmin_ < tmid)? std::sqrt(rows * rows + cols * cols)
           : (tmin_ < 90.0)? rho(cols, rows, tmin_)
           :                rho(0   , rows, tmin_)
         );
-        cv::Mat_<std::atomic<FLOAT>> hist = cv::Mat_<std::atomic<FLOAT>>::zeros(unitvecs_.size(), rmax - rmin + 1);
+
+        // auto r = std::sqrt(cols * cols + rows * rows);
+        // auto rmin = -r;
+        // auto rmax = r;
+        cv::Mat_<std::atomic<std::uint16_t>> hist = cv::Mat_<std::atomic<std::uint16_t>>::zeros(unitvecs_.size(), rmax - rmin + 1);
         chipimgproc::info(std::cout, hist);
         const auto thread_num = 4;
         {
             // ::LightTuneScope<LightTuneScopeNoPool> timer("hough_transform");
+
             auto thread_pool = nucleona::parallel::make_thread_pool( thread_num );
             auto segsize = img.rows / thread_num;
             for ( int seg_beg = 0; seg_beg < img.rows; seg_beg += segsize) {
@@ -78,13 +84,23 @@ struct HoughTransform
                             if (img.template at<uint8_t>(r, c) > 127) // and (std::rand() & 0x4) == 0)
                                 for (auto& u: unitvecs_ )
                                 {
-                                    auto hi = std::round((u.theta     - tmin_) / tstep_);
-                                    auto hj = std::round((u.rho(c, r) - rmin)          );
-                                    auto v = hist( hi, hj ).load( std::memory_order_acquire );
-                                    hist(hi, hj).compare_exchange_weak( v, v + 1.0
-                                        , std::memory_order_release
-                                        , std::memory_order_relaxed 
-                                    );
+                                    try{
+                                        auto hi = std::round((u.theta     - tmin_) / tstep_);
+                                        auto hj = std::round((u.rho(c, r) - rmin)          );
+                                        if( hi < 0 || hi >= hist.rows) {
+                                            throw std::runtime_error("hi out of range: " + std::to_string(hi));
+                                        }
+                                        if( hj < 0 || hj >= hist.cols) {
+                                            throw std::runtime_error("hj out of range: " + std::to_string(hj));
+                                        }
+                                        auto v = hist( hi, hj ).load( std::memory_order_acquire );
+                                        hist(hi, hj).compare_exchange_weak( v, v + 1
+                                            , std::memory_order_release
+                                            , std::memory_order_relaxed 
+                                        );
+                                    } catch( const std::exception& e ) {
+                                        // std::cout << e.what() << std::endl;
+                                    }
                                 }
                 });
             }
