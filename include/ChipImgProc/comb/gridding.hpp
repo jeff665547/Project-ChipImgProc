@@ -54,9 +54,7 @@ struct Gridding {
     }
     
     Result operator() (const cv::Mat& src) {
-        *msg_ << __FILE__ << ":" << __LINE__ << std::endl;
         bool has_grid_img_ = (grid_img_ != nullptr);
-        *msg_ << __FILE__ << ":" << __LINE__ << std::endl;
         auto theta = rot_estimator_(
             src,
             has_grid_img_,
@@ -69,19 +67,14 @@ struct Gridding {
             v_edges_,
             v_hough_
         );
-        *msg_ << __FILE__ << ":" << __LINE__ << std::endl;
         cv::Mat tmp = src.clone();
-        *msg_ << __FILE__ << ":" << __LINE__ << std::endl;
         rot_calibrator_(
             tmp,
             theta,
             v_rot_cali_res_
         );
-        *msg_ << __FILE__ << ":" << __LINE__ << std::endl;
         auto grid_res = gridder_(tmp, grid_max_intvl_, *msg_, v_grid_res_);
-        *msg_ << __FILE__ << ":" << __LINE__ << std::endl;
         Result res( grid_res, tmp );
-        *msg_ << __FILE__ << ":" << __LINE__ << std::endl;
         return res;
     }
   private:
