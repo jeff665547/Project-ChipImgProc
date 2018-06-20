@@ -85,10 +85,10 @@ struct Gridding {
         return res;
     }
   private:
-    FLOAT                     rot_min_theta_     {   0 }                         ; 
-    FLOAT                     rot_max_theta_     {   2 }                         ; 
+    FLOAT                     rot_min_theta_     {  87 }                         ; 
+    FLOAT                     rot_max_theta_     {  93 }                         ; 
     FLOAT                     rot_steps_         { 800 }                         ;
-    FLOAT                     grid_max_intvl_    {  17 }                         ;
+    FLOAT                     grid_max_intvl_    {  35 }                         ;
     const cv::Mat*            grid_img_          { nullptr }                     ;
     std::ostream*             msg_               { &nucleona::stream::null_out } ;
     std::function<

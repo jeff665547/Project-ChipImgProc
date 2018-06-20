@@ -224,7 +224,7 @@ class Estimate
         chipimgproc::info(std::cout, src);
         // double val;
         // cv::minMaxLoc(hist, nullptr, &val, nullptr, &loc);
-        auto theta = hough_transform.unitvecs()[loc.y].theta;
+        auto theta = hough_transform.unitvecs()[loc.y].theta - 90;
 
         msg << "theta = " << theta << '\n';
 
