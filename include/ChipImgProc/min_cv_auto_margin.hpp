@@ -10,7 +10,8 @@
 #include <cassert>
 #include <Nucleona/util.hpp>
 #include <ChipImgProc/tiled_mat.hpp>
-#include <ChipImgProc/utils/cell_stat.hpp>
+#include <ChipImgProc/stat/cell.hpp>
+#include <ChipImgProc/stat/mats.hpp>
 #include <algorithm>
 
 namespace chipimgproc {
@@ -23,16 +24,9 @@ namespace chipimgproc {
  */
 struct MinCVAutoMargin
 {
-    CellStat count_cv ( const cv::Mat_<int32_t>& mat )
+    stat::Cell count_cv ( const cv::Mat_<int32_t>& mat )
     {
-        CellStat res;
-        cv::Scalar_<double> mean, stddev;
-        cv::meanStdDev( mat, mean, stddev );
-        
-        res.mean = mean(0);
-        res.stddev = stddev(0);
-        res.cv = res.stddev / res.mean;
-        return res;
+        return stat::Cell::make(mat);
     }
     auto find_min_cv(
           const cv::Mat& src
@@ -40,8 +34,8 @@ struct MinCVAutoMargin
         , std::int32_t windows_width
         , std::int32_t windows_height 
     ) {
-
-        CellStat min;
+        // TODO: optimize
+        stat::Cell min;
         cv::Rect min_cv_win(0, 0, windows_width, windows_height);
         min.cv = std::numeric_limits<float>::max();
         for ( std::int32_t i = t.y; i < t.y + t.height - windows_height + 1; i ++ )
@@ -71,7 +65,7 @@ struct MinCVAutoMargin
         if( min_cv_win.height <= 0 ) { throw std::runtime_error("min cv tile constrain check fail"); };
         // min.detail_raw_value = src(t);
         struct {
-            CellStat stat;
+            stat::Cell stat;
             cv::Rect win;
         } res {
             min, min_cv_win
@@ -91,25 +85,20 @@ struct MinCVAutoMargin
         , std::int32_t windows_height 
     )
     {
-        std::vector<cv::Mat> stat(3, cv::Mat_<float>(
-            tiled_src.rows, tiled_src.cols
-        ) );
-        stat.push_back(cv::Mat_<std::uint32_t>(
-            tiled_src.rows, tiled_src.cols
-        ));
+        stat::Mats res(tiled_src.rows, tiled_src.cols);
         auto& tiles = tiled_src.get_tiles();
         for( int y = 0; y < tiled_src.rows; y ++ ) {
             for ( int x = 0; x < tiled_src.cols; x ++ ) {
                 auto& t = tiled_src.tile_at(x, y);
                 auto min_cv_data = find_min_cv(tiled_src.get_cali_img(), t, windows_width, windows_width);
-                stat[StatIdx::means]  (x, y) = min_cv_data.stat.mean;
-                stat[StatIdx::stddev] (x, y) = min_cv_data.stat.stddev;
-                stat[StatIdx::cv]     (x, y) = min_cv_data.stat.cv;
-                stat[StatIdx::num]    (x, y) = min_cv_data.stat.num;
+                res.mean   (x, y) = min_cv_data.stat.mean;
+                res.stddev (x, y) = min_cv_data.stat.stddev;
+                res.cv     (x, y) = min_cv_data.stat.cv;
+                res.num    (x, y) = min_cv_data.stat.num;
                 t = min_cv_data.win;
             }
         }
-        return stat;
+        return res;
     };
 };
 
