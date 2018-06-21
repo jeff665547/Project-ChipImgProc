@@ -9,6 +9,19 @@ template<
 >
 struct TiledMat : public cv::Mat_<TID>
 {
+    using Base = cv::Mat_<TID>;
+    cv::Rect& tile_at(int x, int y) {
+        return tiles_.at(Base::at(x, y));
+    }
+    cv::Mat tile_img_at(int x, int y) {
+        return cali_img_(tile_at(x, y));
+    }
+    auto& get_tiles() {
+        return tiles;
+    }
+    cv::Mat& get_cali_img() {
+        return cali_img_;
+    }
     template<class GRID_RES>
     static TiledMat make_from_grid_res(GRID_RES&& grid_res) {
         // TODO: consider forward parameter
@@ -39,7 +52,6 @@ struct TiledMat : public cv::Mat_<TID>
         for(auto&& v : grid_res.gl_y ) {
             tm.gl_y_.push_back(v);
         }
-        
         return tm;
     }
 private:
