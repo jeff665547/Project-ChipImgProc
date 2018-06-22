@@ -118,19 +118,19 @@ struct Gridding
         std::vector<cv::Rect> tiles;
         for (decltype(y.size()) j = 1; j != y.size(); ++j)
         {
-            const auto y1 = std::round(y[j - 1]);
-            const auto y2 = std::round(y[j]);
+            const int y1 = std::round(y[j - 1]);
+            const int y2 = std::round(y[j]);
             for (decltype(x.size()) i = 1; i != x.size(); ++i)
             {
-                const auto x1 = std::round(x[i - 1]);
-                const auto x2 = std::round(x[i]);
+                const int x1 = std::round(x[i - 1]);
+                const int x2 = std::round(x[i]);
                 tiles.emplace_back(
                     cv::Point(x1, y1)
                   , cv::Point(x2, y2)
                 );
             }
         }
-        std::vector<uint32_t> gl_x, gl_y;
+        std::vector<std::uint32_t> gl_x, gl_y;
         for ( auto&& xi : x ) 
             gl_x.emplace_back ( std::round(xi) );
         for ( auto&& yi : y )

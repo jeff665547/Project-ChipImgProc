@@ -14,7 +14,7 @@
 #include <ChipImgProc/stat/mats.hpp>
 #include <algorithm>
 
-namespace chipimgproc {
+namespace chipimgproc { namespace margin{
 /**
  *  @brief      @copybrief ChipImgProc/min_cv_auto_margin.hpp
  *  @details    Search the minimum coefficient of variation section in the grid cell, 
@@ -22,7 +22,7 @@ namespace chipimgproc {
  *              The section size is defined by input parameter.
  *              See @ref improc_min_cv_auto_margin for more detail.
  */
-struct MinCVAutoMargin
+struct AutoMinCV
 {
     stat::Cell count_cv ( const cv::Mat_<int32_t>& mat )
     {
@@ -77,18 +77,22 @@ struct MinCVAutoMargin
      * @param   tiled_src       Image data and grid cell generate by gridding step.
      * @param   windows_width   The result section width in grid cell after auto margin.
      * @param   windows_height  The result section height in grid cell after auto margin.
+     * @param   v_result        The process result debug image view.
      */
-    template<class TID, class GLID>
+    template<class GLID>
     auto operator()( 
-          TiledMat<TID, GLID>& tiled_src
-        , std::int32_t windows_width
-        , std::int32_t windows_height 
+          TiledMat<GLID>&      tiled_src
+        , std::int32_t              windows_width
+        , std::int32_t              windows_height 
+        , const std::function<
+            void(const cv::Mat&)
+          >&                        v_result            = nullptr
     )
     {
-        stat::Mats res(tiled_src.rows, tiled_src.cols);
+        stat::Mats res(rows(tiled_src), cols(tiled_src));
         auto& tiles = tiled_src.get_tiles();
-        for( int y = 0; y < tiled_src.rows; y ++ ) {
-            for ( int x = 0; x < tiled_src.cols; x ++ ) {
+        for( int y = 0; y < rows(tiled_src); y ++ ) {
+            for ( int x = 0; x < cols(tiled_src); x ++ ) {
                 auto& t = tiled_src.tile_at(x, y);
                 auto min_cv_data = find_min_cv(tiled_src.get_cali_img(), t, windows_width, windows_width);
                 res.mean   (x, y) = min_cv_data.stat.mean;
@@ -98,8 +102,11 @@ struct MinCVAutoMargin
                 t = min_cv_data.win;
             }
         }
+        if(v_result)
+            tiled_src.view(v_result);
         return res;
     };
 };
 
+}
 }
