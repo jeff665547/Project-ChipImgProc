@@ -80,10 +80,10 @@ struct GeneralAlgo {
         );
         auto grid_res   = gridder_(tmp, grid_max_intvl_, *msg_, v_grid_res_);
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        // TiledMat<> tm(grid_res.feature_rows, grid_res.feature_cols);
         auto tiled_mat  = TiledMat<>::make_from_grid_res(grid_res, tmp);
-        // std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        // auto margin_res = auto_min_cv_(tiled_mat, window_width, window_height, v_margin_res_);
+        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+        auto margin_res = auto_min_cv_(tiled_mat, window_width, window_height, v_margin_res_);
+        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 
 
         // Result res( grid_res, tmp );

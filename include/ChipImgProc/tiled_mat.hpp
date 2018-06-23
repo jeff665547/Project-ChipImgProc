@@ -17,15 +17,13 @@ struct TiledMat
     , gl_x_()
     , gl_y_()
     {
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         tiles_.reserve(rows * cols);
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
     }
-    cv::Rect& tile_at(int x, int y) {
-        return tiles_.at(index_.template at<std::int32_t>(x, y));
+    cv::Rect& tile_at(int r, int c) {
+        return tiles_.at(index_.template at<std::int32_t>(r, c));
     }
-    cv::Mat tile_img_at(int x, int y) {
-        return cali_img_(tile_at(x, y));
+    cv::Mat tile_img_at(int r, int c) {
+        return cali_img_(tile_at(r, c));
     }
     auto& get_tiles() {
         return tiles_;
@@ -60,6 +58,27 @@ struct TiledMat
     auto rows() {
         return index_.rows;
     }
+    void roi(const cv::Rect& r ) {
+        index_ = index_(r);
+        decltype(gl_x_) tmp_x(
+            gl_x_.begin() + r.x, 
+            gl_x_.begin() + r.x + r.width + 1
+        );
+        gl_x_.swap(tmp_x);
+        decltype(gl_y_) tmp_y(
+            gl_y_.begin() + r.y, 
+            gl_y_.begin() + r.y + r.height + 1
+        );
+        gl_y_.swap(tmp_y);
+    }
+    cv::Rect get_image_roi() {
+        auto w = gl_x_.back() - gl_x_.front();
+        auto h = gl_y_.back() - gl_y_.front();
+        return cv::Rect(
+            gl_x_.at(0), gl_x_.at(0),
+            w, h
+        );
+    }
     template<class GRID_RES>
     static TiledMat<GLID> make_from_grid_res(GRID_RES& grid_res, cv::Mat& rot_cali_img ) {
         // TODO: consider forward parameter
@@ -76,12 +95,10 @@ struct TiledMat
                 std::to_string(grid_res.tiles.size())
             );
         }
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         TiledMat<GLID> tm(
             grid_res.feature_rows,
             grid_res.feature_cols
         );
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         int cols = tm.index_.cols;
         int rows = tm.index_.rows;
         for( decltype(grid_res.feature_rows) r = 0; r < grid_res.feature_rows; r ++ ) {
@@ -90,27 +107,16 @@ struct TiledMat
                 tm.index_.template at<std::int32_t>(r, c) = tid;
             }
         }
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        info(std::cout, rot_cali_img);
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         tm.cali_img_ = rot_cali_img;
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        std::cout << "grid_res.tiles.size(): " << grid_res.tiles.size() << std::endl;
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         tm.tiles_ = grid_res.tiles;
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        std::cout << "gl_x.size(): " << grid_res.gl_x.size() << std::endl;
-        std::cout << "gl_y.size(): " << grid_res.gl_y.size() << std::endl;
         tm.gl_x_.reserve(grid_res.gl_x.size());
         for(auto v : grid_res.gl_x ) {
             tm.gl_x_.push_back((GLID)v);
         }
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         tm.gl_y_.reserve(grid_res.gl_y.size());
         for(auto v : grid_res.gl_y ) {
             tm.gl_y_.push_back((GLID)v);
         }
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         return tm;
     }
     

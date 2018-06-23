@@ -12,10 +12,10 @@ struct MarkerLayout {
     enum DistForm {
         uni_mat, random
     };
-    cv::Mat_<std::int16_t>  mk_map   ;
-    std::vector<MarkerDes>  mks      ;
-    std::int32_t            mk_invl_x;
-    std::int32_t            mk_invl_y;
+    cv::Mat_<std::int16_t>  mk_map      ;
+    std::vector<MarkerDes>  mks         ;
+    std::uint32_t           mk_invl_x_cl;
+    std::uint32_t           mk_invl_y_cl;
     // PatternNum  pat_num             ;
     DistForm                dist_form;
 };
