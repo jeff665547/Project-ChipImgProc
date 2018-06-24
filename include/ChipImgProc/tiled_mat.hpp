@@ -71,13 +71,16 @@ struct TiledMat
         );
         gl_y_.swap(tmp_y);
     }
-    cv::Rect get_image_roi() {
+    cv::Rect get_image_roi() const {
         auto w = gl_x_.back() - gl_x_.front();
         auto h = gl_y_.back() - gl_y_.front();
         return cv::Rect(
             gl_x_.at(0), gl_x_.at(0),
             w, h
         );
+    }
+    cv::Mat get_roi_image() const {
+        return cali_img_(get_image_roi());
     }
     template<class GRID_RES>
     static TiledMat<GLID> make_from_grid_res(GRID_RES& grid_res, cv::Mat& rot_cali_img ) {

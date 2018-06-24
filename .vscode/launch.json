@@ -25,10 +25,10 @@
             ]
         },
         {
-            "name": "ChipImgProc-comb-gridding_test",
+            "name": "ChipImgProc-comb-general_algo_test",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/stage/bin/ChipImgProc-comb-gridding_test.exe",
+            "program": "${workspaceFolder}/stage/bin/ChipImgProc-comb-general_algo_test.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
