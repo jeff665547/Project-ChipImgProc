@@ -85,6 +85,10 @@ struct GeneralAlgo {
         auto margin_res = auto_min_cv_(tiled_mat, window_width, window_height, v_margin_res_);
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 
+        // if(mk_layout.dist_form != MarkerLayout::DistForm::uni_mat) {
+        //     throw std::runtime_error("")
+        // }
+
 
         // Result res( grid_res, tmp );
         // return res;

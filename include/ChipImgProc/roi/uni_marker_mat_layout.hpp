@@ -43,7 +43,7 @@ struct UniMarkerMatLayout {
             cv::Point org_point;
         } res {
             max_vote->second > threshold,
-            max_vote->first
+            max_vote->first - mk_layout.get_marker_des(0, 0).pos
         };
         return res;
     }
