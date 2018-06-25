@@ -8,7 +8,8 @@
                 "${workspaceFolder}",
                 "${workspaceFolder}/include",
                 "C:/.hunter/_Base/9cfab9c/0b5ade2/b52a7fb/Install/include",
-                "D:/.hunter/_Base/9cfab9c/cb829e4/f27687f/Install/include"
+                "D:/.hunter/_Base/9cfab9c/cb829e4/f27687f/Install/include",
+                "D:/.hunter/_Base/9cfab9c/0b5ade2/7b779fb/Install/include"
             ],
             "defines": [],
             "browse": {
@@ -16,7 +17,9 @@
                     "${workspaceFolder}",
                     "${workspaceFolder}/include",
                     "C:/.hunter/_Base/9cfab9c/0b5ade2/b52a7fb/Install/include",
-                    "D:/.hunter/_Base/9cfab9c/cb829e4/f27687f/Install/include"
+                    "D:/.hunter/_Base/9cfab9c/cb829e4/f27687f/Install/include",
+                    "D:/.hunter/_Base/9cfab9c/0b5ade2/7b779fb/Install/include"
+
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""

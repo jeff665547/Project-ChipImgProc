@@ -5,6 +5,12 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 namespace chipimgproc { 
+int cols(const cv::Mat& m) {
+    return m.cols;
+}
+int rows(const cv::Mat& m) {
+    return m.rows;
+}
 const char* depth(const cv::Mat& image)
 {
     switch (image.depth())
