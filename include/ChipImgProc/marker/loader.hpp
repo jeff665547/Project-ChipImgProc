@@ -3,8 +3,8 @@
 #include <ChipImgProc/utils.h>
 #include <string>
 #include <istream>
-#include <nucleona/algo/split.hpp>
-#include <nucleona/stream/null_buffer.hpp>
+#include <Nucleona/algo/split.hpp>
+#include <Nucleona/stream/null_buffer.hpp>
 namespace chipimgproc{ namespace marker{
 
 struct Loader {
