@@ -22,7 +22,6 @@ struct UniMarkerMatLayout {
     ) {
         cv::Point op(tgt_mk_pos_x(0, 0), tgt_mk_pos_y(0, 0));
         std::map<cv::Point, int, PointLess> vote_tab(point_less);
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         for( int r = 0; r < tgt_mk_pos_x.rows; r ++ ) {
             for ( int c = 0; c < tgt_mk_pos_x.cols; c ++ ) {
                 std::uint16_t x = tgt_mk_pos_x(r, c);
@@ -33,7 +32,6 @@ struct UniMarkerMatLayout {
                 vote_tab[p] ++;
             }
         }
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         auto max_vote = vote_tab.begin();
         for ( auto itr = vote_tab.begin(); itr != vote_tab.end(); itr ++ ) {
             logger << itr->first << " : " << itr->second << std::endl;
@@ -41,7 +39,6 @@ struct UniMarkerMatLayout {
                 max_vote = itr;
             }
         }
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         struct {
             bool qc_pass;
             cv::Point org_point;
@@ -83,7 +80,6 @@ struct UniMarkerMatLayout {
         );
         for( int r = 0; r < mk_layout.mk_map.rows; r ++ ) {
             for( int c = 0; c < mk_layout.mk_map.cols; c ++ ) {
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
                 std::int16_t mk_des_idx = mk_layout.mk_map(c, r);
                 auto& mk_des = mk_layout.mks.at(mk_des_idx);
                 auto& candi_mks = mk_des.candi_mks;
@@ -96,14 +92,11 @@ struct UniMarkerMatLayout {
                 out << "sub region (r,c): (" << r << "," << c << "): " << match_region << std::endl;
                 cv::Mat sub_tgt = tgt(match_region); 
                 cv::Mat_<float> sub_score;
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
                 for(auto& mk : candi_mks) {
                     cv::Mat_<float> sub_candi_score(
-                        sub_tgt.cols - mk.cols + 1,
-                        sub_tgt.rows - mk.rows + 1
+                        sub_tgt.rows - mk.rows + 1,
+                        sub_tgt.cols - mk.cols + 1
                     );
-                    cv::imwrite("debug_sub_tgt.tiff", sub_tgt);
-                    cv::imwrite("debug_mk.tiff", mk); // TODO: get bad marker here
                     cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED);
                     if(sub_score.empty()) 
                         sub_score = sub_candi_score;
@@ -111,29 +104,26 @@ struct UniMarkerMatLayout {
                         sub_score += sub_candi_score;
                 }
                 if(v_score) {
-                    cv::Mat tmp = sub_score + 1;
-                    cv::Mat tmp2;
-                    tmp.convertTo(tmp2, CV_16UC1, 65535, 0);
-                    v_score(viewable(tmp2), r, c);
+                    cv::Mat tmp;
+                    // cv::Mat tmp = sub_score + 1;
+                    // cv::Mat tmp2;
+                    // tmp.convertTo(tmp2, CV_16UC1, 65535, 0);
+                    sub_score.convertTo(tmp, CV_16UC1, 65535, 0);
+                    v_score(tmp, r, c);
                 }
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
                 double min, max;
                 cv::Point min_loc, max_loc;
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
                 cv::minMaxLoc(sub_score, &min, &max, &min_loc, &max_loc);
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
                 max_loc.x += match_region.x;
                 max_loc.y += match_region.y;
                 found_mk_pos_x(r, c) = max_loc.x;
                 found_mk_pos_y(r, c) = max_loc.y;
-                std::cout << __FILE__ << ":" << __LINE__ << std::endl;
             }
         }
         out << "match mk loc x: " << std::endl;
         out << found_mk_pos_x << std::endl;
         out << "match mk loc y: " << std::endl;
         out << found_mk_pos_y << std::endl;
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         auto check_res = check_marker_position(
             found_mk_pos_x, 
             found_mk_pos_y,
@@ -141,27 +131,20 @@ struct UniMarkerMatLayout {
             2, 
             out
         );
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         cv::Rect r(
             check_res.org_point.x,
             check_res.org_point.y,
-            check_res.org_point.x + 
-                mk_layout.mk_invl_x_cl * mk_layout.mk_map.cols,
-            check_res.org_point.y + 
-                mk_layout.mk_invl_y_cl * mk_layout.mk_map.rows
+            mk_layout.mk_invl_x_cl * ( mk_layout.mk_map.cols - 1 ) + mk_layout.get_marker_width(),
+            mk_layout.mk_invl_y_cl * ( mk_layout.mk_map.rows - 1 ) + mk_layout.get_marker_height()
         );
         out << "cell roi: " << r << std::endl;
 
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         tiled_src.roi(r);
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         raw_smats.roi(r);
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         if(v_result) {
             auto tmp = tiled_src.get_roi_image();
             v_result(viewable(tmp));
         }
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         
         return check_res.qc_pass;
         

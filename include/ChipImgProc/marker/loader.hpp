@@ -53,7 +53,7 @@ struct Loader {
         );
         logger << "load marker: " << std::endl;
         logger << res << std::endl;
-        return res;
+        return res.clone();
     }
 };
 

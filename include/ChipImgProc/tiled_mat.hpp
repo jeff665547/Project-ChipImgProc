@@ -75,7 +75,7 @@ struct TiledMat
         auto w = gl_x_.back() - gl_x_.front();
         auto h = gl_y_.back() - gl_y_.front();
         return cv::Rect(
-            gl_x_.at(0), gl_x_.at(0),
+            gl_x_.at(0), gl_y_.at(0),
             w, h
         );
     }

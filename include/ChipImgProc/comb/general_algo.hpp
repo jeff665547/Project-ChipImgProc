@@ -119,7 +119,6 @@ struct GeneralAlgo {
                             v_roi_score_,
                             v_roi_res_
                           );
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 
     }
   private:
