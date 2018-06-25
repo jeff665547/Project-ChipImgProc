@@ -36,8 +36,11 @@ int nucleona::app::main(int argc, char* argv[]) {
     gridder.set_roi_score_viewer([](const cv::Mat& m, int r, int c){
         cv::imwrite("debug_roi_score_" + std::to_string(c) + "_" + std::to_string(r) + ".tiff", m);
     });
+    std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats;
+    auto mk = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
+    candi_mk_pats.push_back(mk);
     gridder.set_marker_layout(
-        { chipimgproc::marker::Loader::from_txt(marker_in, std::cout) }
+        candi_mk_pats
     );
     auto test_img_path = nucleona::test::data_dir() / "0-0-2.tiff";
     cv::Mat img = cv::imread(test_img_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);

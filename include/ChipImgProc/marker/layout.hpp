@@ -73,6 +73,12 @@ struct Layout {
     void info(std::ostream& out) {
     
     }
+    int get_marker_width() const {
+        return mks.at(0).candi_mks.at(0).cols;
+    }
+    int get_marker_height() const {
+        return mks.at(0).candi_mks.at(0).rows;
+    }
     // void set_mk_pat_for_uni_mat_dist( const cv::Point& ) {
 
     // }
