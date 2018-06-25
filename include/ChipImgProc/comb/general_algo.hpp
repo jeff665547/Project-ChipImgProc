@@ -3,7 +3,7 @@
 #include <ChipImgProc/gridding.hpp>
 #include <ChipImgProc/margin.hpp>
 #include <ChipImgProc/tiled_mat.hpp>
-#include <ChipImgProc/marker_layout.hpp>
+#include <ChipImgProc/marker/layout.hpp>
 #include <ChipImgProc/roi/uni_marker_mat_layout.hpp>
 namespace chipimgproc{ namespace comb{
 
@@ -129,7 +129,7 @@ struct GeneralAlgo {
     const cv::Mat*            grid_img_          { nullptr }                     ;
     std::int32_t              window_width       {  20 }                         ;
     std::int32_t              window_height      {  20 }                         ;
-    MarkerLayout              marker_layout_                                     ;
+    marker::Layout            marker_layout_                                     ;
     std::ostream*             msg_               { &nucleona::stream::null_out } ;
     std::function<
         void(const cv::Mat&)

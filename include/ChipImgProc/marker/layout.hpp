@@ -1,8 +1,8 @@
 #pragma once
 #include <ChipImgProc/utils.h>
-namespace chipimgproc{
-struct MarkerDes {
-friend struct MarkerLayout;
+namespace chipimgproc{ namespace marker{
+struct Des {
+friend struct Layout;
     const cv::Point& get_pos() const {
         return pos_;
     }
@@ -10,21 +10,21 @@ friend struct MarkerLayout;
 private:
     cv::Point pos_;
 };
-struct MarkerLayout {
+struct Layout {
     enum PatternNum {
         single, multi
     };
     enum DistForm {
         uni_mat, random
     };
-    const MarkerDes& get_marker_des(int r, int c) const {
+    const Des& get_marker_des(int r, int c) const {
         if( dist_form != uni_mat) {
             throw std::runtime_error("get_marker_des(r,c) only support uni_mat form");
         }
         return mks.at(mk_map(r, c));
     }
-    MarkerDes& get_marker_des(int r, int c) {
-        return const_cast<MarkerDes&>(
+    Des& get_marker_des(int r, int c) {
+        return const_cast<Des&>(
             static_cast<const decltype(this)>(this)->get_marker_des(r,c)
         );
     }
@@ -62,7 +62,7 @@ struct MarkerLayout {
         //     throw std::runtime_error("set_mk_pat(p, candi_pats) is used in random distribution type");
         // }
         if( dist_form == random ) {
-            MarkerDes mk;
+            Des mk;
             mk.candi_mks = candi_pats;
             mk.pos_ = p;
             mks.push_back(mk);
@@ -86,10 +86,10 @@ struct MarkerLayout {
     PatternNum              pat_num        { multi  } ;
     DistForm                dist_form      { random } ;
     cv::Mat_<std::int16_t>  mk_map                    ; // used in uni_mat
-    std::vector<MarkerDes>  mks                       ; // used in all type
+    std::vector<Des>        mks                       ; // used in all type
     std::uint32_t           mk_invl_x_cl              ; // used in uni_mat
     std::uint32_t           mk_invl_y_cl              ; // used in uni_mat
 };
 
 
-}
+}}

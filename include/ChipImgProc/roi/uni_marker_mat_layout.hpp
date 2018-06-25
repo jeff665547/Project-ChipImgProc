@@ -1,5 +1,5 @@
 #pragma once
-#include <ChipImgProc/marker_layout.hpp>
+#include <ChipImgProc/marker/layout.hpp>
 #include <ChipImgProc/roi/result.hpp>
 #include <ChipImgProc/stat/mats.hpp>
 #include <ChipImgProc/tiled_mat.hpp>
@@ -16,7 +16,7 @@ struct UniMarkerMatLayout {
     auto check_marker_position(
         const cv::Mat_<std::uint16_t>& tgt_mk_pos_x,
         const cv::Mat_<std::uint16_t>& tgt_mk_pos_y,
-        const MarkerLayout& mk_layout,
+        const marker::Layout& mk_layout,
         int threshold = 2,
         std::ostream& logger = nucleona::stream::null_out
     ) {
@@ -50,7 +50,7 @@ struct UniMarkerMatLayout {
     }
     template<class GLID>
     bool operator()( 
-        const MarkerLayout&        mk_layout,
+        const marker::Layout&        mk_layout,
         stat::Mats&                raw_smats,
         TiledMat<GLID>&            tiled_src,
         std::ostream&              out       = nucleona::stream::null_out,
