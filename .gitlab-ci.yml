@@ -28,7 +28,7 @@ build_and_test_centos:
         - rm -rf stage
         - mkdir -p build
         - cd build
-        - cmake --build . --target clean
+        - cmake --build . --target clean || true 
         - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILS_TESTS=ON -DINSTALL_DEPS=ON
         - cmake --build . --target install
     only:
