@@ -6,7 +6,7 @@ Win_CI:
         - rmdir stage /s /q
         - mkdir build
         - cd build
-        - cmake --build . --target clean
+        - cmake --build . --target clean > nul 2> nul
         - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILS_TESTS=ON -DINSTALL_DEPS=ON
         - cmake --build . --target install
     only:
