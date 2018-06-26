@@ -1,5 +1,5 @@
-build_and_test_win:
-    stage: build_and_test
+Win_CI:
+    stage: build
     script: 
         - git submodule init
         - git submodule update
@@ -14,8 +14,8 @@ build_and_test_win:
     tags:
         - WIN
 
-build_and_test_centos:
-    stage: build_and_test
+CentOS_CI:
+    stage: build
     script: 
         - source /opt/rh/devtoolset-6/enable
         - source /opt/rh/python27/enable
