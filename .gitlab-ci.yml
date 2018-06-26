@@ -1,3 +1,19 @@
+build_and_test_win:
+    stage: build_and_test
+    script: 
+        - git submodule init
+        - git submodule update
+        - rmdir stage /s /q
+        - mkdir build
+        - cd build
+        - cmake --build . --target clean
+        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILS_TESTS=ON -DINSTALL_DEPS=ON
+        - cmake --build . --target install
+    only:
+        - master
+    tags:
+        - WIN
+
 build_and_test_centos:
     stage: build_and_test
     script: 
