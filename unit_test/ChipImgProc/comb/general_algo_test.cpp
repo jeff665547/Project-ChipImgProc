@@ -3,13 +3,14 @@
 #include <Nucleona/test/data_dir.hpp>
 #include <Nucleona/app/main.hpp>
 #include <ChipImgProc/marker/loader.hpp>
-
+#include <ChipImgProc/multi_tiled_mat.hpp>
+#include <ChipImgProc/stat/mats.hpp>
 // TEST(comb_gridding, basic_test) {
 int nucleona::app::main(int argc, char* argv[]) {
     std::ifstream marker_in(
         ( nucleona::test::data_dir() / "zion_pat.tsv").string()
     );
-    chipimgproc::comb::GeneralAlgo<float> gridder;
+    chipimgproc::comb::GeneralAlgo<> gridder;
     gridder.set_logger(std::cout);
 
     gridder.set_grid_res_viewer([](const cv::Mat& m){
@@ -42,9 +43,29 @@ int nucleona::app::main(int argc, char* argv[]) {
     gridder.set_marker_layout(
         candi_mk_pats
     );
-    auto test_img_path = nucleona::test::data_dir() / "0-0-2.tiff";
-    cv::Mat img = cv::imread(test_img_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-    cv::imwrite("debug_src.tiff", img);
-    chipimgproc::info(std::cout, img);
-    gridder(img);
+    auto test_img_paths = {
+        nucleona::test::data_dir() / "C018_2017_11_30_18_14_23" / "0-0-2.tiff",
+        nucleona::test::data_dir() / "C018_2017_11_30_18_14_23" / "0-1-2.tiff",
+        nucleona::test::data_dir() / "C018_2017_11_30_18_14_23" / "1-0-2.tiff",
+        nucleona::test::data_dir() / "C018_2017_11_30_18_14_23" / "1-1-2.tiff"
+    };
+    using TiledMatT = typename decltype(gridder)::TiledMatT; 
+    using Gridline  = typename decltype(gridder)::Gridline;
+    std::vector<TiledMatT>                           tiled_mats  ;
+    std::vector<chipimgproc::stat::Mats>             stat_mats_s ;
+    for(auto p : test_img_paths ) {
+        cv::Mat img = cv::imread(p.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+        cv::imwrite("debug_src.tiff", img);
+        chipimgproc::info(std::cout, img);
+        auto [qc, tiled_mat, stat_mats] = gridder(img);
+        tiled_mats.push_back(tiled_mat);
+        stat_mats_s.push_back(stat_mats);
+    }
+    std::vector<cv::Point_<int>> st_ps({
+        {0, 0}, {0, 27}, {27, 0}, {27, 27}
+    });
+
+    chipimgproc::MultiTiledMat<Gridline> multi_tiled_mat(
+        tiled_mats, stat_mats_s, st_ps
+    );
 }

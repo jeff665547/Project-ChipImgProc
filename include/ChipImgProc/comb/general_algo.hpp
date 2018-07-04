@@ -7,7 +7,10 @@
 #include <ChipImgProc/roi/uni_marker_mat_layout.hpp>
 namespace chipimgproc{ namespace comb{
 
-template<class FLOAT>
+template<
+    class FLOAT = float, 
+    class GLID  = std::uint16_t
+>
 struct GeneralAlgo {
     // using FLOAT  = float;
     // using ResultBase = typename chipimgproc::Gridding<FLOAT>::Result;
@@ -18,6 +21,8 @@ struct GeneralAlgo {
     //     {}
     //     cv::Mat rot_cali_res;
     // };
+    using Gridline = GLID;
+    using TiledMatT = TiledMat<Gridline>;
 
     void set_rot_theta_range( FLOAT min, FLOAT max ) {
         rot_min_theta_ = min;
@@ -89,37 +94,43 @@ struct GeneralAlgo {
     
     auto operator() (const cv::Mat& src) {
         bool has_grid_img_ = (grid_img_ != nullptr);
-        // auto theta = rot_estimator_(
-        //     src,
-        //     has_grid_img_,
-        //     has_grid_img_ ? *grid_img_ : cv::Mat(),
-        //     rot_min_theta_,
-        //     rot_max_theta_,
-        //     rot_steps_,
-        //     *msg_,
-        //     v_sample_,
-        //     v_edges_,
-        //     v_hough_
-        // );
+        auto theta = rot_estimator_(
+            src,
+            has_grid_img_,
+            has_grid_img_ ? *grid_img_ : cv::Mat(),
+            rot_min_theta_,
+            rot_max_theta_,
+            rot_steps_,
+            *msg_,
+            v_sample_,
+            v_edges_,
+            v_hough_
+        );
         cv::Mat tmp = src.clone();
         rot_calibrator_(
             tmp,
-            0.607353,
+            theta,
             v_rot_cali_res_
         );
         auto grid_res   = gridder_(tmp, grid_max_intvl_, *msg_, v_grid_res_);
         auto tiled_mat  = TiledMat<>::make_from_grid_res(grid_res, tmp);
-        auto margin_res = auto_min_cv_(tiled_mat, window_width, window_height, v_margin_res_);
+        auto stat_mats  = auto_min_cv_(
+                            tiled_mat, 
+                            window_width, window_height, 
+                            v_margin_res_
+                          );
         auto roi_qc     = roi_bounder_(
                             marker_layout_, 
-                            margin_res, 
+                            stat_mats, 
                             tiled_mat,
                             *msg_,
                             v_roi_bin_,
                             v_roi_score_,
                             v_roi_res_
                           );
-
+        return std::make_tuple(
+            roi_qc, tiled_mat, stat_mats
+        );
     }
   private:
     FLOAT                     rot_min_theta_     {  87 }                         ; 

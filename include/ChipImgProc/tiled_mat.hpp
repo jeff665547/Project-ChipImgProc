@@ -6,12 +6,11 @@ namespace chipimgproc{
 template<
     class GLID = std::uint16_t
 >
-// using TID = std::int32_t;
-// using GLID = std::uint16_t;
 struct TiledMat
 {
+    using IndexType = cv::Mat_<std::int32_t>;
     TiledMat(int rows, int cols)
-    : index_(rows, cols, CV_32SC1)
+    : index_(rows, cols)
     , cali_img_()
     , tiles_()
     , gl_x_()
@@ -20,15 +19,24 @@ struct TiledMat
         tiles_.reserve(rows * cols);
     }
     cv::Rect& tile_at(int r, int c) {
-        return tiles_.at(index_.template at<std::int32_t>(r, c));
+        return tiles_.at(index_(r, c));
     }
-    cv::Mat tile_img_at(int r, int c) {
+    const cv::Rect& tile_at(int r, int c) const {
+        return tiles_.at(index_(r, c));
+    }
+    cv::Mat tile_img_at(int r, int c) const {
         return cali_img_(tile_at(r, c));
     }
     auto& get_tiles() {
         return tiles_;
     }
+    const auto& get_tiles() const {
+        return tiles_;
+    }
     cv::Mat& get_cali_img() {
+        return cali_img_;
+    }
+    const cv::Mat& get_cali_img() const {
         return cali_img_;
     }
     template<class FUNC>
@@ -58,6 +66,10 @@ struct TiledMat
     auto rows() {
         return index_.rows;
     }
+    auto& glx() { return gl_x_; }
+    auto& gly() { return gl_y_; }
+    const auto& glx() const { return gl_x_; }
+    const auto& gly() const { return gl_y_; }
     void roi(const cv::Rect& r ) {
         index_ = index_(r);
         decltype(gl_x_) tmp_x(
@@ -70,6 +82,9 @@ struct TiledMat
             gl_y_.begin() + r.y + r.height + 1
         );
         gl_y_.swap(tmp_y);
+    }
+    cv::Mat index() const {
+        return index_.clone();
     }
     cv::Rect get_image_roi() const {
         auto w = gl_x_.back() - gl_x_.front();
@@ -107,7 +122,7 @@ struct TiledMat
         for( decltype(grid_res.feature_rows) r = 0; r < grid_res.feature_rows; r ++ ) {
             for( decltype(grid_res.feature_cols) c = 0; c < grid_res.feature_cols; c ++ ) {
                 std::int32_t tid = (r * (std::int32_t)grid_res.feature_cols) + c;
-                tm.index_.template at<std::int32_t>(r, c) = tid;
+                tm.index_(r, c) = tid;
             }
         }
         tm.cali_img_ = rot_cali_img;
@@ -124,7 +139,7 @@ struct TiledMat
     }
     
 private:
-    cv::Mat index_;
+    IndexType index_;
     cv::Mat cali_img_;
     std::vector<cv::Rect> tiles_;
     std::vector<GLID> gl_x_;

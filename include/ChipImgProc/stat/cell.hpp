@@ -12,6 +12,7 @@ struct Cell
         res.mean = mean(0);
         res.stddev = stddev(0);
         res.cv = res.stddev / res.mean;
+        res.num = mat.cols * mat.rows;
         return res;
     }
     float mean;
