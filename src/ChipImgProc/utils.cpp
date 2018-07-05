@@ -4,6 +4,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <iostream>
 namespace chipimgproc { 
 int cols(const cv::Mat& m) {
     return m.cols;
@@ -103,10 +104,14 @@ cv::Mat_<std::uint16_t> viewable(
         case CV_8U:
             m.convertTo(tmp, CV_16U, 256);
             break;
+        case CV_32F:
+            std::cout << "viewable: detect float image, assume range is [0, 1]" << std::endl;
+            m.convertTo(tmp, CV_16U, 65535);
+            break;
         default:
             throw std::runtime_error("not support depth: " + std::string(depth(m)));
     }
-    trim_outlier(tmp, 0.05, 0.05);
+    trim_outlier(tmp, ltrim, rtrim);
     cv::Mat_<std::uint16_t> res = tmp.clone();
     cv::normalize( tmp, res, 0, 65535, cv::NORM_MINMAX );
     return res;

@@ -5,6 +5,8 @@
 #include <ChipImgProc/tiled_mat.hpp>
 #include <ChipImgProc/marker/layout.hpp>
 #include <ChipImgProc/roi/uni_marker_mat_layout.hpp>
+#include <ChipImgProc/rotation/cache.hpp>
+
 namespace chipimgproc{ namespace comb{
 
 template<
@@ -92,20 +94,30 @@ struct GeneralAlgo {
         v_roi_score_ = v;
     }
     
-    auto operator() (const cv::Mat& src) {
+    auto operator() (const cv::Mat& src, const std::string& id = "") {
+        *msg_ << "img id: " << id << std::endl;
         bool has_grid_img_ = (grid_img_ != nullptr);
-        auto theta = rot_estimator_(
-            src,
-            has_grid_img_,
-            has_grid_img_ ? *grid_img_ : cv::Mat(),
-            rot_min_theta_,
-            rot_max_theta_,
-            rot_steps_,
-            *msg_,
-            v_sample_,
-            v_edges_,
-            v_hough_
-        );
+        rot_cache_.set_img_id(id);
+        auto theta = [this, &src, has_grid_img_]() {
+            if(rot_cache_.has_cache()) {
+                return rot_cache_.get_cache();
+            } else {
+                auto v = rot_estimator_(
+                    src,
+                    has_grid_img_,
+                    has_grid_img_ ? *grid_img_ : cv::Mat(),
+                    rot_min_theta_,
+                    rot_max_theta_,
+                    rot_steps_,
+                    *msg_,
+                    v_sample_,
+                    v_edges_,
+                    v_hough_
+                );
+                rot_cache_.save_cache(v);
+                return v;
+            }
+        }();
         cv::Mat tmp = src.clone();
         rot_calibrator_(
             tmp,
@@ -129,7 +141,7 @@ struct GeneralAlgo {
                             v_roi_res_
                           );
         return std::make_tuple(
-            roi_qc, tiled_mat, stat_mats
+            roi_qc, tiled_mat, stat_mats, theta
         );
     }
   private:
@@ -173,6 +185,7 @@ struct GeneralAlgo {
 
     chipimgproc::rotation::Estimate<FLOAT>  rot_estimator_      ;
     chipimgproc::rotation::Calibrate        rot_calibrator_     ;
+    chipimgproc::rotation::Cache<FLOAT>     rot_cache_          ;
     chipimgproc::Gridding<FLOAT>            gridder_            ;
     chipimgproc::margin::AutoMinCV          auto_min_cv_        ;
     chipimgproc::roi::UniMarkerMatLayout    roi_bounder_        ;

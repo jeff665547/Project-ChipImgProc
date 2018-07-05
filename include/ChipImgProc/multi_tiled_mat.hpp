@@ -92,6 +92,30 @@ struct MultiTiledMat
         }
         return res;
     }
+    cv::Mat dump_means() {
+        return dump([this](const auto& cell_infos){
+            float min_cv = std::numeric_limits<float>::max();
+            float res;
+            for(auto& ci : cell_infos) {
+                if(min_cv > ci.cv ) {
+                    min_cv = ci.cv;
+                    res = ci.mean;
+                }
+            }
+            return res;
+        });
+    }
+    template<class FUNC>
+    cv::Mat dump(FUNC&& func) {
+        cv::Mat_<float> res(index_.rows, index_.cols);
+        res.forEach([this, v_func = FWD(func)](float& value, const int* pos){
+            auto& x = pos[0];
+            auto& y = pos[1];
+            auto cell_infos = tiles_.at(index_(y, x));
+            value = v_func(cell_infos);
+        });
+        return res;
+    }
 private:
     IndexType                           index_      ;
     std::vector<GridRawImg<GLID>>       cali_imgs_  ;

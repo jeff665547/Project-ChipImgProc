@@ -1,5 +1,5 @@
 /**
- *    @file        ChipImgProc/calibrate.hpp
+ *    @file      ChipImgProc/calibrate.hpp
  *    @author    Alex Lee
  *    @brief     Rotate the image by given angle.
  */

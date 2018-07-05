@@ -12,10 +12,6 @@ int nucleona::app::main(int argc, char* argv[]) {
     );
     chipimgproc::comb::GeneralAlgo<> gridder;
     gridder.set_logger(std::cout);
-
-    gridder.set_grid_res_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_grid_result.tiff", m);
-    });
     gridder.set_rot_cali_viewer([]( const cv::Mat& m ){
         cv::imwrite("debug_rot_cali.tiff", m);
     });
@@ -30,9 +26,6 @@ int nucleona::app::main(int argc, char* argv[]) {
     });
     gridder.set_roi_bin_viewer([](const cv::Mat& m){
         cv::imwrite("debug_roi_bin.tiff", m);
-    });
-    gridder.set_roi_res_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_roi_res.tiff", m);
     });
     gridder.set_roi_score_viewer([](const cv::Mat& m, int r, int c){
         cv::imwrite("debug_roi_score_" + std::to_string(c) + "_" + std::to_string(r) + ".tiff", m);
@@ -53,19 +46,31 @@ int nucleona::app::main(int argc, char* argv[]) {
     using Gridline  = typename decltype(gridder)::Gridline;
     std::vector<TiledMatT>                           tiled_mats  ;
     std::vector<chipimgproc::stat::Mats>             stat_mats_s ;
+
+    int i = 0;
     for(auto p : test_img_paths ) {
         cv::Mat img = cv::imread(p.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
         cv::imwrite("debug_src.tiff", img);
         chipimgproc::info(std::cout, img);
-        auto [qc, tiled_mat, stat_mats] = gridder(img);
+        gridder.set_grid_res_viewer([&i](const cv::Mat& m){
+            cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
+        });
+        gridder.set_roi_res_viewer([&i](const cv::Mat& m){
+            cv::imwrite("debug_roi_res_" + std::to_string(i) +".tiff", m);
+        });
+        auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
         stat_mats_s.push_back(stat_mats);
+        i ++;
     }
     std::vector<cv::Point_<int>> st_ps({
-        {0, 0}, {0, 27}, {27, 0}, {27, 27}
+        {0, 0}, {0, 74}, {74, 0}, {74, 74}
     });
 
     chipimgproc::MultiTiledMat<Gridline> multi_tiled_mat(
         tiled_mats, stat_mats_s, st_ps
     );
+    cv::Mat md;
+    multi_tiled_mat.dump_means().convertTo(md, CV_16U, 1);
+    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md));
 }
