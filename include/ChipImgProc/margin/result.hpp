@@ -2,9 +2,9 @@
 #include <cstdint>
 #include <ChipImgProc/stat/mats.hpp>
 namespace chipimgproc{ namespace margin{
-
+template<class FLOAT = float>
 struct Result {
-    stat::Mats stat_mat_;
+    stat::Mats<FLOAT> stat_mat_;
 };
 
 

@@ -9,25 +9,28 @@
 #include <ChipImgProc/stat/mats.hpp>
 namespace chipimgproc{
 
+template<class FLOAT = float>
 struct IdxRect 
 : public cv::Rect
-, public stat::Cell 
+, public stat::Cell<FLOAT> 
 {
     std::uint16_t img_idx;
 };
 // using GLID = std::uint16_t;
 template<
-    class GLID = std::uint16_t
+    class FLOAT = float,
+    class GLID  = std::uint16_t
 >
 struct MultiTiledMat
 {
-    using IndexType = typename TiledMat<GLID>::IndexType;
+    using IndexType  = typename TiledMat<GLID>::IndexType;
     using IndexValue = typename IndexType::value_type;
+    using CellInfos  = std::vector<IdxRect<FLOAT>>;
 
     MultiTiledMat(
-        const std::vector<TiledMat<GLID>>&  imgs,
-        const std::vector<stat::Mats>&      stats,
-        const std::vector<cv::Point_<int>>& cell_st_pts
+        const std::vector<TiledMat<GLID>>&        imgs,
+        const std::vector<stat::Mats<FLOAT>>&     stats,
+        const std::vector<cv::Point>&             cell_st_pts
     ) {
         // initial cali_imgs_
         for(auto& m: imgs) {
@@ -80,10 +83,9 @@ struct MultiTiledMat
             });
         }
     }
-    float mean(std::uint32_t x, std::uint32_t y) {
-        auto cell_infos = tiles_.at(index_(y, x));
-        float min_cv = std::numeric_limits<float>::max();
-        float res;
+    static FLOAT cell_infos_cv_min( const CellInfos& cell_infos ) {
+        auto min_cv = std::numeric_limits<FLOAT>::max();
+        FLOAT res;
         for(auto& ci : cell_infos) {
             if(min_cv > ci.cv ) {
                 min_cv = ci.cv;
@@ -92,23 +94,18 @@ struct MultiTiledMat
         }
         return res;
     }
-    cv::Mat dump_means() {
-        return dump([this](const auto& cell_infos){
-            float min_cv = std::numeric_limits<float>::max();
-            float res;
-            for(auto& ci : cell_infos) {
-                if(min_cv > ci.cv ) {
-                    min_cv = ci.cv;
-                    res = ci.mean;
-                }
-            }
-            return res;
-        });
+    template<class CELL_INFOS_FUNC = FLOAT(*)(const CellInfos&)>
+    FLOAT operator()(
+        std::uint32_t row, std::uint32_t col, 
+        CELL_INFOS_FUNC&& cell_info_func = cell_infos_cv_min
+    ) {
+        auto cell_infos = tiles_.at(index_(row, col));
+        return cell_infos_cv_func(cell_infos);
     }
-    template<class FUNC>
-    cv::Mat dump(FUNC&& func) {
-        cv::Mat_<float> res(index_.rows, index_.cols);
-        res.forEach([this, v_func = FWD(func)](float& value, const int* pos){
+    template<class FUNC = FLOAT(*)(const CellInfos&)>
+    cv::Mat dump(FUNC&& func = cell_infos_cv_min) {
+        cv::Mat_<FLOAT> res(index_.rows, index_.cols);
+        res.forEach([this, v_func = FWD(func)](FLOAT& value, const int* pos){
             auto& x = pos[0];
             auto& y = pos[1];
             auto cell_infos = tiles_.at(index_(y, x));
@@ -117,9 +114,9 @@ struct MultiTiledMat
         return res;
     }
 private:
-    IndexType                           index_      ;
-    std::vector<GridRawImg<GLID>>       cali_imgs_  ;
-    std::vector<std::vector<IdxRect>>   tiles_      ;
+    IndexType                                  index_      ;
+    std::vector<GridRawImg<GLID>>              cali_imgs_  ;
+    std::vector<CellInfos>                     tiles_      ;
 };
 
 

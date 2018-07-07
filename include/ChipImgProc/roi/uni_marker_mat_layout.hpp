@@ -48,10 +48,10 @@ struct UniMarkerMatLayout {
         };
         return res;
     }
-    template<class GLID>
+    template<class FLOAT, class GLID>
     bool operator()( 
-        const marker::Layout&        mk_layout,
-        stat::Mats&                raw_smats,
+        const marker::Layout&      mk_layout,
+        stat::Mats<FLOAT>&         raw_smats,
         TiledMat<GLID>&            tiled_src,
         std::ostream&              out       = nucleona::stream::null_out,
         const std::function<

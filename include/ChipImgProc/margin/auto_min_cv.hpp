@@ -22,11 +22,12 @@ namespace chipimgproc { namespace margin{
  *              The section size is defined by input parameter.
  *              See @ref improc_min_cv_auto_margin for more detail.
  */
+template<class FLOAT>
 struct AutoMinCV
 {
-    stat::Cell count_cv ( const cv::Mat_<int32_t>& mat )
+    stat::Cell<FLOAT> count_cv ( const cv::Mat_<int32_t>& mat )
     {
-        return stat::Cell::make(mat);
+        return stat::Cell<FLOAT>::make(mat);
     }
     auto find_min_cv(
           const cv::Mat& src
@@ -35,7 +36,7 @@ struct AutoMinCV
         , std::int32_t windows_height 
     ) {
         // TODO: optimize
-        stat::Cell min;
+        stat::Cell<FLOAT> min;
         cv::Rect min_cv_win(0, 0, windows_width, windows_height);
         min.cv = std::numeric_limits<float>::max();
         for ( std::int32_t i = t.y; i < t.y + t.height - windows_height + 1; i ++ )
@@ -65,7 +66,7 @@ struct AutoMinCV
         if( min_cv_win.height <= 0 ) { throw std::runtime_error("min cv tile constrain check fail"); };
         // min.detail_raw_value = src(t);
         struct {
-            stat::Cell stat;
+            stat::Cell<FLOAT> stat;
             cv::Rect win;
         } res {
             min, min_cv_win
@@ -79,6 +80,7 @@ struct AutoMinCV
      * @param   windows_height  The result section height in grid cell after auto margin.
      * @param   v_result        The process result debug image view.
      */
+    // using GLID = int;
     template<class GLID>
     auto operator()( 
           TiledMat<GLID>&           tiled_src
@@ -89,7 +91,7 @@ struct AutoMinCV
           >&                        v_result            = nullptr
     )
     {
-        stat::Mats res(rows(tiled_src), cols(tiled_src));
+        stat::Mats<FLOAT> res(rows(tiled_src), cols(tiled_src));
         auto& tiles = tiled_src.get_tiles();
         for( int y = 0; y < rows(tiled_src); y ++ ) {
             for ( int x = 0; x < cols(tiled_src); x ++ ) {

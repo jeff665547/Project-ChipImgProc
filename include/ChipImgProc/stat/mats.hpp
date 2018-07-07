@@ -2,8 +2,12 @@
 #include <cstdint>
 #include <ChipImgProc/utils.h>
 namespace chipimgproc { namespace stat{
+
+template<class FLOAT = float>
 struct Mats
 {
+    using FloatType = FLOAT;
+
     Mats() = default;
     Mats(int rows, int cols)
     : mean  (rows, cols)
@@ -17,9 +21,9 @@ struct Mats
         cv     = cv     (r);
         num    = num    (r);
     }
-    cv::Mat_<float>         mean    ;
-    cv::Mat_<float>         stddev  ;
-    cv::Mat_<float>         cv      ;
+    cv::Mat_<FLOAT>         mean    ;
+    cv::Mat_<FLOAT>         stddev  ;
+    cv::Mat_<FLOAT>         cv      ;
     cv::Mat_<std::uint32_t> num     ;
 };
 

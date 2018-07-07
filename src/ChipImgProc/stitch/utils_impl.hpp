@@ -1,5 +1,6 @@
 #include <ChipImgProc/utils.h>
 #include <iostream>
+#include <vector>
 namespace chipimgproc{ namespace stitch{
 
 cv::Rect get_full_w_h( 
