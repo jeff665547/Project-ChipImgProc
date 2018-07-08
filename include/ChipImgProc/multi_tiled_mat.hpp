@@ -20,31 +20,31 @@ struct IdxRect
 namespace detail{
 
 template<class FLOAT = float>
-using CellInfos  = std::vector<IdxRect<FLOAT>>;
+using CellInfos_    = std::vector<IdxRect<FLOAT>>;
 
 template<class FLOAT = float>
-using Tiles = std::vector<CellInfos<FLOAT>>;
+using Tiles_        = std::vector<CellInfos_<FLOAT>>;
 
 template<class GLID = std::uint16_t>
-using IndexType  = typename TiledMat<GLID>::IndexType;
+using IndexType_    = typename TiledMat<GLID>::IndexType;
 
 template<
     class FLOAT = float,
     class GLID  = std::uint16_t
 >
 using IndexedRange = wrapper::IndexedRange<
-    detail::Tiles<FLOAT>,
-    detail::IndexType<GLID>
+    detail::Tiles_<FLOAT>,
+    detail::IndexType_<GLID>
 >;
 
 template<class GLID = std::uint16_t>
 struct IndexWrapper {
-    using IndexType = IndexType<GLID>;
+    using IndexType = IndexType_<GLID>;
     IndexType index_;
 };
 template<class FLOAT = float>
 struct TilesWrapper {
-    using Tiles = Tiles<FLOAT>;
+    using Tiles = Tiles_<FLOAT>;
     Tiles tiles_;
 };
 
@@ -62,7 +62,7 @@ struct MultiTiledMat
 {
     using IndexType  = typename detail::IndexWrapper<GLID>::IndexType;
     using IndexValue = typename IndexType::value_type;
-    using CellInfos  = detail::CellInfos<FLOAT>;
+    using CellInfos  = detail::CellInfos_<FLOAT>;
     using Tiles      = typename detail::TilesWrapper<FLOAT>::Tiles;
     using This       = MultiTiledMat<FLOAT, GLID>;
 
