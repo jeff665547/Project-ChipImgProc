@@ -36,11 +36,11 @@ protected:
 template<class MAT, class ACC_FUNC>
 struct AccBind 
 : public AccBindImpl<MAT, ACC_FUNC>
-, public TransformRange<MAT&, ACC_FUNC> 
+, public TransformRange<MAT&, std::decay_t<ACC_FUNC> >
 {
     AccBind(MAT&& mat, ACC_FUNC&& acc_func)
     : AccBindImpl   <MAT , ACC_FUNC>(FWD(mat), FWD(acc_func))
-    , TransformRange<MAT&, ACC_FUNC>(
+    , TransformRange<MAT&, std::decay_t<ACC_FUNC>>(
         nucleona::range::transform(
             this->inter_, 
             nucleona::copy(this->acc_func_),

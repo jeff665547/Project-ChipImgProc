@@ -6,6 +6,7 @@
 #include <ChipImgProc/marker/layout.hpp>
 #include <ChipImgProc/roi/uni_marker_mat_layout.hpp>
 #include <ChipImgProc/rotation/cache.hpp>
+#include <Nucleona/tuple.hpp>
 
 namespace chipimgproc{ namespace comb{
 
@@ -48,6 +49,12 @@ struct SingleGeneral {
     }
     void set_logger( std::ostream& out) {
         msg_ = &out;
+    }
+    void set_margin_method ( const std::string& method ) {
+        margin_method_ = method;
+    }
+    void set_seg_rate( float rate ) {
+        seg_rate_ = rate;
     }
     template<class FUNC> 
     void set_sample_viewer( const FUNC& v ) {
@@ -118,22 +125,28 @@ struct SingleGeneral {
         );
         auto grid_res   = gridder_(tmp, grid_max_intvl_, *msg_, v_grid_res_);
         auto tiled_mat  = TiledMat<>::make_from_grid_res(grid_res, tmp);
-        auto stat_mats  = auto_min_cv_(
-                            tiled_mat, 
-                            window_width, window_height, 
-                            v_margin_res_
+        auto margin_res = margin_(
+                            margin_method_,
+                            margin::Param<GLID> {
+                                seg_rate_, 
+                                &tiled_mat,
+                                v_margin_res_
+                            }
                           );
         auto roi_qc     = roi_bounder_(
                             marker_layout_, 
-                            stat_mats, 
+                            margin_res.stat_mats,
                             tiled_mat,
                             *msg_,
                             v_roi_bin_,
                             v_roi_score_,
                             v_roi_res_
                           );
-        return std::make_tuple(
-            roi_qc, tiled_mat, stat_mats, theta
+        return nucleona::make_tuple(
+            std::move(roi_qc), 
+            std::move(tiled_mat), 
+            std::move(margin_res.stat_mats), 
+            std::move(theta)
         );
     }
   private:
@@ -142,10 +155,11 @@ struct SingleGeneral {
     FLOAT                     rot_steps_         { 800 }                         ;
     FLOAT                     grid_max_intvl_    {  35 }                         ;
     const cv::Mat*            grid_img_          { nullptr }                     ;
-    std::int32_t              window_width       {  20 }                         ;
-    std::int32_t              window_height      {  20 }                         ;
+    std::string               margin_method_     { "mid_seg" }                   ;
+    float                     seg_rate_          { 0.6 }                         ;
     marker::Layout            marker_layout_                                     ;
     std::ostream*             msg_               { &nucleona::stream::null_out } ;
+
     std::function<
         void(const cv::Mat&)
     >                         v_sample_          { nullptr }                     ;
@@ -179,7 +193,7 @@ struct SingleGeneral {
     chipimgproc::rotation::Calibrate        rot_calibrator_     ;
     chipimgproc::rotation::Cache<FLOAT>     rot_cache_          ;
     chipimgproc::Gridding<FLOAT>            gridder_            ;
-    chipimgproc::margin::AutoMinCV<FLOAT>   auto_min_cv_        ;
+    chipimgproc::Margin<FLOAT, GLID>        margin_             ;
     chipimgproc::roi::UniMarkerMatLayout    roi_bounder_        ;
 
 };

@@ -3,10 +3,15 @@
 #include <ChipImgProc/tiled_mat.hpp>
 namespace chipimgproc{ namespace margin{
 
+template<
+    class GLID = std::uint16_t
+>
 struct Param {
-    std::int32_t        windows_width  ;
-    std::int32_t        windows_height ;
-    TiledMat<>* const   tiled_mat      ;
+    float                   seg_rate       ;
+    TiledMat<GLID>* const   tiled_mat      ;
+    std::function<
+        void(const cv::Mat&)
+    >                       v_result       ;
 };
 
 

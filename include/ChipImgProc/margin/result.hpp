@@ -4,7 +4,7 @@
 namespace chipimgproc{ namespace margin{
 template<class FLOAT = float>
 struct Result {
-    stat::Mats<FLOAT> stat_mat_;
+    stat::Mats<FLOAT> stat_mats;
 };
 
 

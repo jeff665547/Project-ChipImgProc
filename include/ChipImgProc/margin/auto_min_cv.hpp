@@ -84,8 +84,7 @@ struct AutoMinCV
     template<class GLID>
     auto operator()( 
           TiledMat<GLID>&           tiled_src
-        , std::int32_t              windows_width
-        , std::int32_t              windows_height 
+        , float                     seg_rate
         , const std::function<
             void(const cv::Mat&)
           >&                        v_result            = nullptr
@@ -96,8 +95,11 @@ struct AutoMinCV
         for( int y = 0; y < rows(tiled_src); y ++ ) {
             for ( int x = 0; x < cols(tiled_src); x ++ ) {
                 auto& t = tiled_src.tile_at(y, x);
+                int windows_width  = std::round(t.width  * seg_rate);
+                int windows_height = std::round(t.height * seg_rate);
                 auto min_cv_data = find_min_cv(
-                    tiled_src.get_cali_img(), t, windows_width, windows_width
+                    tiled_src.get_cali_img(), t, 
+                    windows_width, windows_width
                 );
                 res.mean   (y, x) = min_cv_data.stat.mean;
                 res.stddev (y, x) = min_cv_data.stat.stddev;
