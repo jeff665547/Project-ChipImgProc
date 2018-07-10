@@ -112,8 +112,23 @@ struct Gridding
     )
     {
         auto src = in_src.clone();
-        auto x = fit_sinewave<0,18>(src, max_intvl, msg);
-        auto y = fit_sinewave<1,18>(src, max_intvl, msg);
+        std::vector<FLOAT> x, y, x_, y_;
+        for(int i = 0; i < 7; i ++ ) {
+            x_ = fit_sinewave<0,18>(src, max_intvl, msg);
+            y_ = fit_sinewave<1,18>(src, max_intvl, msg);
+            if( !x.empty() ) {
+                float ratio = ( x_.size() / (float)x.size() );
+                msg << "last x num: "    << x.size()  << std::endl;
+                msg << "current x num: " << x_.size() << std::endl;
+                msg << "ratio: " << ratio << std::endl;
+                if( ratio > 1.6 ) {
+                    break;
+                } 
+            }
+            x = x_;
+            y = y_;
+            max_intvl -= 2;
+        }
     
         std::vector<cv::Rect> tiles;
         for (decltype(y.size()) j = 1; j != y.size(); ++j)
