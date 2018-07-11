@@ -25,7 +25,7 @@ struct Gridding
     template <int32_t dim, int32_t lg2nfft>
     auto fit_sinewave(
           const cv::Mat_<FLOAT>& src
-        , const double max_intvl
+        , const double max_invl
         , std::ostream& out = nucleona::stream::null_out
     )
     {
@@ -53,7 +53,7 @@ struct Gridding
         FLOAT max = 0.0;
         FLOAT loc = 0.0;
         auto last = ft.total() >> 1;
-        for (auto i = decltype(last)(ft.total()/max_intvl); i != last; ++i)
+        for (auto i = decltype(last)(ft.total()/max_invl); i != last; ++i)
         {
             auto val = cv::norm(ft(i));
             if (max < val)
@@ -63,7 +63,7 @@ struct Gridding
             }
         }
         double freq = loc / static_cast<FLOAT>(ft.total());
-        out << "intvl = " << 1.0 / freq << '\n';
+        out << "invl = " << 1.0 / freq << '\n';
     
         // Phase estimation
         cv::Mat_<FLOAT> Phi, w;
@@ -98,13 +98,13 @@ struct Gridding
     /**
      *  @brief  Recognize the grid border of the image.
      *  @param  in_src       Input image
-     *  @param  max_intvl    Max interval of grid line
+     *  @param  max_invl    Max interval of grid line
      *  @param  verbose Set to false if no image shown are needed ( will override other "v_" prefix variable ), else set to true.
      *  @return grid rows, grid cols, grid tiles ( a rectangle set )
      */
     Result operator()( 
           const cv::Mat&            in_src
-        , double                    max_intvl 
+        , double                    max_invl 
         , std::ostream&             msg                 = nucleona::stream::null_out
         , const std::function<
             void(const cv::Mat&)
@@ -112,23 +112,18 @@ struct Gridding
     )
     {
         auto src = in_src.clone();
-        std::vector<FLOAT> x, y, x_, y_;
-        for(int i = 0; i < 7; i ++ ) {
-            x_ = fit_sinewave<0,18>(src, max_intvl, msg);
-            y_ = fit_sinewave<1,18>(src, max_intvl, msg);
-            if( !x.empty() ) {
-                float ratio = ( x_.size() / (float)x.size() );
-                msg << "last x num: "    << x.size()  << std::endl;
-                msg << "current x num: " << x_.size() << std::endl;
-                msg << "ratio: " << ratio << std::endl;
-                if( ratio > 1.6 ) {
-                    break;
-                } 
-            }
-            x = x_;
-            y = y_;
-            max_intvl -= 2;
-        }
+        std::vector<FLOAT> x, y;
+        x = fit_sinewave<0,18>(src, max_invl, msg);
+        y = fit_sinewave<1,18>(src, max_invl, msg);
+        // if( !x.empty() ) {
+        //     float ratio = ( x_.size() / (float)x.size() );
+        //     msg << "last x num: "    << x.size()  << std::endl;
+        //     msg << "current x num: " << x_.size() << std::endl;
+        //     msg << "ratio: " << ratio << std::endl;
+        //     if( ratio > 1.6 ) {
+        //         break;
+        //     } 
+        // }
     
         std::vector<cv::Rect> tiles;
         for (decltype(y.size()) j = 1; j != y.size(); ++j)

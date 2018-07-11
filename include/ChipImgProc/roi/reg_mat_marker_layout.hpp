@@ -6,7 +6,7 @@
 #include <map>
 #include <ChipImgProc/utils.h>
 namespace chipimgproc{ namespace roi{
-struct UniMarkerMatLayout {
+struct RegMatMarkerLayout {
     cv::Mat binarize(const cv::Mat_<float>& m) {
         auto trimmed_mean = trim_outlier(m.clone(), 0, 0.02); // TODO: smarter way
         cv::Mat_<std::uint8_t> bin;
@@ -44,7 +44,7 @@ struct UniMarkerMatLayout {
             cv::Point org_point;
         } res {
             max_vote->second > threshold,
-            max_vote->first - mk_layout.get_marker_des(0, 0).get_pos()
+            max_vote->first - mk_layout.get_marker_des(0, 0).get_pos_cl()
         };
         return res;
     }
@@ -82,7 +82,7 @@ struct UniMarkerMatLayout {
             for( int c = 0; c < mk_layout.mk_map.cols; c ++ ) {
                 std::int16_t mk_des_idx = mk_layout.mk_map(c, r);
                 auto& mk_des = mk_layout.mks.at(mk_des_idx);
-                auto& candi_mks = mk_des.candi_mks;
+                auto& candi_mks = mk_des.candi_mks_cl;
                 cv::Rect match_region(
                     c * sp_w,
                     r * sp_h,
@@ -134,8 +134,8 @@ struct UniMarkerMatLayout {
         cv::Rect r(
             check_res.org_point.x,
             check_res.org_point.y,
-            mk_layout.mk_invl_x_cl * ( mk_layout.mk_map.cols - 1 ) + mk_layout.get_marker_width(),
-            mk_layout.mk_invl_y_cl * ( mk_layout.mk_map.rows - 1 ) + mk_layout.get_marker_height()
+            mk_layout.mk_invl_x_cl * ( mk_layout.mk_map.cols - 1 ) + mk_layout.get_marker_width_cl(),
+            mk_layout.mk_invl_y_cl * ( mk_layout.mk_map.rows - 1 ) + mk_layout.get_marker_height_cl()
         );
         out << "cell roi: " << r << std::endl;
 

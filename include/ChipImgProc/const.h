@@ -43,4 +43,24 @@ private:
     State s_;
 };
 
+struct MatUnit {
+    enum State {
+        PX, CELL
+    };
+    std::string to_string() const {
+        switch(s_) {
+            case PX     : return "pixel" ;
+            case CELL   : return "cell"  ;
+        }
+    }
+    operator std::string() const {
+        return to_string();
+    }
+    operator const State&() const {
+        return s_;
+    }
+private:
+    State s_;
+};
+
 }

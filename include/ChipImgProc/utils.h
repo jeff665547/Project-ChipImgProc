@@ -15,6 +15,8 @@ int cols(const cv::Mat& m);
 int rows(const cv::Mat& m);
 const char* depth(const cv::Mat& image);
 
+cv::Mat binarize(const cv::Mat& m, float ltrim = 0.05, float rtrim = 0.05);
+
 template<class OS>
 void info(OS& os, const cv::Mat& image)
 {

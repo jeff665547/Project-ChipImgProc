@@ -26,6 +26,13 @@ const char* depth(const cv::Mat& image)
     }
     return "Undefined";
 }
+template<class T>
+cv::Mat binarize(const cv::Mat_<T>& m, float ltrim, float rtrim) {
+    auto trimmed_m = trim_outlier(m.clone(), ltrim, rtrim); // TODO: smarter way
+    cv::Mat_<std::uint8_t> bin;
+    cv::normalize(trimmed_m, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
+    return bin;
+}
 
 double cmax(const cv::Mat& image)
 {

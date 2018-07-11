@@ -4,7 +4,7 @@
 #include <ChipImgProc/margin.hpp>
 #include <ChipImgProc/tiled_mat.hpp>
 #include <ChipImgProc/marker/layout.hpp>
-#include <ChipImgProc/roi/uni_marker_mat_layout.hpp>
+#include <ChipImgProc/roi/reg_mat_marker_layout.hpp>
 #include <ChipImgProc/rotation/cache.hpp>
 #include <Nucleona/tuple.hpp>
 
@@ -26,8 +26,8 @@ struct SingleGeneral {
     void set_rot_estimate_steps(FLOAT steps) {
         rot_steps_ = steps;
     }
-    void set_grid_max_intvl(int intvl) {
-        grid_max_intvl_ = intvl;
+    void set_grid_max_invl(int invl) {
+        grid_max_invl_ = invl;
     }
     void set_grid_support_img( const cv::Mat& mat) {
         grid_img_ = &mat;
@@ -38,14 +38,17 @@ struct SingleGeneral {
         int cols = 3,
         std::uint32_t invl_x_cl = 37, 
         std::uint32_t invl_y_cl = 37,
+        std::uint32_t invl_x_px = 1091, // can get this value from micron to pixel
+        std::uint32_t invl_y_px = 1091,
         const cv::Point& min_p = {0, 0}
     ) {
-        marker_layout_.set_uni_mat_dist(
+        marker_layout_.set_reg_mat_dist(
             rows,  cols,
             min_p,
-            invl_x_cl, invl_y_cl
+            invl_x_cl, invl_y_cl,
+            invl_x_px, invl_y_px
         );
-        marker_layout_.set_single_mk_pat( candi_pats );
+        marker_layout_.set_single_mk_pat( candi_pats, {} ); // TODO: raw marker image required
     }
     void set_logger( std::ostream& out) {
         msg_ = &out;
@@ -123,7 +126,7 @@ struct SingleGeneral {
             theta,
             v_rot_cali_res_
         );
-        auto grid_res   = gridder_(tmp, grid_max_intvl_, *msg_, v_grid_res_);
+        auto grid_res   = gridder_(tmp, grid_max_invl_, *msg_, v_grid_res_);
         auto tiled_mat  = TiledMat<>::make_from_grid_res(grid_res, tmp);
         auto margin_res = margin_(
                             margin_method_,
@@ -153,7 +156,7 @@ struct SingleGeneral {
     FLOAT                     rot_min_theta_     {  87 }                         ; 
     FLOAT                     rot_max_theta_     {  93 }                         ; 
     FLOAT                     rot_steps_         { 800 }                         ;
-    FLOAT                     grid_max_intvl_    {  35 }                         ;
+    FLOAT                     grid_max_invl_     {  27 }                         ;
     const cv::Mat*            grid_img_          { nullptr }                     ;
     std::string               margin_method_     { "mid_seg" }                   ;
     float                     seg_rate_          { 0.6 }                         ;
@@ -194,7 +197,7 @@ struct SingleGeneral {
     chipimgproc::rotation::Cache<FLOAT>     rot_cache_          ;
     chipimgproc::Gridding<FLOAT>            gridder_            ;
     chipimgproc::Margin<FLOAT, GLID>        margin_             ;
-    chipimgproc::roi::UniMarkerMatLayout    roi_bounder_        ;
+    chipimgproc::roi::RegMatMarkerLayout    roi_bounder_        ;
 
 };
 
