@@ -7,7 +7,7 @@
 #include <ChipImgProc/utils.h>
 namespace chipimgproc{ namespace roi{
 struct RegMatMarkerLayout {
-    cv::Mat binarize(const cv::Mat_<float>& m) {
+    cv::Mat norm_u8(const cv::Mat_<float>& m) {
         auto trimmed_mean = trim_outlier(m.clone(), 0, 0.02); // TODO: smarter way
         cv::Mat_<std::uint8_t> bin;
         cv::normalize(trimmed_mean, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
@@ -64,7 +64,7 @@ struct RegMatMarkerLayout {
             void(const cv::Mat&)
         >&                         v_result  = nullptr
     ) {
-        auto tgt = binarize(raw_smats.mean); // TODO:
+        auto tgt = norm_u8(raw_smats.mean); // TODO:
         if(v_bin) v_bin(tgt);
         auto sp_h = tgt.rows / mk_layout.mk_map.rows;
         auto sp_w = tgt.cols / mk_layout.mk_map.cols;

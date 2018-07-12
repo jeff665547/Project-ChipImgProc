@@ -47,6 +47,9 @@ struct MatUnit {
     enum State {
         PX, CELL
     };
+    MatUnit(const State& s)
+    : s_ (s)
+    {}
     std::string to_string() const {
         switch(s_) {
             case PX     : return "pixel" ;

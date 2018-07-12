@@ -1,4 +1,4 @@
-#include <ChipImgProc/rotation/estimate.hpp>
+#include <ChipImgProc/rotation/line_detection.hpp>
 #include <ChipImgProc/rotation/calibrate.hpp>
 #include <ChipImgProc/gridding.hpp>
 #include <ChipImgProc/margin.hpp>
@@ -192,12 +192,12 @@ struct SingleGeneral {
     >                         v_roi_res_         { nullptr }                     ;
 
 
-    chipimgproc::rotation::Estimate<FLOAT>  rot_estimator_      ;
-    chipimgproc::rotation::Calibrate        rot_calibrator_     ;
-    chipimgproc::rotation::Cache<FLOAT>     rot_cache_          ;
-    chipimgproc::Gridding<FLOAT>            gridder_            ;
-    chipimgproc::Margin<FLOAT, GLID>        margin_             ;
-    chipimgproc::roi::RegMatMarkerLayout    roi_bounder_        ;
+    chipimgproc::rotation::LineDetection<FLOAT>  rot_estimator_      ;
+    chipimgproc::rotation::Calibrate             rot_calibrator_     ;
+    chipimgproc::rotation::Cache<FLOAT>          rot_cache_          ;
+    chipimgproc::Gridding<FLOAT>                 gridder_            ;
+    chipimgproc::Margin<FLOAT, GLID>             margin_             ;
+    chipimgproc::roi::RegMatMarkerLayout         roi_bounder_        ;
 
 };
 

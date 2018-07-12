@@ -30,7 +30,7 @@ struct Calibrate
               cv::Mat& in_src
             , FLOAT theta
             , const std::function<void(const cv::Mat&)>& v_result = nullptr
-        )
+        ) const
         {
             auto& src = in_src;
             cv::Point2f center(src.cols >> 1, src.rows >> 1);

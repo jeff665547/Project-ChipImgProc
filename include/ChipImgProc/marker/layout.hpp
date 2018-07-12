@@ -126,11 +126,33 @@ struct Layout {
         mk.pos_cl_ = p_cl;
         mks.push_back(mk);
     }
-    int get_marker_width_cl() const {
+    auto get_marker_width_cl() const {
         return mks.at(0).candi_mks_cl.at(0).cols;
     }
-    int get_marker_height_cl() const {
+    auto get_marker_height_cl() const {
         return mks.at(0).candi_mks_cl.at(0).rows;
+    }
+    auto get_marker_width_px() const {
+        return mks.at(0).candi_mks_px.at(0).cols;
+    }
+    auto get_marker_height_px() const {
+        return mks.at(0).candi_mks_px.at(0).rows;
+    }
+    auto get_marker_height(const MatUnit& unit) const {
+        switch(unit) {
+            case MatUnit::PX:
+                return get_marker_height_px();
+            case MatUnit::CELL:
+                return get_marker_height_cl();
+        }
+    }
+    auto get_marker_width(const MatUnit& unit) const {
+        switch(unit) {
+            case MatUnit::PX:
+                return get_marker_width_px();
+            case MatUnit::CELL:
+                return get_marker_width_cl();
+        }
     }
     // void set_mk_pat_for_reg_mat_dist( const cv::Point& ) {
 

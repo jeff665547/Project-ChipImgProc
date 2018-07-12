@@ -15,7 +15,7 @@ int cols(const cv::Mat& m);
 int rows(const cv::Mat& m);
 const char* depth(const cv::Mat& image);
 
-cv::Mat binarize(const cv::Mat& m, float ltrim = 0.05, float rtrim = 0.05);
+// cv::Mat norm_u8(const cv::Mat& m, float ltrim = 0.05, float rtrim = 0.05);
 
 template<class OS>
 void info(OS& os, const cv::Mat& image)
@@ -112,6 +112,21 @@ auto trim_outlier( M&& mm, float ltrim_rate, float utrim_rate )
     }
     return mm;
 }
+template<class T>
+cv::Mat_<std::uint8_t> norm_u8(const cv::Mat_<T>& m, float ltrim = 0.05, float rtrim = 0.05) {
+    auto trimmed_m = trim_outlier(m.clone(), ltrim, rtrim); // TODO: smarter way
+    cv::Mat_<std::uint8_t> bin;
+    cv::normalize(trimmed_m, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
+    return bin;
+}
+template<class T>
+cv::Mat_<std::uint8_t> binarize(const cv::Mat_<T>& m, float ltrim = 0.05, float rtrim = 0.05) {
+    auto trimmed_m = trim_outlier(m.clone(), ltrim, rtrim); // TODO: smarter way
+    cv::Mat_<std::uint8_t> bin(m.rows, m.cols);
+    cv::threshold(trimmed_m, bin, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    // cv::normalize(trimmed_m, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
+    return bin;
+}
 template<class T, class SM, class DM>
 void mat_copy ( 
       const SM& sm
@@ -145,4 +160,7 @@ cv::Mat_<std::uint16_t> viewable(
     float rtrim = 0.05
 );
 
+using ViewerCallback = std::function<void(const cv::Mat&)>;
+template<class... ARGS>
+using ViewerCallbackA = std::function<void(const cv::Mat&, ARGS...)>;
 }
