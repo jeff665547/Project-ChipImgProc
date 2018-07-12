@@ -19,7 +19,24 @@ private:
         }
         return sum / d.size();
     }
-
+    auto x_y_group( const std::vector<marker::detection::MKRegion>& set ) const {
+        std::map<int, std::vector<cv::Point>> x_group, y_group;
+        for(auto&& mk_r : set ) {
+            x_group[mk_r.x_i].push_back(cv::Point(mk_r.x, mk_r.y));
+            y_group[mk_r.y_i].push_back(cv::Point(mk_r.x, mk_r.y));
+        }
+        return nucleona::make_tuple(
+            std::move(x_group), std::move(y_group)
+        );
+    }
+    auto horizontal_estimate(std::map<int, std::vector<cv::Point>>& x_group) const {
+        for( auto&& p : x_group ) {
+            std::sort(p.second.begin(), p.second.end(), [](const auto& a, const auto& b){
+                return a.y < b.y;
+            });
+            auto vec = p.second.back() - p.second.front();
+        }
+    }
 public:
     auto operator()(
         const cv::Mat_<std::uint16_t>&          src                                     ,
@@ -34,48 +51,8 @@ public:
         const ViewerCallback&                   v_bin      = nullptr,
         const ViewerCallbackA<int,int,int>&     marker_rot = nullptr           
     ) const {
-        cv::Mat_<std::uint8_t> src_u8;
-        src.convertTo(src_u8, src_u8.type(), 0.00390625);
-        src_u8 = binarize(src_u8);
-        auto delta = (max_theta - min_theta) / steps;
-        std::vector<FLOAT> thetas;
-        thetas.reserve(mk_regions.size());
-        for(auto& mk_r : mk_regions) {
-            FLOAT max_score       = std::numeric_limits<FLOAT>::min();
-            FLOAT max_score_theta = 0;
-            auto&& candi_mks = mk_layout.get_marker_des(
-                mk_r.y_i, mk_r.x_i
-            ).get_candi_mks(MatUnit::PX);
-            cv::Rect search_range;
-            search_range.x = mk_r.x - (mk_r.width  / 2);
-            if( search_range.x < 0 ) search_range.x = 0;
-            search_range.y = mk_r.y - (mk_r.height / 2);
-            if( search_range.y < 0 ) search_range.y = 0;
-            search_range.width  = mk_r.width  * 2;
-            search_range.height = mk_r.height * 2;
-            auto mat = src_u8(search_range);
-            cv::imwrite("debug_img_roi.tiff", mat);
-            FLOAT theta = min_theta; // TODO: use range
-            for( int s = 0; s < steps; s ++ ) {
-                auto score = scoring(mat, candi_mks, theta);
-                if( max_score < score ) {
-                    max_score = score;
-                    max_score_theta = theta;
-                }
-                theta += delta;
-            }
-            thetas.push_back(max_score_theta);
-            logger << "mk(" << mk_r.x_i << "," << mk_r.y_i << "), theta: "
-                << max_score_theta << ", score: " << max_score << std::endl;
-            if( marker_rot ) {
-                int mk_i = 0; // TODO: range
-                for( auto&& mk : candi_mks ) {
-                    marker_rot(rotate(mk, max_score_theta), mk_r.x_i, mk_r.y_i, mk_i);
-                    mk_i ++; 
-                }
-            }
-        }
-        return mean(thetas);
+        auto[x_group, y_group] = x_y_group(mk_regions);
+        auto thetas = horizontal_estimate(x_group);
     }
 private:
     auto rotate(const cv::Mat& mat, FLOAT theta) const {
