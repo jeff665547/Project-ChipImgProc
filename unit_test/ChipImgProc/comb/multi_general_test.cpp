@@ -11,6 +11,7 @@ TEST(multi_image_general_gridding, basic_test) {
     std::ifstream marker_in(
         ( nucleona::test::data_dir() / "zion_pat.tsv").string()
     );
+    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat.tiff";
     chipimgproc::comb::MultiGeneral<> gridder;
     gridder.set_logger(std::cout);
     gridder.set_rot_cali_viewer([]( const cv::Mat& m ){
@@ -31,11 +32,16 @@ TEST(multi_image_general_gridding, basic_test) {
     gridder.set_roi_score_viewer([](const cv::Mat& m, int r, int c){
         cv::imwrite("debug_roi_score_" + std::to_string(c) + "_" + std::to_string(r) + ".tiff", m);
     });
-    std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats;
+    std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
     auto mk = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
-    candi_mk_pats.push_back(mk);
+    candi_mk_pats_cl.push_back(mk);
+
+    std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
+    candi_mk_pats_px.push_back(
+        cv::imread(zion_pat_px_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH )
+    );
     gridder.set_marker_layout(
-        candi_mk_pats
+        candi_mk_pats_cl, candi_mk_pats_px
     );
     std::vector<boost::filesystem::path> test_img_paths ({
         nucleona::test::data_dir() / "C018_2017_11_30_18_14_23" / "0-0-2.tiff",

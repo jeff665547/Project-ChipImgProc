@@ -1,4 +1,6 @@
 #include <ChipImgProc/rotation/line_detection.hpp>
+#include <ChipImgProc/marker/detection/reg_mat.hpp>
+#include <ChipImgProc/rotation/marker_vec.hpp>
 #include <ChipImgProc/rotation/calibrate.hpp>
 #include <ChipImgProc/gridding.hpp>
 #include <ChipImgProc/margin.hpp>
@@ -33,7 +35,8 @@ struct SingleGeneral {
         grid_img_ = &mat;
     }
     void set_marker_layout( 
-        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats,
+        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl,
+        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
         int rows = 3, 
         int cols = 3,
         std::uint32_t invl_x_cl = 37, 
@@ -48,7 +51,7 @@ struct SingleGeneral {
             invl_x_cl, invl_y_cl,
             invl_x_px, invl_y_px
         );
-        marker_layout_.set_single_mk_pat( candi_pats, {} ); // TODO: raw marker image required
+        marker_layout_.set_single_mk_pat( candi_pats_cl, candi_pats_px ); // TODO: raw marker image required
     }
     void set_logger( std::ostream& out) {
         msg_ = &out;
@@ -98,23 +101,33 @@ struct SingleGeneral {
     
     auto operator() (const cv::Mat& src, const std::string& id = "") {
         *msg_ << "img id: " << id << std::endl;
+        auto marker_regs = marker_detection_(
+            static_cast<const cv::Mat_<std::uint16_t>&>(src), 
+            marker_layout_, 
+            chipimgproc::MatUnit::PX, 
+            *msg_
+        );
+
         bool has_grid_img_ = (grid_img_ != nullptr);
         rot_cache_.set_img_id(id);
-        auto theta = [this, &src, has_grid_img_]() {
+        auto theta = [this, &src, has_grid_img_, &marker_regs]() {
             if(rot_cache_.has_cache()) {
                 return rot_cache_.get_cache();
             } else {
+                // auto v = rot_estimator_(
+                //     src,
+                //     has_grid_img_,
+                //     has_grid_img_ ? *grid_img_ : cv::Mat(),
+                //     rot_min_theta_,
+                //     rot_max_theta_,
+                //     rot_steps_,
+                //     *msg_,
+                //     v_sample_,
+                //     v_edges_,
+                //     v_hough_
+                // );
                 auto v = rot_estimator_(
-                    src,
-                    has_grid_img_,
-                    has_grid_img_ ? *grid_img_ : cv::Mat(),
-                    rot_min_theta_,
-                    rot_max_theta_,
-                    rot_steps_,
-                    *msg_,
-                    v_sample_,
-                    v_edges_,
-                    v_hough_
+                    marker_regs, *msg_
                 );
                 rot_cache_.save_cache(v);
                 return v;
@@ -156,7 +169,7 @@ struct SingleGeneral {
     FLOAT                     rot_min_theta_     {  87 }                         ; 
     FLOAT                     rot_max_theta_     {  93 }                         ; 
     FLOAT                     rot_steps_         { 800 }                         ;
-    FLOAT                     grid_max_invl_     {  27 }                         ;
+    FLOAT                     grid_max_invl_     {  35 }                         ;
     const cv::Mat*            grid_img_          { nullptr }                     ;
     std::string               margin_method_     { "mid_seg" }                   ;
     float                     seg_rate_          { 0.6 }                         ;
@@ -191,8 +204,8 @@ struct SingleGeneral {
         void(const cv::Mat&)
     >                         v_roi_res_         { nullptr }                     ;
 
-
-    chipimgproc::rotation::LineDetection<FLOAT>  rot_estimator_      ;
+    chipimgproc::marker::detection::RegMat       marker_detection_   ;
+    chipimgproc::rotation::MarkerVec<FLOAT>      rot_estimator_      ;
     chipimgproc::rotation::Calibrate             rot_calibrator_     ;
     chipimgproc::rotation::Cache<FLOAT>          rot_cache_          ;
     chipimgproc::Gridding<FLOAT>                 gridder_            ;
