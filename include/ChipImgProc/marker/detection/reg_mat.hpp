@@ -128,6 +128,7 @@ struct RegMat {
             mk_r.y      = max_loc.y             ;
             mk_r.width  = candi_mks.at(0).cols  ;
             mk_r.height = candi_mks.at(0).rows  ;
+            mk_r.info(out);
             if(v_marker) {
                 cv::rectangle(view, mk_r, 128, 3);
             }

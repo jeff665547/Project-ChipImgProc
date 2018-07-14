@@ -20,7 +20,7 @@ TEST(reg_mat_layout, operator_call_test) {
     std::ifstream marker_in(
         ( nucleona::test::data_dir() / "zion_pat.tsv").string()
     );
-    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat.tiff";
+    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat_295px.tif";
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
     candi_mk_pats_cl.push_back(
         chipimgproc::marker::Loader::from_txt(marker_in, std::cout)
@@ -55,7 +55,7 @@ TEST(reg_mat_layout, hard_case) {
     std::ifstream marker_in(
         ( nucleona::test::data_dir() / "zion_pat.tsv").string()
     );
-    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat.tiff";
+    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat_265px.tif";
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
     candi_mk_pats_cl.push_back(
         chipimgproc::marker::Loader::from_txt(marker_in, std::cout)

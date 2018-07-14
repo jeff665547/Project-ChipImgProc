@@ -116,4 +116,42 @@ cv::Mat_<std::uint16_t> viewable(
     cv::normalize( tmp, res, 0, 65535, cv::NORM_MINMAX );
     return res;
 }
+
+int depth_to_bits_num(const cv::Mat& m) {
+    switch(m.depth()) {
+        case 0: case 1: 
+            return 8;
+        case 2: case 3:
+            return 16;
+        case 4: case 5:
+            return 32;
+        case 6:
+            return 64;
+        default:
+            throw std::runtime_error("undefined depth");
+    }
+}
+cv::Rect bound_rect( const std::vector<cv::Point>& points ) {
+    cv::Point max_p(
+        std::numeric_limits<cv::Point::value_type>::min(),
+        std::numeric_limits<cv::Point::value_type>::min()
+    );
+    cv::Point min_p(
+        std::numeric_limits<cv::Point::value_type>::max(), 
+        std::numeric_limits<cv::Point::value_type>::max() 
+    );
+    for (auto&& p : points ) {
+        if( p.x > max_p.x) max_p.x = p.x;
+        if( p.y > max_p.y) max_p.y = p.y;
+        if( p.x < min_p.x) min_p.x = p.x;
+        if( p.y < min_p.y) min_p.y = p.y;
+    }
+    return cv::Rect(
+        min_p.x, min_p.y,
+        max_p.x - min_p.x,
+        max_p.y - min_p.y
+    );
+}
+
+
 }

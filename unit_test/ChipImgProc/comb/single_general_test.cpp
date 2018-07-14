@@ -11,7 +11,7 @@ TEST(single_image_general_gridding, basic_test) {
     std::ifstream marker_in(
         ( nucleona::test::data_dir() / "zion_pat.tsv").string()
     );
-    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat.tiff";
+    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat_295px.tif";
     chipimgproc::comb::SingleGeneral<> gridder;
     gridder.set_logger(std::cout);
     gridder.set_rot_cali_viewer([]( const cv::Mat& m ){
@@ -88,7 +88,7 @@ TEST(single_image_general_gridding, hard_case_test) {
     std::ifstream marker_in(
         ( nucleona::test::data_dir() / "zion_pat.tsv").string()
     );
-    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat.tiff";
+    auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat_265px.tif";
     chipimgproc::comb::SingleGeneral<> gridder;
     gridder.set_logger(std::cout);
     gridder.set_rot_cali_viewer([]( const cv::Mat& m ){

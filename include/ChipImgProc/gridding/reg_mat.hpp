@@ -42,7 +42,7 @@ struct RegMat {
         return res;
     }
 
-    std::vector<int> consensus( const std::vector<std::vector<int>>& anchors_group ) const {
+    auto consensus( const std::vector<std::vector<int>>& anchors_group ) const {
         auto size = anchors_group.front().size();
         for( auto&& as : anchors_group ) {
             if( as.size() != size ) {
@@ -50,7 +50,7 @@ struct RegMat {
             }
         }
 
-        std::vector<int> res;
+        std::vector<std::uint32_t> res;
         for(decltype(size) i = 0; i < size; i ++ ) {
             std::size_t sum = 0;
             for( auto&& as : anchors_group ) {
@@ -70,6 +70,7 @@ struct RegMat {
             void(const cv::Mat&)
           >&                            v_result    = nullptr
     ) const {
+        Result result;
         auto x_grouped_ps = MKRegion::x_group_points(mk_regs);
         auto y_grouped_ps = MKRegion::y_group_points(mk_regs);
         auto x_grid_pos_group = grid_anchors_group(
@@ -101,6 +102,28 @@ struct RegMat {
                 );
             }
         }
+        result.feature_rows = y_grid_anchor.size() - 1;
+        result.feature_cols = x_grid_anchor.size() - 1;
+        result.tiles        = tiles;
+        result.gl_x         = x_grid_anchor;
+        result.gl_y         = y_grid_anchor;
+
+        msg << "feature_rows: " << result.feature_rows << std::endl;
+        msg << "feature_cols: " << result.feature_cols << std::endl;
+
+        if(v_result) {
+            cv::Mat_<std::uint16_t> debug_img = viewable(in_src);
+            auto color = 65536/2;
+            for (auto tile: tiles)
+            {
+                tile.width  += 1;
+                tile.height += 1;
+                cv::rectangle(debug_img, tile, color);
+            }
+            v_result(debug_img);
+
+        }
+        return result;
     }
 };
 

@@ -15,8 +15,6 @@ int cols(const cv::Mat& m);
 int rows(const cv::Mat& m);
 const char* depth(const cv::Mat& image);
 
-// cv::Mat norm_u8(const cv::Mat& m, float ltrim = 0.05, float rtrim = 0.05);
-
 template<class OS>
 void info(OS& os, const cv::Mat& image)
 {
@@ -163,4 +161,9 @@ cv::Mat_<std::uint16_t> viewable(
 using ViewerCallback = std::function<void(const cv::Mat&)>;
 template<class... ARGS>
 using ViewerCallbackA = std::function<void(const cv::Mat&, ARGS...)>;
+
+int depth_to_bits_num( const cv::Mat& m );
+
+cv::Rect bound_rect( const std::vector<cv::Point>& points ); 
+
 }
