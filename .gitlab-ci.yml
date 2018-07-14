@@ -7,7 +7,7 @@ Win_CI:
         - rmdir build /s /q
         - mkdir build
         - cd build
-        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILS_TESTS=ON -DINSTALL_DEPS=ON
+        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILDS_TESTS=ON -DINSTALL_DEPS=ON
         - cmake --build . --target install
     only:
         - master
@@ -26,7 +26,7 @@ CentOS_CI:
         - rm -rf build
         - mkdir -p build
         - cd build
-        - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILS_TESTS=ON
+        - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILDS_TESTS=ON
         - cmake --build . --target install
     only:
         - master
