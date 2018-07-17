@@ -7,3 +7,4 @@ target_include_directories(${__screw_target} PUBLIC
 target_link_libraries(${__screw_target} PUBLIC
     ChipImgProc-utils
 )
+screw_show_var(__screw_target)

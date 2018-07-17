@@ -14,6 +14,12 @@ struct GridRawImg {
     , gl_x_ (glx)
     , gl_y_ (gly)
     {}
+    decltype(auto) mat() {
+        return img_;
+    }
+    decltype(auto) mat() const {
+        return img_;
+    }
 private:
     cv::Mat img_;
     std::vector<GLID> gl_x_;

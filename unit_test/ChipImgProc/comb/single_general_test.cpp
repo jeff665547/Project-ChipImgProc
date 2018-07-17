@@ -5,12 +5,21 @@
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/multi_tiled_mat.hpp>
 #include <ChipImgProc/stat/mats.hpp>
+#include <cpp-base64/base64.h>
+std::string jpg_base64( const cv::Mat& pixels) {
+    std::vector<std::uint8_t> buf;
+    cv::imencode(".jpg", pixels, buf);
+    std::string pixels_encode = base64_encode(buf.data(), buf.size());
+    std::cout << "base64 size: " << pixels_encode.size() << std::endl;
+    std::cout << "content: " << pixels_encode << std::endl;
+    return pixels_encode;
+}
 auto pat_img(const std::string& path) {
     auto mk_px_ = cv::imread(path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
     chipimgproc::info(std::cout, mk_px_);
     cv::Mat_<std::uint8_t> mk_px;
-    chipimgproc::info(std::cout, mk_px);
     cv::extractChannel(mk_px_, mk_px, mk_px_.channels() - 1);
+    chipimgproc::info(std::cout, mk_px);
     cv::imwrite("debug_marker.tiff", mk_px);
     return mk_px;
 }

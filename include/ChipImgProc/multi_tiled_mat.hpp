@@ -128,10 +128,10 @@ struct MultiTiledMat
         }
     }
     static constexpr struct MinCVMean {
-        FLOAT operator()( const CellInfos& cell_infos, const MultiTiledMat& mm ) const {
+        FLOAT operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
             FLOAT res;
-            for(auto& ci : cell_infs) {
+            for(auto& ci : cell_infos) {
                 if(min_cv > ci.cv ) {
                     min_cv = ci.cv;
                     res = ci.mean;
@@ -141,19 +141,23 @@ struct MultiTiledMat
         }
     } min_cv_mean{};
 
-    static constexpr struct Pixels {
-        cv::Mat operator()( const CellInfos& cell_infos, const MultiTiledMat& mm ) const {
+    struct Pixels {
+        Pixels(const MultiTiledMat& m)
+        : mm_(m)
+        {}
+        cv::Mat operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
             cv::Mat res;
             for(auto& ci : cell_infos) {
                 if(min_cv > ci.cv ) {
                     min_cv = ci.cv;
-                    res = mm.cali_imgs_.at(ci.img_idx)(ci).clone();
+                    res = mm_.cali_imgs_.at(ci.img_idx).mat()(ci).clone();
                 }
             }
             return res;
         }
-    } pixels{};
+        const MultiTiledMat& mm_;
+    };
     auto rows() const {
         return this->index_.rows;
     }
@@ -199,7 +203,7 @@ struct MultiTiledMat
             auto& r = pos[0];
             auto& c = pos[1];
             auto cell_infos = this->tiles_.at(this->index_(r, c));
-            value = v_func(cell_infos, *this);
+            value = v_func(cell_infos);
         });
         return res;
     }
@@ -218,7 +222,7 @@ private:
         auto&& cell_infos = this_.tiles_.at(
             this_.index_(row, col)
         );
-        return cell_infos_func(FWD(cell_infos), *this_);
+        return cell_infos_func(FWD(cell_infos));
     }
     std::vector<GridRawImg<GLID>>              cali_imgs_  ;
 };
