@@ -6,7 +6,6 @@
 #include <ChipImgProc/rotation/marker_vec.hpp>
 #include <ChipImgProc/rotation/calibrate.hpp>
 #include <ChipImgProc/gridding/reg_mat.hpp>
-#include <ChipImgProc/marker/detection/contour_refine.hpp>
 auto pat_img(const std::string& id) {
     auto zion_pat_px_path = nucleona::test::data_dir() / id;
     auto mk_px_ = cv::imread(zion_pat_px_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
@@ -59,7 +58,6 @@ TEST(reg_mat_layout, hard_case) {
     chipimgproc::marker::detection::RegMat reg_mat;
     chipimgproc::rotation::MarkerVec<float> marker_fit;
     chipimgproc::rotation::Calibrate rot_cali;
-    chipimgproc::marker::detection::ContourRefine contour_refine;
     chipimgproc::gridding::RegMat gridding;
 
     // prepare image
@@ -90,7 +88,6 @@ TEST(reg_mat_layout, hard_case) {
     auto theta = marker_fit(mk_regs, std::cout);
     rot_cali(img, theta);
     mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
-    // contour_refine(img, mk_regs, mk_layout);
     auto gl_res = gridding(img, mk_layout, mk_regs, std::cout, [](const auto& m){
         cv:imwrite("debug_gridding.tiff", m);
     });

@@ -5,6 +5,15 @@
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/multi_tiled_mat.hpp>
 #include <ChipImgProc/stat/mats.hpp>
+auto pat_img(const std::string& path) {
+    auto mk_px_ = cv::imread(path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+    chipimgproc::info(std::cout, mk_px_);
+    cv::Mat_<std::uint8_t> mk_px;
+    chipimgproc::info(std::cout, mk_px);
+    cv::extractChannel(mk_px_, mk_px, mk_px_.channels() - 1);
+    cv::imwrite("debug_marker.tiff", mk_px);
+    return mk_px;
+}
 TEST(single_image_general_gridding, basic_test) {
 // int nucleona::app::main(int argc, char* argv[]) {
     using FLOAT = float;
@@ -17,20 +26,8 @@ TEST(single_image_general_gridding, basic_test) {
     gridder.set_rot_cali_viewer([]( const cv::Mat& m ){
         cv::imwrite("debug_rot_cali.tiff", m);
     });
-    gridder.set_edges_viewer([]( const cv::Mat& m ){
-        cv::imwrite("debug_edge.tiff", m);
-    });
-    gridder.set_hough_tf_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_hough_tf.tiff", m);
-    });
     gridder.set_margin_res_viewer([](const cv::Mat& m){
         cv::imwrite("debug_margin.tiff", m);
-    });
-    gridder.set_roi_bin_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_roi_bin.tiff", m);
-    });
-    gridder.set_roi_score_viewer([](const cv::Mat& m, int r, int c){
-        cv::imwrite("debug_roi_score_" + std::to_string(c) + "_" + std::to_string(r) + ".tiff", m);
     });
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
     auto mk = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
@@ -38,7 +35,7 @@ TEST(single_image_general_gridding, basic_test) {
 
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
     candi_mk_pats_px.push_back(
-        cv::imread(zion_pat_px_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH )
+        pat_img(zion_pat_px_path.string())
     );
 
     gridder.set_marker_layout(
@@ -62,9 +59,6 @@ TEST(single_image_general_gridding, basic_test) {
         chipimgproc::info(std::cout, img);
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
-        });
-        gridder.set_roi_res_viewer([&i](const cv::Mat& m){
-            cv::imwrite("debug_roi_res_" + std::to_string(i) +".tiff", m);
         });
         auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
@@ -94,20 +88,8 @@ TEST(single_image_general_gridding, hard_case_test) {
     gridder.set_rot_cali_viewer([]( const cv::Mat& m ){
         cv::imwrite("debug_rot_cali.tiff", m);
     });
-    gridder.set_edges_viewer([]( const cv::Mat& m ){
-        cv::imwrite("debug_edge.tiff", m);
-    });
-    gridder.set_hough_tf_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_hough_tf.tiff", m);
-    });
     gridder.set_margin_res_viewer([](const cv::Mat& m){
         cv::imwrite("debug_margin.tiff", m);
-    });
-    gridder.set_roi_bin_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_roi_bin.tiff", m);
-    });
-    gridder.set_roi_score_viewer([](const cv::Mat& m, int r, int c){
-        cv::imwrite("debug_roi_score_" + std::to_string(c) + "_" + std::to_string(r) + ".tiff", m);
     });
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
     auto mk = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
@@ -115,7 +97,7 @@ TEST(single_image_general_gridding, hard_case_test) {
 
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
     candi_mk_pats_px.push_back(
-        cv::imread(zion_pat_px_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH )
+        pat_img(zion_pat_px_path.string())
     );
 
     gridder.set_marker_layout(
@@ -140,9 +122,6 @@ TEST(single_image_general_gridding, hard_case_test) {
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
-        gridder.set_roi_res_viewer([&i](const cv::Mat& m){
-            cv::imwrite("debug_roi_res_" + std::to_string(i) +".tiff", m);
-        });
         auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
         stat_mats_s.push_back(stat_mats);
@@ -157,5 +136,5 @@ TEST(single_image_general_gridding, hard_case_test) {
     );
     cv::Mat md;
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
-    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md));
+    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
 }

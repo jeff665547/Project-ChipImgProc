@@ -6,7 +6,6 @@
 #include <ChipImgProc/stat/mats.hpp>
 #include <ChipImgProc/analysis/probe_sort.hpp>
 TEST(multi_image_general_gridding, basic_test) {
-// int nucleona::app::main(int argc, char* argv[]) {
     using FLOAT = float;
     std::ifstream marker_in(
         ( nucleona::test::data_dir() / "zion_pat.tsv").string()
@@ -17,20 +16,8 @@ TEST(multi_image_general_gridding, basic_test) {
     gridder.set_rot_cali_viewer([]( const cv::Mat& m ){
         cv::imwrite("debug_rot_cali.tiff", m);
     });
-    gridder.set_edges_viewer([]( const cv::Mat& m ){
-        cv::imwrite("debug_edge.tiff", m);
-    });
-    gridder.set_hough_tf_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_hough_tf.tiff", m);
-    });
     gridder.set_margin_res_viewer([](const cv::Mat& m){
         cv::imwrite("debug_margin.tiff", m);
-    });
-    gridder.set_roi_bin_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_roi_bin.tiff", m);
-    });
-    gridder.set_roi_score_viewer([](const cv::Mat& m, int r, int c){
-        cv::imwrite("debug_roi_score_" + std::to_string(c) + "_" + std::to_string(r) + ".tiff", m);
     });
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
     auto mk = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
@@ -52,13 +39,15 @@ TEST(multi_image_general_gridding, basic_test) {
     std::vector<cv::Point_<int>> st_ps({
         {0, 0}, {74, 0}, {0, 74}, {74, 74}
     });
-    
+    auto start_time = std::chrono::system_clock::now();
     auto multi_tiled_mat = gridder(test_img_paths, st_ps);
     auto&& mean_float_acc = chipimgproc::wrapper::bind_acc(
         multi_tiled_mat, 
         nucleona::copy(decltype(multi_tiled_mat)::min_cv_mean)
     );
     cv::Mat_<float> mean_float = multi_tiled_mat.dump();
+    auto du = std::chrono::system_clock::now() - start_time;
+    std::cout << "process time: " << std::chrono::duration_cast<std::chrono::seconds>(du).count() << "sec." << std::endl;
     for( int i = 50; i < 55; i ++ ) {
         for ( int j = 50; j < 55; j ++ ) {
             EXPECT_EQ(mean_float(i, j), multi_tiled_mat(i, j));
