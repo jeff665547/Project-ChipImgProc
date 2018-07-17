@@ -9,6 +9,7 @@ Win_CI:
         - cd build
         - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILDS_TESTS=ON -DINSTALL_DEPS=ON
         - cmake --build . --target install
+        - ctest
     only:
         - master
     tags:
@@ -28,6 +29,7 @@ CentOS_CI:
         - cd build
         - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILDS_TESTS=ON
         - cmake --build . --target install
+        - ctest
     only:
         - master
     tags:
