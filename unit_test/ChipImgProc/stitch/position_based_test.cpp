@@ -96,33 +96,33 @@ TEST(position_based_stitch, real_data_test) {
     chipimgproc::info(std::cout, res);
     cv::imwrite((img_base / "position_based_stitch.tiff").string(), res);
 }
-TEST(position_based_stitch, real_data_test2) {
-    auto img_base = nucleona::test::data_dir() / "19_20180612112002";
-    std::cout << img_base << std::endl;
-    std::vector<cv::Mat> imgs;
-    imgs.push_back(cv::imread((img_base / "0-0-White8.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "0-1-White8.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "0-2-White8.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "1-0-White8.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "1-1-White8.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "1-2-White8.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "2-0-White8.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "2-1-White8.tiff").string()));
-    imgs.push_back(cv::imread((img_base / "2-2-White8.tiff").string()));
-
-    std::vector<cv::Point_<int>> st_ps;
-    st_ps.emplace_back(    0,    0 );
-    st_ps.emplace_back( 1954,   19 );
-    st_ps.emplace_back( 3908,   36 );
-    st_ps.emplace_back(    1, 1954 );
-    st_ps.emplace_back( 1956, 1973 );
-    st_ps.emplace_back( 3909, 1990 );
-    st_ps.emplace_back(    4, 3908 );
-    st_ps.emplace_back( 1957, 3926 );
-    st_ps.emplace_back( 3911, 3944 );
-    chipimgproc::stitch::PositionBased pb;
-    auto cali_st_ps = pb(imgs, st_ps, 100);
-    auto res = chipimgproc::stitch::add(imgs, cali_st_ps);
-    chipimgproc::info(std::cout, res);
-    cv::imwrite((img_base / "position_based_stitch.tiff").string(), res);
-}
+// TEST(position_based_stitch, real_data_test2) {
+//     auto img_base = nucleona::test::data_dir() / "19_20180612112002";
+//     std::cout << img_base << std::endl;
+//     std::vector<cv::Mat> imgs;
+//     imgs.push_back(cv::imread((img_base / "0-0-White8.tiff").string()));
+//     imgs.push_back(cv::imread((img_base / "0-1-White8.tiff").string()));
+//     imgs.push_back(cv::imread((img_base / "0-2-White8.tiff").string()));
+//     imgs.push_back(cv::imread((img_base / "1-0-White8.tiff").string()));
+//     imgs.push_back(cv::imread((img_base / "1-1-White8.tiff").string()));
+//     imgs.push_back(cv::imread((img_base / "1-2-White8.tiff").string()));
+//     imgs.push_back(cv::imread((img_base / "2-0-White8.tiff").string()));
+//     imgs.push_back(cv::imread((img_base / "2-1-White8.tiff").string()));
+//     imgs.push_back(cv::imread((img_base / "2-2-White8.tiff").string()));
+// 
+//     std::vector<cv::Point_<int>> st_ps;
+//     st_ps.emplace_back(    0,    0 );
+//     st_ps.emplace_back( 1954,   19 );
+//     st_ps.emplace_back( 3908,   36 );
+//     st_ps.emplace_back(    1, 1954 );
+//     st_ps.emplace_back( 1956, 1973 );
+//     st_ps.emplace_back( 3909, 1990 );
+//     st_ps.emplace_back(    4, 3908 );
+//     st_ps.emplace_back( 1957, 3926 );
+//     st_ps.emplace_back( 3911, 3944 );
+//     chipimgproc::stitch::PositionBased pb;
+//     auto cali_st_ps = pb(imgs, st_ps, 100);
+//     auto res = chipimgproc::stitch::add(imgs, cali_st_ps);
+//     chipimgproc::info(std::cout, res);
+//     cv::imwrite((img_base / "position_based_stitch.tiff").string(), res);
+// }
