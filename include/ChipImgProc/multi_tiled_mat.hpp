@@ -128,10 +128,10 @@ struct MultiTiledMat
         }
     }
     static constexpr struct MinCVMean {
-        FLOAT operator()( const CellInfos& cell_infos ) const {
+        FLOAT operator()( const CellInfos& cell_infos, const MultiTiledMat& mm ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
             FLOAT res;
-            for(auto& ci : cell_infos) {
+            for(auto& ci : cell_infs) {
                 if(min_cv > ci.cv ) {
                     min_cv = ci.cv;
                     res = ci.mean;
@@ -141,6 +141,19 @@ struct MultiTiledMat
         }
     } min_cv_mean{};
 
+    static constexpr struct Pixels {
+        cv::Mat operator()( const CellInfos& cell_infos, const MultiTiledMat& mm ) const {
+            auto min_cv = std::numeric_limits<FLOAT>::max();
+            cv::Mat res;
+            for(auto& ci : cell_infos) {
+                if(min_cv > ci.cv ) {
+                    min_cv = ci.cv;
+                    res = mm.cali_imgs_.at(ci.img_idx)(ci).clone();
+                }
+            }
+            return res;
+        }
+    } pixels{};
     auto rows() const {
         return this->index_.rows;
     }
@@ -186,7 +199,7 @@ struct MultiTiledMat
             auto& r = pos[0];
             auto& c = pos[1];
             auto cell_infos = this->tiles_.at(this->index_(r, c));
-            value = v_func(cell_infos);
+            value = v_func(cell_infos, *this);
         });
         return res;
     }
@@ -205,7 +218,7 @@ private:
         auto&& cell_infos = this_.tiles_.at(
             this_.index_(row, col)
         );
-        return cell_infos_func(FWD(cell_infos));
+        return cell_infos_func(FWD(cell_infos), *this_);
     }
     std::vector<GridRawImg<GLID>>              cali_imgs_  ;
 };
