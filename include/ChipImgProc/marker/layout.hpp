@@ -1,6 +1,7 @@
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/const.h>
+#include <Nucleona/tuple.hpp>
 namespace chipimgproc{ namespace marker{
 struct Des {
 friend struct Layout;
@@ -154,9 +155,27 @@ struct Layout {
                 return get_marker_width_cl();
         }
     }
-    // void set_mk_pat_for_reg_mat_dist( const cv::Point& ) {
-
-    // }
+    auto get_marker_invl(const MatUnit& unit) {
+        switch(unit) {
+            case MatUnit::PX:
+                return nucleona::make_tuple(
+                    nucleona::copy(mk_invl_x_px),
+                    nucleona::copy(mk_invl_y_px)
+                );
+            case MatUnit::CELL:
+                return nucleona::make_tuple(
+                    nucleona::copy(mk_invl_x_cl),
+                    nucleona::copy(mk_invl_y_cl)
+                );
+            default:
+                throw std::runtime_error(
+                    "get_mk_invl, unsupported unit: " + unit.to_string()
+                );
+        }
+    }
+    auto get_marker_invl(const MatUnit& unit) const {
+        return const_cast<Layout&>(*this).get_marker_invl(unit);
+    }
 
     PatternNum              pat_num        { multi  } ;
     DistForm                dist_form      { random } ;

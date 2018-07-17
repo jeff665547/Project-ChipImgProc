@@ -14,12 +14,26 @@ struct MarkerVec {
 
 private:
     template<class T>
-    auto mean( const std::vector<T>& d ) const {
+    auto mean( std::vector<T>& d, std::ostream& out ) const {
+        std::sort(d.begin(), d.end());
+        auto mid = d.at(d.size() / 2);
+        out << "angle mid: " << mid << std::endl;
         T sum = 0;
-        for(auto& v : d) {
-            sum += v;
+        int n = 0;
+        for( const auto& v : d ) {
+            auto diff = std::abs(v - mid);
+            if( diff > 1 ) {
+                out << "bad angle: " << v << std::endl;
+            } else {
+                sum += v;
+                n ++;
+            }
         }
-        return sum / d.size();
+        auto res = sum / n;
+        out << "total used angles: " << n << std::endl;
+        out << "angles mean: " << res << std::endl;
+
+        return res;
     }
     auto angle(const cv::Point& a, const cv::Point& b) const {
         auto dot = (a.x * b.x) + (a.y * b.y);
@@ -75,7 +89,7 @@ public:
         auto v_thetas = vertical_estimate(y_group);
         std::vector<FLOAT> thetas = h_thetas;
         thetas.insert(thetas.end(),v_thetas.begin(), v_thetas.end());
-        return mean(thetas);
+        return mean(thetas, logger);
     }
 private:
     Calibrate rotator_;

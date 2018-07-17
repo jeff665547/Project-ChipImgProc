@@ -2,30 +2,12 @@
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/marker/layout.hpp>
 #include <Nucleona/stream/null_buffer.hpp>
-#include <Nucleona/tuple.hpp>
 #include <ChipImgProc/const.h>
 #include <ChipImgProc/marker/detection/mk_region.hpp>
+#include <Nucleona/tuple.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
 
 struct RegMat {
-    auto get_mk_invl( const Layout& mk_layout, const MatUnit& unit) const {
-        switch(unit) {
-            case MatUnit::PX:
-                return nucleona::make_tuple(
-                    mk_layout.mk_invl_x_px,
-                    mk_layout.mk_invl_y_px
-                );
-            case MatUnit::CELL:
-                return nucleona::make_tuple(
-                    mk_layout.mk_invl_x_cl,
-                    mk_layout.mk_invl_y_cl
-                );
-            default:
-                throw std::runtime_error(
-                    "get_mk_invl, unsupported unit: " + unit.to_string()
-                );
-        }
-    }
     template<class T>
     std::vector<MKRegion> operator()(
         const cv::Mat_<T>&      src, 
@@ -37,7 +19,7 @@ struct RegMat {
         const ViewerCallback&   v_marker   = nullptr
     ) const {
         // marker interval between marker
-        auto [mk_invl_x, mk_invl_y] = get_mk_invl(mk_layout, unit);
+        auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
 
         // marker w, h
         auto mk_width  = mk_layout.get_marker_width (unit) ;

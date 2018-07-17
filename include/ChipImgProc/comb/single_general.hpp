@@ -71,7 +71,8 @@ struct SingleGeneral {
     
     auto operator() (const cv::Mat& src, const std::string& id = "") {
         *msg_ << "img id: " << id << std::endl;
-        v_sample_(viewable(src));
+        if(v_sample_)
+            v_sample_(viewable(src));
         auto marker_regs = marker_detection_(
             static_cast<const cv::Mat_<std::uint16_t>&>(src), 
             marker_layout_, 
