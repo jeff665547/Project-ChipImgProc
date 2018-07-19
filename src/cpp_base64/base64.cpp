@@ -29,7 +29,7 @@
 
 */
 
-#include <cpp-base64/base64.h>
+#include <cpp_base64/base64.h>
 #include <iostream>
 
 static const std::string base64_chars = 

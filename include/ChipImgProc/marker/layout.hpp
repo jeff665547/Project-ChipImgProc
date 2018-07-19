@@ -145,6 +145,10 @@ struct Layout {
                 return get_marker_height_px();
             case MatUnit::CELL:
                 return get_marker_height_cl();
+            default: 
+                throw std::runtime_error(
+                    "Layout::get_marker_width, unsupport type"
+                );
         }
     }
     auto get_marker_width(const MatUnit& unit) const {
@@ -153,6 +157,10 @@ struct Layout {
                 return get_marker_width_px();
             case MatUnit::CELL:
                 return get_marker_width_cl();
+            default: 
+                throw std::runtime_error(
+                    "Layout::get_marker_width, unsupport type"
+                );
         }
     }
     auto get_marker_invl(const MatUnit& unit) {
