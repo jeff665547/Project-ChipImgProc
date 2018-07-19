@@ -141,6 +141,23 @@ struct MultiTiledMat
         }
     } min_cv_mean{};
 
+    struct Pixels {
+        Pixels(const MultiTiledMat& m)
+        : mm_(m)
+        {}
+        cv::Mat operator()( const CellInfos& cell_infos ) const {
+            auto min_cv = std::numeric_limits<FLOAT>::max();
+            cv::Mat res;
+            for(auto& ci : cell_infos) {
+                if(min_cv > ci.cv ) {
+                    min_cv = ci.cv;
+                    res = mm_.cali_imgs_.at(ci.img_idx).mat()(ci).clone();
+                }
+            }
+            return res;
+        }
+        const MultiTiledMat& mm_;
+    };
     auto rows() const {
         return this->index_.rows;
     }
