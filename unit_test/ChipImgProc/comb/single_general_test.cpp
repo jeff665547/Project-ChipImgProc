@@ -1,19 +1,9 @@
 #include <ChipImgProc/comb/single_general.hpp>
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
-// #include <Nucleona/app/main.hpp>
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/multi_tiled_mat.hpp>
 #include <ChipImgProc/stat/mats.hpp>
-#include <cpp-base64/base64.h>
-std::string jpg_base64( const cv::Mat& pixels) {
-    std::vector<std::uint8_t> buf;
-    cv::imencode(".jpg", pixels, buf);
-    std::string pixels_encode = base64_encode(buf.data(), buf.size());
-    std::cout << "base64 size: " << pixels_encode.size() << std::endl;
-    std::cout << "content: " << pixels_encode << std::endl;
-    return pixels_encode;
-}
 auto pat_img(const std::string& path) {
     auto mk_px_ = cv::imread(path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
     chipimgproc::info(std::cout, mk_px_);
