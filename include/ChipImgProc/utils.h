@@ -166,4 +166,6 @@ int depth_to_bits_num( const cv::Mat& m );
 
 cv::Rect bound_rect( const std::vector<cv::Point>& points ); 
 
+std::string jpg_base64( const cv::Mat& pixels);
+
 }

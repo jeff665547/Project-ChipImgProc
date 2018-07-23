@@ -5,6 +5,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
+#include <cpp_base64/base64.h>
 namespace chipimgproc { 
 int cols(const cv::Mat& m) {
     return m.cols;
@@ -151,6 +152,14 @@ cv::Rect bound_rect( const std::vector<cv::Point>& points ) {
         max_p.x - min_p.x,
         max_p.y - min_p.y
     );
+}
+std::string jpg_base64( const cv::Mat& pixels) {
+    std::vector<std::uint8_t> buf;
+    cv::imencode(".jpg", pixels, buf);
+    std::string pixels_encode = base64_encode(buf.data(), buf.size());
+    std::cout << "base64 size: " << pixels_encode.size() << std::endl;
+    std::cout << "content: " << pixels_encode << std::endl;
+    return pixels_encode;
 }
 
 

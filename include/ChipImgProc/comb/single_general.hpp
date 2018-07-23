@@ -44,6 +44,9 @@ struct SingleGeneral {
         );
         marker_layout_.set_single_mk_pat( candi_pats_cl, candi_pats_px ); // TODO: raw marker image required
     }
+    void set_marker_layout( const marker::Layout& mkl ) {
+        marker_layout_ = mkl;
+    }
     void set_logger( std::ostream& out) {
         msg_ = &out;
     }

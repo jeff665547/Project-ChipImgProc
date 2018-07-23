@@ -54,6 +54,8 @@ struct MatUnit {
         switch(s_) {
             case PX     : return "pixel" ;
             case CELL   : return "cell"  ;
+            default: 
+                throw std::runtime_error("MatUnit::to_string, unsupport type");
         }
     }
     operator std::string() const {
