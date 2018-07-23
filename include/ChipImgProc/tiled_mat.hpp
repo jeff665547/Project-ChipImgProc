@@ -98,7 +98,11 @@ struct TiledMat
         return cali_img_(get_image_roi());
     }
     template<class GRID_RES>
-    static TiledMat<GLID> make_from_grid_res(GRID_RES& grid_res, cv::Mat& rot_cali_img ) {
+    static TiledMat<GLID> make_from_grid_res(
+        GRID_RES&               grid_res        , 
+        cv::Mat&                rot_cali_img    ,
+        const marker::Layout&   mk_layout
+    ) {
         // TODO: consider forward parameter
         namespace nr = nucleona::range;
         if(
@@ -135,14 +139,32 @@ struct TiledMat
         for(auto v : grid_res.gl_y ) {
             tm.gl_y_.push_back((GLID)v);
         }
+
+        for(auto& mk_des : mk_layout.mks ) {
+            tm.markers_.push_back(
+                cv::Rect(
+                    mk_des.get_pos_cl().x,
+                    mk_des.get_pos_cl().y,
+                    mk_layout.get_marker_width_cl(),
+                    mk_layout.get_marker_height_cl()
+                )
+            );
+        }
         return tm;
+    }
+    const std::vector<cv::Rect>& markers() const {
+        return markers_;
+    }
+    std::vector<cv::Rect>& markers() {
+        return markers_;
     }
     
 private:
-    IndexType index_;
-    cv::Mat cali_img_;
-    std::vector<cv::Rect> tiles_;
-    std::vector<GLID> gl_x_;
-    std::vector<GLID> gl_y_;
+    IndexType               index_      ;
+    cv::Mat                 cali_img_   ;
+    std::vector<cv::Rect>   tiles_      ;
+    std::vector<GLID>       gl_x_       ;
+    std::vector<GLID>       gl_y_       ;
+    std::vector<cv::Rect>   markers_    ;
 };
 }

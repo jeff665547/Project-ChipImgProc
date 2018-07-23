@@ -95,7 +95,9 @@ struct SingleGeneral {
             marker_layout_, MatUnit::PX, *msg_
         );
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);
-        auto tiled_mat  = TiledMat<>::make_from_grid_res(grid_res, tmp);
+        auto tiled_mat  = TiledMat<>::make_from_grid_res(
+            grid_res, tmp, marker_layout_
+        );
         auto margin_res = margin_(
                             margin_method_,
                             margin::Param<GLID> {

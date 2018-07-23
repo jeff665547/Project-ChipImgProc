@@ -126,6 +126,42 @@ struct MultiTiledMat
                 this->tiles_.at(px).push_back(dst_tile);
             });
         }
+        for(auto& m : imgs) {
+            markers_.insert(
+                markers_.end(), m.markers().begin(), m.markers().end()
+            );
+        }
+        std::cout << "markers, before unique: " << std::endl;
+        for( auto& m : markers_ ) {
+            std::cout << m << std::endl;
+        }
+        auto rect_less = [](const cv::Rect& r1, const cv::Rect& r2) {
+            if( r1.x == r2.x ) {
+                if( r1.y == r2.y ) {
+                    if( r1.width == r2.width ) {
+                        return r1.height < r2.height;
+                    } else return r1.width < r2.width;
+                } else return r1.y < r2.y;
+            } else return r1.x < r2.x;
+        };
+        auto rect_eq = []( const cv::Rect& r1, const cv::Rect& r2 ) {
+            bool comp[4];
+            comp[0] = ( r1.x      == r2.x      );
+            comp[1] = ( r1.y      == r2.y      );
+            comp[2] = ( r1.width  == r2.width  );
+            comp[3] = ( r1.height == r2.height );
+            return comp[0] && comp[1] && comp[2] && comp[3];
+        };
+
+        std::sort( markers_.begin(), markers_.end(), rect_less);
+        auto itr = std::unique( markers_.begin(), markers_.end(), rect_eq );
+        markers_.erase(itr, markers_.end());
+
+        std::cout << "markers, after unique: " << std::endl;
+        for( auto& m : markers_ ) {
+            std::cout << m << std::endl;
+        }
+
     }
     static constexpr struct MinCVMean {
         FLOAT operator()( const CellInfos& cell_infos ) const {
@@ -207,6 +243,18 @@ struct MultiTiledMat
         });
         return res;
     }
+    const std::vector<cv::Rect>& markers() {
+        return markers_;
+    }
+    bool cell_is_marker(const cv::Point& p, cv::Rect& r ) {
+        for(auto& m : markers_ ) {
+            if( m.contains(p) ) {
+                r = m;
+                return true;
+            }
+        }
+        return false;
+    }
 
 private:
     template<
@@ -225,6 +273,7 @@ private:
         return cell_infos_func(FWD(cell_infos));
     }
     std::vector<GridRawImg<GLID>>              cali_imgs_  ;
+    std::vector<cv::Rect>                      markers_    ;
 };
 
 
