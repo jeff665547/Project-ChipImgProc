@@ -1,3 +1,4 @@
+#pragma once
 #include <ChipImgProc/rotation/line_detection.hpp>
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
 #include <ChipImgProc/rotation/marker_vec.hpp>
