@@ -157,8 +157,8 @@ std::string jpg_base64( const cv::Mat& pixels) {
     std::vector<std::uint8_t> buf;
     cv::imencode(".jpg", pixels, buf);
     std::string pixels_encode = base64_encode(buf.data(), buf.size());
-    std::cout << "base64 size: " << pixels_encode.size() << std::endl;
-    std::cout << "content: " << pixels_encode << std::endl;
+    // std::cout << "base64 size: " << pixels_encode.size() << std::endl;
+    // std::cout << "content: " << pixels_encode << std::endl;
     return pixels_encode;
 }
 
