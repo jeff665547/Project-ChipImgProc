@@ -126,10 +126,19 @@ struct MultiTiledMat
                 this->tiles_.at(px).push_back(dst_tile);
             });
         }
-        for(auto& m : imgs) {
-            markers_.insert(
-                markers_.end(), m.markers().begin(), m.markers().end()
-            );
+        for( int i = 0; i < cell_st_pts.size(); i ++ ) {
+            auto& m = imgs.at(i);
+            auto& st_ps = cell_st_pts.at(i);
+            for( auto& mk : m.markers() ) {
+                markers_.push_back(
+                    cv::Rect(
+                        mk.x + st_ps.x,
+                        mk.y + st_ps.y,
+                        mk.width,
+                        mk.height
+                    )
+                );
+            }
         }
         std::cout << "markers, before unique: " << std::endl;
         for( auto& m : markers_ ) {
@@ -278,7 +287,10 @@ struct MultiTiledMat
         });
         return res;
     }
-    const std::vector<cv::Rect>& markers() {
+    const std::vector<cv::Rect>& markers() const {
+        return markers_;
+    }
+    std::vector<cv::Rect>& markers() {
         return markers_;
     }
     bool cell_is_marker(const cv::Point& p, cv::Rect& r ) {
