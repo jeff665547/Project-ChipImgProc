@@ -302,6 +302,12 @@ struct MultiTiledMat
         }
         return false;
     }
+    decltype(auto) mats() {
+        return cali_imgs_;
+    }
+    decltype(auto) mats() const {
+        return cali_imgs_;
+    }
 
 private:
     template<
