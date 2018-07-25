@@ -14,10 +14,10 @@ struct GridRawImg {
     , gl_x_ (glx)
     , gl_y_ (gly)
     {}
-    decltype(auto) mat() {
+    auto& mat() {
         return img_;
     }
-    decltype(auto) mat() const {
+    const auto& mat() const {
         return img_;
     }
 private:

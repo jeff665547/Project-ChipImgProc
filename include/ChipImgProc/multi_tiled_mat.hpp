@@ -302,10 +302,10 @@ struct MultiTiledMat
         }
         return false;
     }
-    decltype(auto) mats() {
+    auto& mats() {
         return cali_imgs_;
     }
-    decltype(auto) mats() const {
+    const auto& mats() const {
         return cali_imgs_;
     }
 
