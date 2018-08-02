@@ -180,10 +180,10 @@ struct MultiTiledMat
                 if( fov_p.x > cs ) cs = fov_p.x;
                 if( fov_p.y > rs ) rs = fov_p.y;
             }
-            fov_index_ = decltype(fov_index_)(rs, cs);
+            fov_index_ = decltype(fov_index_)(rs+1, cs+1);
             int i = 0;
             for( auto& fov_p : fov_index ) {
-                fov_index_(fov_p.y+1, fov_p.x+1) = i;
+                fov_index_(fov_p.y, fov_p.x) = i;
                 i++;
             }
         }
