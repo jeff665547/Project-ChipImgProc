@@ -69,7 +69,8 @@ struct MultiTiledMat
     MultiTiledMat(
         const std::vector<TiledMat<GLID>>&        imgs,
         const std::vector<stat::Mats<FLOAT>>&     stats,
-        const std::vector<cv::Point>&             cell_st_pts
+        const std::vector<cv::Point>&             cell_st_pts,
+        const std::vector<cv::Point>&             fov_index = {}
     )
     : detail::IndexedRange<FLOAT, GLID>(
         detail::TilesWrapper<FLOAT>::tiles_,
@@ -171,6 +172,21 @@ struct MultiTiledMat
             std::cout << m << std::endl;
         }
 
+        // initial fov index
+        if( !fov_index.empty() ) {
+            int rs = 0;
+            int cs = 0;
+            for( auto& fov_p : fov_index ) {
+                if( fov_p.x > cs ) cs = fov_p.x;
+                if( fov_p.y > rs ) rs = fov_p.y;
+            }
+            fov_index_ = decltype(fov_index_)(rs, cs);
+            int i = 0;
+            for( auto& fov_p : fov_index ) {
+                fov_index_(fov_p.y, fov_p.x) = i;
+                i++;
+            }
+        }
     }
     static constexpr struct MinCVMean {
         FLOAT operator()( const CellInfos& cell_infos ) const {
@@ -308,6 +324,12 @@ struct MultiTiledMat
     const auto& mats() const {
         return cali_imgs_;
     }
+    auto& get_fov_img(int x, int y) {
+        return cali_imgs_.at(fov_index_(y, x));
+    }
+    auto& get_fov_img(int x, int y) const {
+        return cali_imgs_.at(fov_index_(y, x));
+    }
 
 private:
     template<
@@ -327,6 +349,7 @@ private:
     }
     std::vector<GridRawImg<GLID>>              cali_imgs_  ;
     std::vector<cv::Rect>                      markers_    ;
+    cv::Mat_<std::uint16_t>                    fov_index_  ;
 };
 
 
