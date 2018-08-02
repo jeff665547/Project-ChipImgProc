@@ -183,7 +183,7 @@ struct MultiTiledMat
             fov_index_ = decltype(fov_index_)(rs, cs);
             int i = 0;
             for( auto& fov_p : fov_index ) {
-                fov_index_(fov_p.y, fov_p.x) = i;
+                fov_index_(fov_p.y+1, fov_p.x+1) = i;
                 i++;
             }
         }
@@ -329,6 +329,18 @@ struct MultiTiledMat
     }
     auto& get_fov_img(int x, int y) const {
         return cali_imgs_.at(fov_index_(y, x));
+    }
+    auto get_fov_rows() {
+        return fov_index_.rows;
+    }
+    auto get_fov_rows() const {
+        return fov_index_.rows;
+    }
+    auto get_fov_cols() {
+        return fov_index_.cols;
+    }
+    auto get_fov_cols() const {
+        return fov_index_.cols;
     }
 
 private:
