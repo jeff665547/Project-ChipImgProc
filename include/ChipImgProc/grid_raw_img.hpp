@@ -20,6 +20,10 @@ struct GridRawImg {
     const auto& mat() const {
         return img_;
     }
+    const auto& gl_x() const { return gl_x_; }
+    auto&       gl_x()       { return gl_x_; }
+    const auto& gl_y() const { return gl_y_; }
+    auto&       gl_y()       { return gl_y_; }
 private:
     cv::Mat img_;
     std::vector<GLID> gl_x_;
