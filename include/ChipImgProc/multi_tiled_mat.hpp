@@ -187,6 +187,7 @@ struct MultiTiledMat
                 i++;
             }
         }
+        cell_st_pts_ = cell_st_pts;
     }
     static constexpr struct MinCVMean {
         FLOAT operator()( const CellInfos& cell_infos ) const {
@@ -343,6 +344,20 @@ struct MultiTiledMat
         return fov_index_.cols;
     }
 
+    const auto& cell_level_stitch_points() const {
+        return cell_st_pts_;
+    }
+
+    auto& cell_level_stitch_points() {
+        return cell_st_pts_;
+    }
+    const auto& cell_level_stitch_point(int x, int y) const {
+        return cell_st_pts_.at(fov_index_(y, x));
+    }
+
+    const auto& cell_level_stitch_point(int x, int y) {
+        return cell_st_pts_.at(fov_index_(y, x));
+    }
 private:
     template<
         class THIS__, 
@@ -359,9 +374,10 @@ private:
         );
         return cell_infos_func(FWD(cell_infos));
     }
-    std::vector<GridRawImg<GLID>>              cali_imgs_  ;
-    std::vector<cv::Rect>                      markers_    ;
-    cv::Mat_<std::uint16_t>                    fov_index_  ;
+    std::vector<GridRawImg<GLID>>      cali_imgs_   ;
+    std::vector<cv::Rect>              markers_     ;
+    cv::Mat_<std::uint16_t>            fov_index_   ;
+    std::vector<cv::Point>             cell_st_pts_ ;
 };
 
 

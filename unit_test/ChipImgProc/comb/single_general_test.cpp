@@ -4,6 +4,7 @@
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/multi_tiled_mat.hpp>
 #include <ChipImgProc/stat/mats.hpp>
+#include <ChipImgProc/stitch/gridline_based.hpp>
 auto pat_img(const std::string& path) {
     auto mk_px_ = cv::imread(path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
     chipimgproc::info(std::cout, mk_px_);
@@ -14,7 +15,6 @@ auto pat_img(const std::string& path) {
     return mk_px;
 }
 TEST(single_image_general_gridding, basic_test) {
-// int nucleona::app::main(int argc, char* argv[]) {
     using FLOAT = float;
     std::ifstream marker_in(
         ( nucleona::test::data_dir() / "zion_pat.tsv").string()
@@ -67,13 +67,19 @@ TEST(single_image_general_gridding, basic_test) {
     std::vector<cv::Point_<int>> st_ps({
         {0, 0}, {74, 0}, {0, 74}, {74, 74}
     });
-
+    std::vector<cv::Point> fov_ids({
+        {0, 0}, {1, 0}, {0, 1}, {1, 1}
+    });
     chipimgproc::MultiTiledMat<FLOAT, Gridline> multi_tiled_mat(
-        tiled_mats, stat_mats_s, st_ps
+        tiled_mats, stat_mats_s, st_ps, fov_ids
     );
     cv::Mat md;
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
     cv::imwrite("means_dump.tiff", chipimgproc::viewable(md));
+    chipimgproc::stitch::GridlineBased gl_stitcher;
+    auto gl_st_img = gl_stitcher(multi_tiled_mat);
+    cv::imwrite("raw_stitch.tiff", gl_st_img.mat());
+
 }
 TEST(single_image_general_gridding, hard_case_test) {
     using FLOAT = float;
@@ -128,13 +134,19 @@ TEST(single_image_general_gridding, hard_case_test) {
     std::vector<cv::Point_<int>> st_ps({
         {0, 0}, {74, 0}, {0, 74}, {74, 74}
     });
+    std::vector<cv::Point> fov_ids({
+        {0, 0}, {1, 0}, {0, 1}, {1, 1}
+    });
 
     chipimgproc::MultiTiledMat<FLOAT, Gridline> multi_tiled_mat(
-        tiled_mats, stat_mats_s, st_ps
+        tiled_mats, stat_mats_s, st_ps, fov_ids
     );
     cv::Mat md;
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
     cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
+    chipimgproc::stitch::GridlineBased gl_stitcher;
+    auto gl_st_img = gl_stitcher(multi_tiled_mat);
+    cv::imwrite("raw_stitch.tiff", gl_st_img.mat());
 }
 TEST(single_image_general_gridding, missing_marker_test) {
     using FLOAT = float;
