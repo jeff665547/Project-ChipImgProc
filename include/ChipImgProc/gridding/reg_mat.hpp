@@ -61,16 +61,17 @@ struct RegMat {
         return res;
     }
     template<class T>
-    void shift_0( std::vector<T>& anchors) const {
+    auto shift_0( std::vector<T>& anchors) const {
         auto org = anchors.front();
         for( auto& v : anchors ) {
             v -= org;
         }
+        return org;
     }
     Result operator()(
           cv::Mat&                      in_src
         , const MKLayout&               mk_layout
-        , const std::vector<MKRegion>&  mk_regs
+        , std::vector<MKRegion>&        mk_regs
         , std::ostream&                 msg         = nucleona::stream::null_out
         , const std::function<
             void(const cv::Mat&)
@@ -103,8 +104,13 @@ struct RegMat {
         in_src.release();
         in_src = tmp;
 
-        shift_0(x_grid_anchor);
-        shift_0(y_grid_anchor);
+        auto x_offset = shift_0(x_grid_anchor);
+        auto y_offset = shift_0(y_grid_anchor);
+        for ( auto& mk : mk_regs ) {
+            mk.x -= x_offset;
+            mk.y -= y_offset;
+        }
+
 
         std::vector<cv::Rect> tiles;
         for(std::size_t i = 1; i < y_grid_anchor.size(); i ++ ) {
