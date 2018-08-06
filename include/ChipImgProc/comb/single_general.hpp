@@ -72,7 +72,10 @@ struct SingleGeneral {
     void set_margin_res_viewer(const FUNC& v) {
         v_margin_res_ = v;
     }
-    
+    template<class FUNC>
+    void set_marker_seg_viewer(const FUNC& v) {
+        v_marker_seg_ = v;
+    }
     auto operator() (const cv::Mat& src, const std::string& id = "") {
         *msg_ << "img id: " << id << std::endl;
         if(v_sample_)
@@ -81,7 +84,9 @@ struct SingleGeneral {
             static_cast<const cv::Mat_<std::uint16_t>&>(src), 
             marker_layout_, 
             chipimgproc::MatUnit::PX, 
-            *msg_
+            *msg_,
+            nullptr,
+            v_marker_seg_
         );
         auto theta = rot_estimator_(marker_regs, *msg_);
         cv::Mat tmp = src.clone();
@@ -131,6 +136,10 @@ struct SingleGeneral {
     std::function<
         void(const cv::Mat&)
     >                         v_margin_res_      { nullptr }                     ;
+
+    std::function<
+        void(const cv::Mat&)
+    >                         v_marker_seg_      { nullptr }                     ;
 
     chipimgproc::marker::detection::RegMat       marker_detection_   ;
     chipimgproc::rotation::MarkerVec<FLOAT>      rot_estimator_      ;
