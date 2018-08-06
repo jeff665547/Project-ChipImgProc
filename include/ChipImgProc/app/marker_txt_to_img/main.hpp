@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <Nucleona/algo/split.hpp>
 #include <ChipImgProc/marker/loader.hpp>
+#include <ChipImgProc/marker/txt_to_img.hpp>
 namespace chipimgproc {
 namespace app {
 namespace marker_txt_to_img{
@@ -16,9 +17,9 @@ struct Parameters
 {
     std::string txt_input;
     std::string img_output;
-    int cell_r_px;
-    int cell_c_px;
-    int border_px;
+    float cell_r_px;
+    float cell_c_px;
+    float border_px;
 };
 
 class OptionParser : public Parameters, public nucleona::app::cli::OptionParser
@@ -32,9 +33,9 @@ public:
             ("help,h"       , "show help message")
             ("txt_input,i"  , po::value<std::string>()->required()  , "marker txt pattern file")
             ("img_output,o" , po::value<std::string>()->required()  , "marker image output")
-            ("cell_r_px,r"  , po::value<int>()->required()          , "cell row pixel num")
-            ("cell_c_px,c"  , po::value<int>()->required()          , "cell col pixel num")
-            ("border_px,b"  , po::value<int>()->required()          , "cell border pixel num")
+            ("cell_r_px,r"  , po::value<float>()->required()        , "cell row pixel num")
+            ("cell_c_px,c"  , po::value<float>()->required()        , "cell col pixel num")
+            ("border_px,b"  , po::value<float>()->required()        , "cell border pixel num")
         ;
         po::store(po::parse_command_line(argc, argv, desc), vm);
         if(argc == 1 or vm.count("help"))
@@ -63,32 +64,15 @@ class Main
     void operator()() {
         std::ifstream fin(args_.txt_input);
         auto mat = marker::Loader::from_txt(fin, std::cout);
-        auto r_cell_bd = args_.cell_r_px + args_.border_px;
-        auto c_cell_bd = args_.cell_c_px + args_.border_px;
-        auto img_row = 
-            args_.border_px + 
-            r_cell_bd * mat.rows;
-        auto img_col = 
-            args_.border_px + 
-            c_cell_bd * mat.cols;
-
-        cv::Mat_<std::uint8_t> img = cv::Mat_<std::uint8_t>::zeros(
-            img_row, img_col
+        auto img = txt_to_img(mat, 
+            args_.cell_r_px,
+            args_.cell_c_px,
+            args_.border_px
         );
-        int i = 0;
-        for( int r = args_.border_px; r < img.rows; r += r_cell_bd ) {
-            int j = 0;
-            for( int c = args_.border_px; c < img.cols; c += c_cell_bd ) {
-                if( mat(i,j) == 255 ) {
-                    cv::Rect cell(c, r, args_.cell_c_px, args_.cell_r_px);
-                    cv::rectangle(img, cell, 255, CV_FILLED);
-                }
-                j ++;
-            }
-            i ++;
-        }
         cv::imwrite(args_.img_output, img);
     }
+
+    chipimgproc::marker::TxtToImg txt_to_img;
 };
 
 template<class OPTION_PARSER>
