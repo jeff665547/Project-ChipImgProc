@@ -77,6 +77,7 @@ struct SingleGeneral {
         v_marker_seg_ = v;
     }
     auto operator() (const cv::Mat& src, const std::string& id = "") {
+        std::function<void(const cv::Mat&)> func;
         *msg_ << "img id: " << id << std::endl;
         if(v_sample_)
             v_sample_(viewable(src));
@@ -86,6 +87,7 @@ struct SingleGeneral {
             chipimgproc::MatUnit::PX, 
             *msg_,
             nullptr,
+            func,
             v_marker_seg_
         );
         auto theta = rot_estimator_(marker_regs, *msg_);
