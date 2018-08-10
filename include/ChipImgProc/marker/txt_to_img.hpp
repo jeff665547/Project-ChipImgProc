@@ -13,6 +13,10 @@ struct TxtToImg {
         float cell_c_px,
         float border_px
     ) {
+        cell_r_px *= 10;
+        cell_c_px *= 10;
+        border_px *= 10;
+
         auto r_cell_bd = cell_r_px + border_px;
         auto c_cell_bd = cell_c_px + border_px;
         auto img_row = 
@@ -30,20 +34,20 @@ struct TxtToImg {
         for( auto r = border_px; r < img.rows; r += r_cell_bd ) {
             int j = 0;
             for( auto c = border_px; c < img.cols; c += c_cell_bd ) {
-                if( mat(i,j) == 255 ) {
-                    cv::Rect cell(
-                        (int)std::round(c), 
-                        (int)std::round(r), 
-                        (int)std::round(cell_c_px), 
-                        (int)std::round(cell_r_px)
-                    );
-                    cv::rectangle(img, cell, 255, CV_FILLED);
-                }
+                cv::Rect cell(
+                    (int)std::round(c), 
+                    (int)std::round(r), 
+                    (int)std::round(cell_c_px), 
+                    (int)std::round(cell_r_px)
+                );
+                cv::rectangle(img, cell, mat(i,j), CV_FILLED);
                 j ++;
             }
             i ++;
         }
-        return img;
+        cv::Mat tmp; 
+        cv::resize(img, tmp, cv::Size(img.cols / 10, img.rows / 10));
+        return tmp;
     }
 };
 

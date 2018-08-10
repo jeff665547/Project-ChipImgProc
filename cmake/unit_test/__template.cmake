@@ -11,6 +11,7 @@ target_include_directories(${__screw_target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+screw_add_launch_task(${__screw_target})
 add_test(
     NAME ${__screw_target}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/workdir 

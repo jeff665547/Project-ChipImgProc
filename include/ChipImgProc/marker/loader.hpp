@@ -39,6 +39,9 @@ struct Loader {
                     case '.':
                         mat_d.push_back(0);
                         break;
+                    case 'O':
+                        mat_d.push_back(127);
+                        break;
                     default:
                         throw std::runtime_error(
                             "pattern file format error:"
