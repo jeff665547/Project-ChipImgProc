@@ -37,3 +37,6 @@ message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
 screw_get_bits(BITS)
 list(APPEND BUNDLE_RT_DIRS ${OpenCV_DIR}/x${BITS}/${OpenCV_RUNTIME}/bin)
 list(APPEND BUNDLE_RT_DIRS ${OpenCV_DIR}/x${BITS}/${OpenCV_RUNTIME}/lib)
+
+
+include(${SCREW_DIR}/hunter_root.cmake)

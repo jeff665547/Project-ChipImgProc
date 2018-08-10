@@ -13,9 +13,9 @@ struct TxtToImg {
         float cell_c_px,
         float border_px
     ) {
-        cell_r_px *= 10;
-        cell_c_px *= 10;
-        border_px *= 10;
+        cell_r_px *= 16;
+        cell_c_px *= 16;
+        border_px *= 16;
 
         auto r_cell_bd = cell_r_px + border_px;
         auto c_cell_bd = cell_c_px + border_px;
@@ -46,7 +46,10 @@ struct TxtToImg {
             i ++;
         }
         cv::Mat tmp; 
-        cv::resize(img, tmp, cv::Size(img.cols / 10, img.rows / 10));
+        for( int i = 0; i < 4; i ++ ) {
+            cv::pyrDown(img, tmp);
+            img = tmp.clone();
+        }
         return tmp;
     }
 };
