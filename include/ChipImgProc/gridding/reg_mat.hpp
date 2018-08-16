@@ -116,7 +116,7 @@ struct RegMat {
         std::vector<cv::Rect> tiles;
         for(std::size_t i = 1; i < y_grid_anchor.size(); i ++ ) {
             for (std::size_t j = 1; j < x_grid_anchor.size(); j ++ ) {
-                auto w = x_grid_anchor.at(i) - x_grid_anchor.at(i-1);
+                auto w = x_grid_anchor.at(j) - x_grid_anchor.at(j-1);
                 auto h = y_grid_anchor.at(i) - y_grid_anchor.at(i-1);
                 tiles.push_back(
                     cv::Rect(

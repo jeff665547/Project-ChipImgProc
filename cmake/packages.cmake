@@ -19,15 +19,15 @@ hunter_config(NucleonaM GIT_SUBMODULE "lib/Nucleona"
 if( MINGW )
     hunter_config(
         OpenCV
-        VERSION ${HUNTER_OpenCV_VERSION}
+        VERSION "3.4.0-p0"
         CMAKE_ARGS 
-            BUILD_SHARED_LIBS=OFF
+            BUILD_SHARED_LIBS=ON
             ENABLE_PRECOMPILED_HEADERS=OFF
     )
 else()
     hunter_config(
         OpenCV
-        VERSION ${HUNTER_OpenCV_VERSION}
-        CMAKE_ARGS BUILD_SHARED_LIBS=OFF
+        VERSION "3.4.0-p0"
+        CMAKE_ARGS BUILD_SHARED_LIBS=ON
     )
 endif()
