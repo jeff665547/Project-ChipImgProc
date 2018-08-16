@@ -99,7 +99,7 @@ struct AutoMinCV
                 int windows_height = std::round(t.height * seg_rate);
                 auto min_cv_data = find_min_cv(
                     tiled_src.get_cali_img(), t, 
-                    windows_width, windows_width
+                    windows_width, windows_height
                 );
                 res.mean   (y, x) = min_cv_data.stat.mean;
                 res.stddev (y, x) = min_cv_data.stat.stddev;
