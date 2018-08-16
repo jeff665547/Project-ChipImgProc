@@ -21,14 +21,14 @@ if( MINGW )
         OpenCV
         VERSION "3.4.0-p0"
         CMAKE_ARGS 
-            BUILD_SHARED_LIBS=ON
+            BUILD_SHARED_LIBS=OFF
             ENABLE_PRECOMPILED_HEADERS=OFF
     )
 else()
     hunter_config(
         OpenCV
         VERSION "3.4.0-p0"
-        CMAKE_ARGS BUILD_SHARED_LIBS=ON
+        CMAKE_ARGS BUILD_SHARED_LIBS=OFF
     )
 endif()
 hunter_config(
