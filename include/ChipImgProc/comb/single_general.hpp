@@ -10,6 +10,7 @@
 #include <ChipImgProc/roi/reg_mat_marker_layout.hpp>
 #include <ChipImgProc/rotation/cache.hpp>
 #include <ChipImgProc/gridding/reg_mat.hpp>
+#include <ChipImgProc/bgb/chunk_local_mean.hpp>
 #include <Nucleona/tuple.hpp>
 
 namespace chipimgproc{ namespace comb{
@@ -81,6 +82,7 @@ struct SingleGeneral {
         *msg_ << "img id: " << id << std::endl;
         if(v_sample_)
             v_sample_(viewable(src));
+        // detect marker
         auto marker_regs = marker_detection_(
             static_cast<const cv::Mat_<std::uint16_t>&>(src), 
             marker_layout_, 
@@ -105,7 +107,14 @@ struct SingleGeneral {
         auto tiled_mat  = TiledMat<>::make_from_grid_res(
             grid_res, tmp, marker_layout_
         );
-        auto margin_res = margin_(
+        GridRawImg<> grid_raw_img(
+            tmp, // share raw image 
+            grid_res.gl_x, 
+            grid_res.gl_y
+        );
+        // basic gridding done, start calibrate matrix content
+        // generate dirty mean, no background calibration
+        auto dirty_margin_res = margin_( // TODO: cv mean or direct segmentation ?
                             margin_method_,
                             margin::Param<GLID> {
                                 seg_rate_, 
@@ -113,6 +122,22 @@ struct SingleGeneral {
                                 v_margin_res_
                             }
                           );
+        // start background calibration
+        bgb::chunk_local_mean(
+            dirty_margin_res.stat_mats.mean,
+            grid_raw_img, // int image -> float image
+            3, 3, 0.05, // TODO: parameterize
+            marker_layout_, 
+            std::cout
+        );
+        auto margin_res = margin_(
+            margin_method_,
+            margin::Param<GLID> {
+                seg_rate_, 
+                &tiled_mat,
+                v_margin_res_
+            }
+        );
         return nucleona::make_tuple(
             true,
             std::move(tiled_mat), 

@@ -3,18 +3,29 @@
 #include <Nucleona/range/irange.hpp>
 namespace chipimgproc{
 
-template<class GLID>
+template<class GLID = std::uint16_t>
 struct GridRawImg {
     GridRawImg() = default;
+
+    template<class MAT, class GLX, class GLY>
     GridRawImg(
-        const cv::Mat& img, 
-        const std::vector<GLID> glx,
-        const std::vector<GLID> gly
+        MAT&& img, 
+        const GLX& glx,
+        const GLY& gly
     )
-    : img_  (img)
-    , gl_x_ (glx)
-    , gl_y_ (gly)
-    {}
+    : img_  (FWD(img))
+    , gl_x_ ()
+    , gl_y_ ()
+    {
+        gl_x_.reserve(glx.size());
+        gl_y_.reserve(gly.size());
+        for(auto&& x : glx) {
+            gl_x_.push_back((GLID)x);
+        }
+        for(auto&& y : gly) {
+            gl_y_.push_back((GLID)y);
+        }
+    }
     auto& mat() {
         return img_;
     }
@@ -27,6 +38,10 @@ struct GridRawImg {
     auto&       gl_y()        { return gl_y_; }
     bool        empty()       { return img_.empty(); }
     bool        empty() const { return img_.empty(); }
+    auto        rows()        { return img_.rows; } 
+    auto        cols()        { return img_.cols; } 
+    auto        rows()  const { return img_.rows; } 
+    auto        cols()  const { return img_.cols; } 
 
     GridRawImg  get_roi(const cv::Rect& r) const {
         cv::Rect raw_rect(

@@ -185,6 +185,21 @@ struct Layout {
         return const_cast<Layout&>(*this).get_marker_invl(unit);
     }
 
+    auto get_marker_rects(const MatUnit& unit) const {
+        std::vector<cv::Rect> res;
+        for( auto&& mk : mks ) {
+            auto&& mk_mat = mk.get_candi_mks(unit).at(0);
+            auto&& mk_pos = mk.get_pos(unit);
+            res.push_back(
+                cv::Rect(
+                    mk_pos.x, mk_pos.y,
+                    mk_mat.cols, mk_mat.rows
+                )
+            );
+        }
+        return res;
+    }
+
     PatternNum              pat_num        { multi  } ;
     DistForm                dist_form      { random } ;
     cv::Mat_<std::int16_t>  mk_map                    ; // used in reg_mat
