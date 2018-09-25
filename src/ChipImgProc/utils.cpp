@@ -13,6 +13,9 @@ int cols(const cv::Mat& m) {
 int rows(const cv::Mat& m) {
     return m.rows;
 }
+cv::Mat get_roi( cv::Mat& m, const cv::Rect& r) {
+    return m(r);
+}
 const char* depth(const cv::Mat& image)
 {
     switch (image.depth())

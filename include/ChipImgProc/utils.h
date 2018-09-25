@@ -2,17 +2,9 @@
 #include <boost/filesystem.hpp>
 #include <ChipImgProc/utils/cv.h>
 #include <ChipImgProc/utils/less.hpp>
+#include <ChipImgProc/utils/mat.hpp>
 namespace chipimgproc { 
-template<class M>
-auto cols(const M& m) {
-    return m.cols();
-}
-template<class M>
-auto rows(const M& m) {
-    return m.rows();
-}
-int cols(const cv::Mat& m);
-int rows(const cv::Mat& m);
+
 const char* depth(const cv::Mat& image);
 
 template<class OS>
