@@ -142,9 +142,9 @@ struct SingleGeneral {
             grid_raw_img.mat().convertTo(
                 tiled_mat.get_cali_img(), CV_16UC1, 1.0
             );
-            tiled_mat.view([](const cv::Mat_<std::uint16_t>& mat){
-                cv::imwrite("debug_bg_cali.tiff", mat);
-            });
+            // tiled_mat.view([](const cv::Mat_<std::uint16_t>& mat){
+            //     cv::imwrite("debug_bg_cali.tiff", mat);
+            // });
         }
         std::cout << "after integer fix: " << std::endl;
         std::cout << "tiled_mat: " << std::endl;
