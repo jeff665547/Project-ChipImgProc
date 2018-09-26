@@ -85,6 +85,7 @@ struct AutoMinCV
     auto operator()( 
           TiledMat<GLID>&           tiled_src
         , float                     seg_rate
+        , bool                      tile_replace        = true
         , const std::function<
             void(const cv::Mat&)
           >&                        v_result            = nullptr
@@ -105,7 +106,8 @@ struct AutoMinCV
                 res.stddev (y, x) = min_cv_data.stat.stddev;
                 res.cv     (y, x) = min_cv_data.stat.cv;
                 res.num    (y, x) = min_cv_data.stat.num;
-                t = min_cv_data.win;
+                if( tile_replace )
+                    t = min_cv_data.win;
             }
         }
         if(v_result)

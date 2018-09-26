@@ -23,6 +23,7 @@ struct Margin {
             auto tmp = auto_min_cv(
                 *param.tiled_mat, 
                 param.seg_rate,
+                param.replace_tile,
                 param.v_result
             );
             res.stat_mats = tmp;
@@ -31,6 +32,7 @@ struct Margin {
             auto tmp = mid_seg(
                 *param.tiled_mat, 
                 param.seg_rate,
+                param.replace_tile,
                 param.v_result
             );
             res.stat_mats = tmp;

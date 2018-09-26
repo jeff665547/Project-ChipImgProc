@@ -108,7 +108,7 @@ struct SingleGeneral {
             grid_res, tmp, marker_layout_
         );
         GridRawImg<> grid_raw_img(
-            tmp, // share raw image 
+            tmp,
             grid_res.gl_x, 
             grid_res.gl_y
         );
@@ -119,22 +119,46 @@ struct SingleGeneral {
                             margin::Param<GLID> {
                                 seg_rate_, 
                                 &tiled_mat,
+                                false, 
                                 v_margin_res_
                             }
                           );
+        std::cout << "before bg fix: " << std::endl;
+        std::cout << "tiled_mat: " << std::endl;
+        chipimgproc::info(std::cout, tiled_mat.get_cali_img());
+        std::cout << std::endl;
+        std::cout << "grid_raw_img: " << std::endl;
+        chipimgproc::info(std::cout, grid_raw_img.mat());
+        std::cout << std::endl;
         // start background calibration
         bgb::chunk_local_mean(
             dirty_margin_res.stat_mats.mean,
-            grid_raw_img, // int image -> float image
-            3, 3, 0.05, // TODO: parameterize
+            grid_raw_img,   // int image -> float image
+            3, 3, 0.05,     // TODO: parameterize
             marker_layout_, 
             std::cout
         );
+        {
+            grid_raw_img.mat().convertTo(
+                tiled_mat.get_cali_img(), CV_16UC1, 1.0
+            );
+            tiled_mat.view([](const cv::Mat_<std::uint16_t>& mat){
+                cv::imwrite("debug_bg_cali.tiff", mat);
+            });
+        }
+        std::cout << "after integer fix: " << std::endl;
+        std::cout << "tiled_mat: " << std::endl;
+        chipimgproc::info(std::cout, tiled_mat.get_cali_img());
+        std::cout << std::endl;
+        std::cout << "grid_raw_img: " << std::endl;
+        chipimgproc::info(std::cout, grid_raw_img.mat());
+        std::cout << std::endl;
         auto margin_res = margin_(
             margin_method_,
             margin::Param<GLID> {
                 seg_rate_, 
                 &tiled_mat,
+                true,
                 v_margin_res_
             }
         );

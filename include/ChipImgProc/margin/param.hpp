@@ -9,6 +9,7 @@ template<
 struct Param {
     float                   seg_rate       ;
     TiledMat<GLID>* const   tiled_mat      ;
+    bool                    replace_tile   ;
     std::function<
         void(const cv::Mat&)
     >                       v_result       ;

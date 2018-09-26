@@ -13,6 +13,7 @@ struct MidSeg
     auto operator()( 
           TiledMat<GLID>&           tiled_src
         , float                     mid_rate
+        , bool                      tile_replace        = true
         , const std::function<
             void(const cv::Mat&)
           >&                        v_result            = nullptr
@@ -27,7 +28,7 @@ struct MidSeg
         auto& tiles = tiled_src.get_tiles();
         for( int y = 0; y < ts_rows; y ++ ) {
             for( int x = 0; x < ts_cols; x ++ ) {
-                auto& tile = tiled_src.tile_at(y, x);
+                cv::Rect tile( tiled_src.tile_at(y, x) );
                 int width  = std::round(tile.width  * mid_rate);
                 int height = std::round(tile.height * mid_rate);
                 auto x_off = ( tile.width  - width  ) / 2;
@@ -46,6 +47,8 @@ struct MidSeg
                 res.stddev (y, x) = cell.stddev;
                 res.cv     (y, x) = cell.cv;
                 res.num    (y, x) = cell.num;
+                if( tile_replace )
+                    tiled_src.tile_at(y, x) = tile;
 
             }
         }

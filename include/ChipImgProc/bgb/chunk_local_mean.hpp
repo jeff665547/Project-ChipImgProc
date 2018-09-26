@@ -21,8 +21,8 @@ constexpr struct ChunkLocalMean
 {
     constexpr static float raw_img_px_floor = 1e-10;
 
-    auto gen_mk_mask(marker::Layout& layout) const {
-        cv::Mat_<std::uint8_t> mask = cv::Mat::ones(mask.size(), CV_8UC1);
+    auto gen_mk_mask(marker::Layout& layout, const cv::Size& size) const {
+        cv::Mat_<std::uint8_t> mask = cv::Mat::ones(size, CV_8UC1);
         for(auto& mk_des : layout.mks) {
             auto& point = mk_des.get_pos(MatUnit::CELL);
             auto& candi_mk = mk_des.get_candi_mks(MatUnit::CELL).at(0);
@@ -59,16 +59,22 @@ constexpr struct ChunkLocalMean
         auto& grfimg = grimg;
         grfimg.mat().convertTo( grfimg.mat(), CV_32F );
 
-        auto chunk_x_size = grid.cols / chunk_x_num;
-        auto chunk_y_size = grid.rows / chunk_y_num;
+        auto grid_chunk_x_size   = grid.cols   / chunk_x_num;
+        auto grid_chunk_y_size   = grid.rows   / chunk_y_num;
+        auto grfimg_chunk_x_size = grfimg.mat().cols / chunk_x_num;
+        auto grfimg_chunk_y_size = grfimg.mat().rows / chunk_y_num;
 
         auto grid_chunk = mat_chunk(
-            grid, chunk_x_size, chunk_y_size
+            grid, 
+            grid_chunk_x_size, 
+            grid_chunk_y_size
         );
         auto grfimg_chunk = mat_chunk(
-            grfimg, chunk_x_size, chunk_y_size
+            grfimg, 
+            grid_chunk_x_size, 
+            grid_chunk_y_size
         );
-        auto mk_mask = gen_mk_mask(layout);
+        auto mk_mask = gen_mk_mask(layout, grid.size());
         std::vector<float> bg_means;
         for( auto&& [g_ch, f_ch] : ranges::view::zip(grid_chunk, grfimg_chunk)) {
             auto&& [gx, gy, g_ch_mat] = g_ch;
@@ -79,19 +85,27 @@ constexpr struct ChunkLocalMean
 
             std::vector<float> means_tmp;
             means_tmp.reserve(g_ch_mat_enum);
-            // collect none marker masked means
+            cv::Mat_<std::uint8_t> bin;
+            {
+                cv::Mat_<std::uint8_t> tmp;
+                g_ch_mat.convertTo(tmp, CV_8UC1, 0.00390625);
+                cv::threshold(tmp, bin, 150, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+            }
+            // collect none marker and black cell as sampled backgroud data
             for(int r = 0; r < g_ch_mat.rows; r ++ ) {
                 for ( int c = 0; c < g_ch_mat.cols; c ++ ) {
                     auto g_abs_pos_x = gx + c;
                     auto g_abs_pos_y = gy + r;
-                    if(mk_mask(g_abs_pos_y, g_abs_pos_x) != 0)
+                    if(mk_mask(g_abs_pos_y, g_abs_pos_x) != 0 && bin(r, c) == 0)
                         means_tmp.push_back(g_ch_mat(r, c));
+                
                 }
             }
+            std::cout << "means_tmp.size(): " << means_tmp.size() << std::endl;
             // trimmed right and left outlier
             means_tmp |= ranges::action::sort;
             float sum = 0;
-            for(std::size_t i = trim_num_half; i < ( means_tmp.size() - trim_num + trim_num_half ); i ++ ) {
+            for(std::size_t i = 0; i < means_tmp.size(); i ++ ) {
                 sum += means_tmp.at(i);
             }
             // count local background mean
