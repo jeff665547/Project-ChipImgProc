@@ -8,6 +8,8 @@
 #include <ChipImgProc/stat/cell.hpp>
 #include <ChipImgProc/stat/mats.hpp>
 #include <ChipImgProc/wrapper/indexed_range.hpp>
+#include <mutex>
+#include <memory>
 namespace chipimgproc{
 
 template<class FLOAT = float>
@@ -192,12 +194,17 @@ struct MultiTiledMat
     static constexpr struct MinCVMean {
         FLOAT operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
-            FLOAT res;
+            FLOAT res = -1.0;
+            if( cell_infos.size() <= 0 ) 
+                throw std::runtime_error("BUG: no cell info found");
             for(auto& ci : cell_infos) {
                 if(min_cv > ci.cv ) {
                     min_cv = ci.cv;
                     res = ci.mean;
                 }
+            }
+            if( res < 0 )  {
+                res = cell_infos.at(0).mean;
             }
             return res;
         }
@@ -210,11 +217,17 @@ struct MultiTiledMat
         cv::Mat operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
             cv::Mat res;
+            if( cell_infos.size() <= 0 ) 
+                throw std::runtime_error("BUG: no cell info found");
             for(auto& ci : cell_infos) {
                 if(min_cv > ci.cv ) {
                     min_cv = ci.cv;
                     res = mm_.cali_imgs_.at(ci.img_idx).mat()(ci).clone();
                 }
+            }
+            if(res.empty()) {
+                auto& ci = cell_infos.at(0);
+                res = mm_.cali_imgs_.at(ci.img_idx).mat()(ci).clone();
             }
             return res;
         }
@@ -230,13 +243,20 @@ struct MultiTiledMat
         {}
         Result operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
+            bool res_ready = false;
             Result res;
             for(auto& ci : cell_infos) {
                 if(min_cv > ci.cv ) {
                     min_cv = ci.cv;
                     res.pixels      = mm_.cali_imgs_.at(ci.img_idx).mat()(ci).clone();
                     res.cell_info   = ci;
+                    res_ready       = true;
                 }
+            }
+            if(!res_ready) {
+                auto& ci        = cell_infos.at(0);
+                res.pixels      = mm_.cali_imgs_.at(ci.img_idx).mat()(ci).clone();
+                res.cell_info   = ci;
             }
             return res;
         }
