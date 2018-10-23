@@ -11,11 +11,6 @@ else()
         VERSION ${HUNTER_GTest_VERSION}
     )
 endif()
-hunter_config(Screw GIT_SUBMODULE "cmake/screw")
-hunter_config(NucleonaM GIT_SUBMODULE "lib/Nucleona"
-    CMAKE_ARGS 
-        BUILD_TESTS=OFF 
-)
 if( MINGW )
     hunter_config(
         OpenCV

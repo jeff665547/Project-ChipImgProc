@@ -1,5 +1,5 @@
 # nucleona 
-hunter_add_package(NucleonaM)
+hunter_add_package(Nucleona)
 find_package(Nucleona CONFIG REQUIRED)
 
 # boost 
