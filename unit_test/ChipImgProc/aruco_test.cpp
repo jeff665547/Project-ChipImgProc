@@ -1,36 +1,63 @@
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
+#include <ChipImgProc/utils.h>
 #include <ChipImgProc/aruco.hpp>
 #include <nlohmann/json.hpp>
 #include <fstream>
-TEST(aruco, bin_to_int) {
-    auto json_path = nucleona::test::data_dir() / "aruco_default_dict_6x6_250.json";
-    std::ifstream fin(json_path.string());
-    nlohmann::json mk_layout;
-    fin >> mk_layout;
-    for( auto&& mk : mk_layout["marker_list"] ) {
-        std::cout << chipimgproc::ArUco::bin_to_dec(mk) << std::endl;
+#include <ChipImgProc/aruco/detector.hpp>
+#include <ChipImgProc/aruco/dictionary.hpp>
+TEST(aruco_test,basic_test) 
+{
+    std::vector<std::int32_t> aruco_ids_in_image({
+        47, 48, 49, 05, 50, 51, 52,
+        40, 41, 42, 43, 44, 45, 46,
+        34, 35, 36, 37, 38, 39, 04,
+        28, 29, 03, 30, 31, 32, 33,
+        21, 22, 23, 24, 25, 26, 27,
+        15, 16, 17, 18, 19, 02, 20,
+        00, 01, 10, 11, 12, 13, 14
+    });
+
+    auto db_path = nucleona::test::data_dir() / "aruco_db.json";
+    auto img0_path = nucleona::test::data_dir() / "aruco_test_img-0.tiff";
+    auto img1_path = nucleona::test::data_dir() / "aruco_test_img-1.tiff";
+    auto frame_template_path = nucleona::test::data_dir() / "aruco_frame_template.tiff";
+    auto frame_mask_path = nucleona::test::data_dir() / "aruco_frame_mask.tiff";
+
+    std::ifstream db_fin(db_path.string());
+    nlohmann::json aruco_db;
+    db_fin >> aruco_db;
+    auto dict = chipimgproc::aruco::Dictionary::from_json(
+        aruco_db["DICT_6X6_250"]
+    );
+
+    auto img0 = cv::imread(img0_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+    auto img1 = cv::imread(img1_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+
+    auto frame_template = cv::imread(frame_template_path.string(), cv::IMREAD_GRAYSCALE);
+    auto frame_mask     = cv::imread(frame_mask_path.string(), cv::IMREAD_GRAYSCALE);
+    chipimgproc::aruco::Detector detector;
+    detector.reset(
+        dict, 
+        3,                  // pyramid_level
+        1,                  // border_bits
+        1,                  // fringe_bits
+        13.04,              // a_bit_width
+        8.04,               // margin_size
+        frame_template,     // locator image
+        frame_mask,         // locator image mask
+        9,                  // nms_count
+        268,                // nms_radius
+        5,                  // cell_size
+        aruco_ids_in_image, // aruco ids
+        std::cout           // logger
+    );
+    auto pts0 = detector.detect_markers(img0, std::cout);
+    for(auto& [id, pt] : pts0 ) {
+        std::cout << id << '\t' << pt << std::endl;
     }
-    // int i = 0;
-    // int j = 0;
-    // for( auto&& mk : mk_layout["marker_list"] ) {
-    //     std::stringstream num; 
-    //     num << "\"" << chipimgproc::ArUco::bin_to_dec(mk) << "\"";
-
-
-    //     std::cout 
-    //         << std::setw(15) << num.str() 
-    //         << ": " 
-    //         << "[" << std::setw(2) << i << ", " << std::setw(2) << j << "],"
-    //         << std::endl;
-    //     j ++;
-    //     if( j == 7 ) {
-    //         i ++;
-    //         j = 0;
-    //     }
-    //     if( i == 7 ) break;
-    // }
-}
-TEST(aruco, int_to_mat ) {
-    std::cout << chipimgproc::ArUco::dec_to_mat(8117912230, 6, 6) << std::endl;
+    auto pts1 = detector.detect_markers(img1, std::cout);
+    for(auto& [id, pt] : pts1 ) {
+        std::cout << id << '\t' << pt << std::endl;
+    }
 }
