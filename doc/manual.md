@@ -48,7 +48,3 @@ find_package(ChipImgProc CONFIG REQUIRED)
 add_executable(foo foo.cpp)
 target_link_libraries(foo PUBLIC ChipImgProc::ChipImgProc-utils)
 ```
-
-# Modules
-
-* [ArUco Marker Detection](@ref aruco_marker_detection)
