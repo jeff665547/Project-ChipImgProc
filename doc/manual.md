@@ -1,4 +1,7 @@
-# Import ChipImgProc to your project
+Manual {#mainpage}
+===
+
+# Import
 
 ## Import with CMake Hunter (recommanded)
 
@@ -30,6 +33,7 @@ find_package(ChipImgProc CONFIG REQUIRED)
 ```
 
 ### A full example
+
 ```
 cmake_minimum_required(VERSION 3.10.0)
 include(cmake/HunterGate.cmake)
@@ -44,3 +48,7 @@ find_package(ChipImgProc CONFIG REQUIRED)
 add_executable(foo foo.cpp)
 target_link_libraries(foo PUBLIC ChipImgProc::ChipImgProc-utils)
 ```
+
+# Modules
+
+* [ArUco Marker Detection](@ref aruco_marker_detection)
