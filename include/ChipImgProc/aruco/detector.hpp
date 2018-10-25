@@ -1,3 +1,8 @@
+/**
+ *  @file    ChipImgProc/aruco/detector.hpp
+ *  @author  Chia-Hua Chang, Alex Lee
+ *  @brief   Detect ArUco marker in a image.
+ */
 #pragma once
 #include <cstdint>
 #include <vector>
@@ -11,9 +16,15 @@
 #include <cinttypes>
 #include "utils.hpp"
 #include "dictionary.hpp"
+#include <Nucleona/stream/null_buffer.hpp>
 
 namespace chipimgproc::aruco {
 
+/**
+ *  @brief The ArUco marker detector class.
+ *  @details Heres a simple usage example
+ *  @snippet ChipImgProc/aruco_test.cpp usage
+ */
 class Detector {
   public:
     Detector()
@@ -34,6 +45,22 @@ class Detector {
     , cell_size_          ()
     , ids_                ()
     {}
+    /**
+     *  @brief  Reset the meta parameter of ArUco marker detector.
+     *  @param  dict            Dictionary file
+     *  @param  pyramid_level   A downsampling level for marker localization.
+     *  @param  border_bits     The thickness of ArUco code boarder in bit units.
+     *  @param  fringe_bits     The thickness of chip chromium width in bit units.
+     *  @param  a_bit_width     A ArUco bit in image pixel width.
+     *  @param  margin_size     The margin size in pixel of template image.
+     *  @param  frame_template  The template image for marker localization.
+     *  @param  frame_mask      The mask for template search.
+     *  @param  nms_count       The max count of markers in next detected image.
+     *  @param  nms_radius      The min distance between detected markers.
+     *  @param  cell_size       The ROI size of a grid cell.
+     *  @param  ids             The candidate ArUco code ids in dictionary.
+     *  @param  logger          Logger for output process detail.
+     */
     void reset(
         const Dictionary&                 dict
       , const std::int32_t&               pyramid_level
@@ -47,7 +74,7 @@ class Detector {
       , const double&                     nms_radius                // pixels
       , const std::int32_t&               cell_size                 // pixels
       , const std::vector<std::int32_t>&  ids
-      , std::ostream&                     logger
+      , std::ostream&                     logger            = nucleona::stream::null_out
     ) {
 
         logger << "pyramid_level          :" << pyramid_level          << '\n'; 
@@ -71,7 +98,7 @@ class Detector {
         maxcor_bits_    = dictionary_->maxcor_bits();
         margin_size_    = margin_size;
         templ_          = frame_template;
-        mask_           = frame_mask;
+        mask           = frame_mask;
         nms_count_      = nms_count;
         nms_radius_     = nms_radius;
         cell_size_      = cv::Size( cell_size, cell_size );
@@ -89,9 +116,15 @@ class Detector {
             cv::pyrDown(small_mask_ , small_mask_ );
         }
     }
+    /**
+     *  @brief   Detect  ArUco markers in a image
+     *  @param   input   Target image
+     *  @param   logger  Logger for output process detail.
+     *  @return  A list of identifeid dictionary ids and points in pixel
+     */
     auto detect_markers(
         cv::Mat input,
-        std::ostream& logger
+        std::ostream& logger = nucleona::stream::null_out
     ) {
         
         // convert to 8U

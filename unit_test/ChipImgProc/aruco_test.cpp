@@ -8,6 +8,7 @@
 #include <ChipImgProc/aruco/dictionary.hpp>
 TEST(aruco_test,basic_test) 
 {
+/// [usage]
     std::vector<std::int32_t> aruco_ids_in_image({
         47, 48, 49, 05, 50, 51, 52,
         40, 41, 42, 43, 44, 45, 46,
@@ -60,4 +61,5 @@ TEST(aruco_test,basic_test)
     for(auto& [id, pt] : pts1 ) {
         std::cout << id << '\t' << pt << std::endl;
     }
+/// [usage]
 }
