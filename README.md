@@ -17,7 +17,7 @@
 include(cmake/HunterGate.cmake)
 HunterGate(
     URL "ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/hunter.git"
-    SHA1 30017f5234c7b0ebd83aaff00659180e32494284
+    SHA1 21a50417fc80b73bb8bcaa692cfdb1f5e4ac8076
 )
 ```
 
@@ -35,12 +35,13 @@ cmake_minimum_required(VERSION 3.10.0)
 include(cmake/HunterGate.cmake)
 HunterGate(
     URL "ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/hunter.git"
-    SHA1 30017f5234c7b0ebd83aaff00659180e32494284
+    SHA1 21a50417fc80b73bb8bcaa692cfdb1f5e4ac8076
 )
 project(ChipImgProc-example)
 
 hunter_add_package(ChipImgProc)
 find_package(ChipImgProc CONFIG REQUIRED)
 add_executable(foo foo.cpp)
-target_link_libraries(foo PUBLIC ChipImgProc::ChipImgProc-utils)
+target_link_libraries(foo PUBLIC ChipImgProc::ChipImgProc)
 ```
+see http://gitlab.centrilliontech.com.tw:10080/centrillion/submodule-ci/blob/ChipImgProc/CMakeLists.txt for a runable project
