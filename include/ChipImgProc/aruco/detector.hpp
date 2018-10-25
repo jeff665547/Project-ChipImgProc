@@ -98,7 +98,7 @@ class Detector {
         maxcor_bits_    = dictionary_->maxcor_bits();
         margin_size_    = margin_size;
         templ_          = frame_template;
-        mask           = frame_mask;
+        mask_           = frame_mask;
         nms_count_      = nms_count;
         nms_radius_     = nms_radius;
         cell_size_      = cv::Size( cell_size, cell_size );
