@@ -188,10 +188,10 @@ struct TiledMat
     cv::Mat get_roi_image() const {
         return cali_img_(get_image_roi());
     }
-    /*
+    /**
      * @brief Create TiledMat object form gridding result.
      * @param grid_res      A parameter pack include the gridding algorithm output, 
-     *                      basically the chipimgproc::griddding::Result type
+     *                      basically the chipimgproc::gridding::Result type
      * @param rot_cali_img  Image after rotation calibration.
      * @param mk_layout     Chip depended marker layout on rot_cali_img.
      */
