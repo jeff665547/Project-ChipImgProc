@@ -1,3 +1,8 @@
+/**
+ * @file ChipImgProc/comb/single_general.hpp
+ * @brief The combined chip image process algorthm.
+ * @author Chia-Hua Chang
+ */
 #pragma once
 #include <ChipImgProc/rotation/line_detection.hpp>
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
@@ -15,8 +20,13 @@
 
 namespace chipimgproc{ namespace comb{
 
-// using FLOAT = float;
-// using GLID = std::uint16_t;
+/**
+ *  @brief Chip image process pipeline of single FOV image.
+ *  @tparam FLOAT The float point type used during image process, depend on user application.
+ *  @tparam GLID  The integer type used during image prcoess, depend on image size.
+ *  
+ *  @defail
+ */
 template<
     class FLOAT = float, 
     class GLID  = std::uint16_t
