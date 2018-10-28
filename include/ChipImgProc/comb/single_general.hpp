@@ -1,6 +1,6 @@
 /**
  * @file ChipImgProc/comb/single_general.hpp
- * @brief The combined chip image process algorthm.
+ * @brief The combined chip image process algorthm for single FOV.
  * @author Chia-Hua Chang
  */
 #pragma once
@@ -21,11 +21,11 @@
 namespace chipimgproc{ namespace comb{
 
 /**
- *  @brief Chip image process pipeline of single FOV image.
+ *  @brief Chip image process pipelin for single FOV image.
  *  @tparam FLOAT The float point type used during image process, depend on user application.
  *  @tparam GLID  The integer type used during image prcoess, depend on image size.
  *  
- *  @defail The image process pipeline follows these steps: <BR>
+ *  @details The image process pipeline follows these steps: <BR>
  *  1. Marker detection. See: chipimgproc::marker::detection::RegMat <BR>
  *  2. Rotation estimate. See: chipimgproc::rotation::MarkerVec <BR>
  *  3. Rotation calibration. See: chipimgproc::rotation::Calibrate <BR>
@@ -158,8 +158,10 @@ struct SingleGeneral {
     /**
      *  @brief The main function of image process pipeline.
      *  @details See SingleGeneral.
-     *  @param src Input image.
+     *  @param src Input image, currently only support 16 bit image.
      *  @param id A task tag for console viewing, useful for debug.
+     *  @return A tuple of type std::tuple<bool, chipimgproc::TiledMat, chipimgproc::stat::Mats, float>, 
+     *          which represent (image QC, image process result, statistic result, rotation angle in degree)
      */
     auto operator() (const cv::Mat& src, const std::string& id = "") {
         std::function<void(const cv::Mat&)> func;
