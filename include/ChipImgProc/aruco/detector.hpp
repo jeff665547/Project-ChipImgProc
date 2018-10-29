@@ -1,7 +1,7 @@
 /**
  *  @file    ChipImgProc/aruco/detector.hpp
  *  @author  Chia-Hua Chang, Alex Lee
- *  @brief   Detect ArUco marker in a image.
+ *  @brief   Detect ArUco markers in an image.
  */
 #pragma once
 #include <cstdint>
@@ -22,7 +22,7 @@ namespace chipimgproc::aruco {
 
 /**
  *  @brief The ArUco marker detector class.
- *  @details Heres a simple usage example
+ *  @details Here shows an example
  *  @snippet ChipImgProc/aruco_test.cpp usage
  */
 class Detector {
@@ -46,20 +46,31 @@ class Detector {
     , ids_                ()
     {}
     /**
-     *  @brief  Reset the meta parameter of ArUco marker detector.
-     *  @param  dict            Dictionary file
-     *  @param  pyramid_level   A downsampling level for marker localization.
-     *  @param  border_bits     The thickness of ArUco code boarder in bit units.
-     *  @param  fringe_bits     The thickness of chip chromium width in bit units.
-     *  @param  a_bit_width     A ArUco bit in image pixel width.
-     *  @param  margin_size     The margin size in pixel of template image.
-     *  @param  frame_template  The template image for marker localization.
-     *  @param  frame_mask      The mask for template search.
-     *  @param  nms_count       The max count of markers in next detected image.
-     *  @param  nms_radius      The min distance between detected markers.
-     *  @param  cell_size       The ROI size of a grid cell.
-     *  @param  ids             The candidate ArUco code ids in dictionary.
-     *  @param  logger          Logger for output process detail.
+     * @brief  Reset the detector parameters
+     * @param  dict            Dictionary for ArUco coding binaries.
+     * @param  pyramid_level   A number of downsampling levels for speeding up marker localization.
+     *                         The value is an integer > 0. Experientially, setting the value of levels to 2 or 3 is good enough.
+     * @param  border_bits     A number of bits for border edge generation.
+     *                         Please refer to the symbol b in the schematic diagram.
+     * @param  fringe_bits     A number of bits for fringe edge generation.
+     *                         Please refer to the symbol f in schematic diagram.
+     * @param  a_bit_width     The width of a bit pattern in pixel scales. This value needs to be estimated precisely. 
+     *                         Please refer to the symbol p in schematic diagram.
+     * @param  margin_size     The width of the margin for matching frame template.
+     *                         This value must be greater than 0 and less than a size of border width.
+     *                         Experientially, setting the parameter to border_bits x 0.6 is a practical.
+     *                         Please refer to the symbol m in schematic diagram.
+     * @param  frame_template  The template image for marker localization.
+     *                         It should be determined by border_bits, fringe_bits, a_bit_width and margin_size parameters.
+     * @param  frame_mask      The mask for matching frame template.
+     *                         It is used to exclude the patterns of coding region in matching process.
+     *                         The image should be determined by border_bits, fringe_bits, a_bit_width and margin_size parameters.
+     * @param  nms_count       An upper bound to the number of markers in an observed image.
+     * @param  nms_radius      A lower bound to the distance between ArUco markers in pixel scales.
+     * @param  cell_size       The size of the interior region for a bit detection.
+     *                         Please refer to the symbol s in schematic diagram.
+     * @param  ids             A list of candidate marker IDs possibly detected in an image.
+     * @param  logger          A logger for outputting the recognition process details.
      */
     void reset(
         const Dictionary&                 dict
@@ -117,10 +128,10 @@ class Detector {
         }
     }
     /**
-     *  @brief   Detect  ArUco markers in a image
-     *  @param   input   Target image
-     *  @param   logger  Logger for output process detail.
-     *  @return  A list of identifeid dictionary ids and points in pixel
+     *  @brief   Detect markers in an image
+     *  @param   input   Input image
+     *  @param   logger  Logger for outputting processing details.
+     *  @return  A list of marker ids and corresponding locations in pixel scales
      */
     auto detect_markers(
         cv::Mat input,
