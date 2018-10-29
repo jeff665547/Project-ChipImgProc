@@ -216,6 +216,7 @@ TEST(single_image_general_gridding, missing_marker_test) {
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
     cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
 }
+/// [usage]
 TEST(single_image_general_gridding, banff_test) {
     using FLOAT = float;
     std::ifstream marker_in(
@@ -290,3 +291,4 @@ TEST(single_image_general_gridding, banff_test) {
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
     cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
 }
+/// [usage]

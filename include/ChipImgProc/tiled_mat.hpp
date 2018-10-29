@@ -1,14 +1,29 @@
+/**
+ *  @file    ChipImgProc/tiled_mat.hpp
+ *  @author  Chia-Hua Chang
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <Nucleona/range/irange.hpp>
 namespace chipimgproc{
 
+
+/**
+ *  @brief   Image matrix include after gridding, include grid tile informations.
+ *  @tparam  The integer type use to score the grid line position, 
+ *           this depend on the image size.
+ */
 template<
     class GLID = std::uint16_t
 >
 struct TiledMat
 {
     using IndexType = cv::Mat_<std::int32_t>;
+    /**
+     *  @brief        Tiled matrix constructor.
+     *  @param rows   Grid level row number.
+     *  @param cols   Grid level column number.
+     */
     TiledMat(int rows, int cols)
     : index_(rows, cols)
     , cali_img_()
@@ -18,27 +33,64 @@ struct TiledMat
     {
         tiles_.reserve(rows * cols);
     }
+    /**
+     *  @brief Get the grid level tile region on image.
+     *  @param r The grid level row position.
+     *  @param c The grid level column position.
+     *  @return A bound rectangle of related tile position on image.
+     */
     cv::Rect& tile_at(int r, int c) {
         return tiles_.at(index_(r, c));
     }
+    /**
+     *  @brief Get the grid level tile region on image.
+     *  @param r The grid level row position.
+     *  @param c The grid level column position.
+     *  @return A bound rectangle of related tile position on image.
+     */
     const cv::Rect& tile_at(int r, int c) const {
         return tiles_.at(index_(r, c));
     }
+    /**
+     *  @brief Get the grid level image of selected tile.
+     *  @param r The grid level row position.
+     *  @param c The grid level column position.
+     *  @return A partial image of related tile position on original image.
+     */
     cv::Mat tile_img_at(int r, int c) const {
         return cali_img_(tile_at(r, c));
     }
+    /**
+     * @brief Get all tiles.
+     * @return A reference tile list.
+     */
     auto& get_tiles() {
         return tiles_;
     }
+    /**
+     * @brief Get all tiles.
+     * @return A reference tile list.
+     */
     const auto& get_tiles() const {
         return tiles_;
     }
+    /**
+     * @brief Get image.
+     * @return A reference to the image.
+     */
     cv::Mat& get_cali_img() {
         return cali_img_;
     }
+    /**
+     * @brief Get image.
+     * @return A reference to the image.
+     */
     const cv::Mat& get_cali_img() const {
         return cali_img_;
     }
+    /**
+     * @brief view The grid image, useful for debugging.
+     */
     template<class FUNC>
     void view(FUNC&& func) {
         cv::Mat_<std::uint16_t> debug_img = viewable(cali_img_);
@@ -51,25 +103,50 @@ struct TiledMat
         }
         func(debug_img);
     }
-    // decltype(auto) operator()( int x, int y ) {
-    //     return index_(x, y);
-    // }
+    /**
+     * @brief The grid level column number.
+     */
     auto cols() const {
         return index_.cols;
     }
+    /**
+     * @brief The grid level column number.
+     */
     auto rows() const {
         return index_.rows;
     }
+    /**
+     * @brief The grid level column number.
+     */
     auto cols() {
         return index_.cols;
     }
+    /**
+     * @brief The grid level column number.
+     */
     auto rows() {
         return index_.rows;
     }
+    /**
+     * @brief The grid line along the x axis.
+     */
     auto& glx() { return gl_x_; }
+    /**
+     * @brief The grid line along the y axis.
+     */
     auto& gly() { return gl_y_; }
+    /**
+     * @brief The grid line along the x axis.
+     */
     const auto& glx() const { return gl_x_; }
+    /**
+     * @brief The grid line along the y axis.
+     */
     const auto& gly() const { return gl_y_; }
+    /**
+     * @brief The grid level region of interest.
+     * @param r A grid level rectangle region.
+     */
     void roi(const cv::Rect& r ) {
         index_ = index_(r);
         decltype(gl_x_) tmp_x(
@@ -83,9 +160,19 @@ struct TiledMat
         );
         gl_y_.swap(tmp_y);
     }
+    /**
+     * @brief The internal tile index.
+     * @detail The index store the mapping of grid position and tile list.
+     *         For example: index()(10, 5) -> 201, 
+     *         means the get_tiles()[201] is at grid level position (10, 5).
+     */
     cv::Mat index() const {
         return index_.clone();
     }
+    /**
+     * @brief Get the grid line covered region on image.
+     * @return The bound rectangle of image.
+     */
     cv::Rect get_image_roi() const {
         auto w = gl_x_.back() - gl_x_.front();
         auto h = gl_y_.back() - gl_y_.front();
@@ -94,9 +181,20 @@ struct TiledMat
             w, h
         );
     }
+    /**
+     * @brief Get the grid line covered region on image.
+     * @return The bound rectangle of image.
+     */
     cv::Mat get_roi_image() const {
         return cali_img_(get_image_roi());
     }
+    /**
+     * @brief Create TiledMat object form gridding result.
+     * @param grid_res      A parameter pack include the gridding algorithm output, 
+     *                      basically the chipimgproc::gridding::Result type
+     * @param rot_cali_img  Image after rotation calibration.
+     * @param mk_layout     Chip depended marker layout on rot_cali_img.
+     */
     template<class GRID_RES>
     static TiledMat<GLID> make_from_grid_res(
         GRID_RES&               grid_res        , 
@@ -152,9 +250,15 @@ struct TiledMat
         }
         return tm;
     }
+    /**
+     * @brief Get marker list.
+     */
     const std::vector<cv::Rect>& markers() const {
         return markers_;
     }
+    /**
+     * @brief Get marker list.
+     */
     std::vector<cv::Rect>& markers() {
         return markers_;
     }
