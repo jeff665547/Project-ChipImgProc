@@ -1,6 +1,0 @@
-[submodule "cmake/screw"]
-	path = cmake/screw
-	url = ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/screw.git
-[submodule "lib/Nucleona"]
-	path = lib/Nucleona
-	url = ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/Nucleona.git

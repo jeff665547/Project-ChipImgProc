@@ -62,3 +62,4 @@ build
 stage/
 # data/
 workdir/
+doc/output

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.10.0)
 include(cmake/HunterGate.cmake)
 set(
     HUNTER_CACHE_SERVERS
@@ -9,7 +9,7 @@ set(
 )
 HunterGate(
     URL "ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/hunter.git"
-    SHA1 f4b65c22d782adddc3de9544660dc9a036335d34
+    SHA1 b06f89371cee76e7055f1e0e583c82e9cb583e93
     FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
 )
 project(ChipImgProc LANGUAGES C CXX)
