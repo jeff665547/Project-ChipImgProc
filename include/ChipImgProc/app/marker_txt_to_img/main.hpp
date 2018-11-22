@@ -63,8 +63,8 @@ class Main
     {}
     void operator()() {
         std::ifstream fin(args_.txt_input);
-        auto mat = marker::Loader::from_txt(fin, std::cout);
-        auto img = txt_to_img(mat, 
+        auto [mat, mask] = marker::Loader::from_txt(fin, std::cout);
+        auto [img, mask_img] = txt_to_img(mat, mask, 
             args_.cell_r_px,
             args_.cell_c_px,
             args_.border_px

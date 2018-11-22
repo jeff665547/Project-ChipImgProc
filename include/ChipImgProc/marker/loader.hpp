@@ -39,7 +39,7 @@ struct Loader {
                     case 'X':
                         mat_d.push_back(255);
                         break;
-                    case '.':
+                    case '.': case 'M':
                         mat_d.push_back(0);
                         break;
                     case 'O':
@@ -57,7 +57,7 @@ struct Loader {
                         mat_m.push_back(0);
                         break;
                     default:
-                        mat_m.push_back(255);
+                        mat_m.push_back(1);
                         break;
                 }
             }
@@ -71,6 +71,8 @@ struct Loader {
         );
         logger << "load marker: " << std::endl;
         logger << res << std::endl;
+        logger << "load mask: " << std::endl;
+        logger << mask << std::endl;
         return nucleona::make_tuple(
             std::move(res),
             std::move(mask)

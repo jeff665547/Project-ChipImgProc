@@ -225,20 +225,25 @@ auto get_banff_gridder(const std::string& patname ) {
         cv::imwrite("debug_margin.tiff", m);
     });
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
-    auto mk = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
+    auto [mk, mask] = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
     candi_mk_pats_cl.push_back(mk);
 
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
-    candi_mk_pats_px.push_back(
-        txt_to_img(mk, 
-            4 * 2.68,
-            4 * 2.68,
-            1 * 2.68
-        )
+    std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px_mask;
+    auto [mk_img, mask_img] = txt_to_img(
+        mk, mask,
+        4 * 2.68,
+        4 * 2.68,
+        1 * 2.68
     );
+    candi_mk_pats_px.push_back(std::move(mk_img));
+    candi_mk_pats_px_mask.push_back(std::move(mask_img));
+
 
     gridder.set_marker_layout(
-        candi_mk_pats_cl, candi_mk_pats_px,
+        candi_mk_pats_cl, 
+        candi_mk_pats_px,
+        candi_mk_pats_px_mask,
         3, 3, 81, 81, 1085, 1085
     );
     return gridder;

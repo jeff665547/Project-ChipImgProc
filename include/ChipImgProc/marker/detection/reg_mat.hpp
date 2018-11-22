@@ -85,17 +85,20 @@ struct RegMat {
         for(auto& mk_r : marker_regions) {
             auto& mk_des = mk_layout.get_marker_des(mk_r.y_i, mk_r.x_i);
             auto& candi_mks = mk_des.get_candi_mks(unit);
+            auto& candi_mks_mask = mk_des.get_candi_mks_mask_px();
             if(v_search) {
                 cv::rectangle(view, mk_r, 128, 3);
             }
             cv::Mat sub_tgt = tgt(mk_r); 
             cv::Mat_<float> sub_score;
-            for(auto& mk : candi_mks) {
+            for(std::size_t i = 0; i < candi_mks.size(); i ++ ) {
+                auto& mk = candi_mks.at(i);
+                auto& mask = candi_mks_mask.at(i);
                 cv::Mat_<float> sub_candi_score(
                     sub_tgt.rows - mk.rows + 1,
                     sub_tgt.cols - mk.cols + 1
                 );
-                cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED);
+                cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED, mask);
                 if(sub_score.empty()) 
                     sub_score = sub_candi_score;
                 else 

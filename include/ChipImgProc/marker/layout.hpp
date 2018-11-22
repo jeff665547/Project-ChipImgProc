@@ -36,7 +36,7 @@ friend struct Layout;
         }
     }
     const auto& get_candi_mks_mask_px() const {
-
+        return candi_mks_px_mask;
     }
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_cl;
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_px;
@@ -97,7 +97,7 @@ struct Layout {
         for( auto& mk : mks ) {
             mk.candi_mks_cl      = candi_pats_cl;
             mk.candi_mks_px      = candi_pats_px;
-            mk.candi_mks_px_mask = candi_mks_px_mask;
+            mk.candi_mks_px_mask = candi_pats_px_mask;
         }
     } 
     void set_mk_pat_reg_mat( 
