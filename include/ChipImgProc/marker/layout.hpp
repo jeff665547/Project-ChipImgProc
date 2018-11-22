@@ -35,8 +35,12 @@ friend struct Layout;
                 );
         }
     }
+    const auto& get_candi_mks_mask_px() const {
+
+    }
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_cl;
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_px;
+    std::vector<cv::Mat_<std::uint8_t>> candi_mks_px_mask;
 private:
     cv::Point pos_cl_;
     cv::Point pos_px_;

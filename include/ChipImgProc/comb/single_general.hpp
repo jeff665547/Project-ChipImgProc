@@ -77,6 +77,9 @@ struct SingleGeneral {
     void set_marker_seg_viewer(const FUNC& v) {
         v_marker_seg_ = v;
     }
+    void disable_background_fix(bool flag) {
+        disable_bg_fix_ = flag;
+    }
     auto operator() (const cv::Mat& src, const std::string& id = "") {
         std::function<void(const cv::Mat&)> func;
         *msg_ << "img id: " << id << std::endl;
@@ -114,54 +117,61 @@ struct SingleGeneral {
         );
         // basic gridding done, start calibrate matrix content
         // generate dirty mean, no background calibration
-        auto dirty_margin_res = margin_( // TODO: cv mean or direct segmentation ?
-                            margin_method_,
-                            margin::Param<GLID> {
-                                seg_rate_, 
-                                &tiled_mat,
-                                false, 
-                                v_margin_res_
-                            }
-                          );
-        std::cout << "before bg fix: " << std::endl;
-        std::cout << "tiled_mat: " << std::endl;
-        chipimgproc::info(std::cout, tiled_mat.get_cali_img());
-        std::cout << std::endl;
-        std::cout << "grid_raw_img: " << std::endl;
-        chipimgproc::info(std::cout, grid_raw_img.mat());
-        std::cout << std::endl;
-        // start background calibration
-        bgb::chunk_local_mean(
-            dirty_margin_res.stat_mats.mean,
-            grid_raw_img,   // int image -> float image
-            3, 3, 0.05,     // TODO: parameterize
-            marker_layout_, 
-            std::cout
-        );
-        {
-            grid_raw_img.mat().convertTo(
-                tiled_mat.get_cali_img(), CV_16UC1, 1.0
-            );
-            // tiled_mat.view([](const cv::Mat_<std::uint16_t>& mat){
-            //     cv::imwrite("debug_bg_cali.tiff", mat);
-            // });
-        }
-        std::cout << "after integer fix: " << std::endl;
-        std::cout << "tiled_mat: " << std::endl;
-        chipimgproc::info(std::cout, tiled_mat.get_cali_img());
-        std::cout << std::endl;
-        std::cout << "grid_raw_img: " << std::endl;
-        chipimgproc::info(std::cout, grid_raw_img.mat());
-        std::cout << std::endl;
-        auto margin_res = margin_(
-            margin_method_,
-            margin::Param<GLID> {
-                seg_rate_, 
-                &tiled_mat,
-                true,
-                v_margin_res_
+        auto margin_res = [&]() {
+            auto dirty_margin_res = margin_( // TODO: cv mean or direct segmentation ?
+                                margin_method_,
+                                margin::Param<GLID> {
+                                    seg_rate_, 
+                                    &tiled_mat,
+                                    disable_bg_fix_, 
+                                    v_margin_res_
+                                }
+                              );
+            if(!disable_bg_fix_) {
+                std::cout << "before bg fix: " << std::endl;
+                std::cout << "tiled_mat: " << std::endl;
+                chipimgproc::info(std::cout, tiled_mat.get_cali_img());
+                std::cout << std::endl;
+                std::cout << "grid_raw_img: " << std::endl;
+                chipimgproc::info(std::cout, grid_raw_img.mat());
+                std::cout << std::endl;
+                // start background calibration
+                bgb::chunk_local_mean(
+                    dirty_margin_res.stat_mats.mean,
+                    grid_raw_img,   // int image -> float image
+                    3, 3, 0.05,     // TODO: parameterize
+                    marker_layout_, 
+                    std::cout
+                );
+                {
+                    grid_raw_img.mat().convertTo(
+                        tiled_mat.get_cali_img(), CV_16UC1, 1.0
+                    );
+                    // tiled_mat.view([](const cv::Mat_<std::uint16_t>& mat){
+                    //     cv::imwrite("debug_bg_cali.tiff", mat);
+                    // });
+                }
+                std::cout << "after integer fix: " << std::endl;
+                std::cout << "tiled_mat: " << std::endl;
+                chipimgproc::info(std::cout, tiled_mat.get_cali_img());
+                std::cout << std::endl;
+                std::cout << "grid_raw_img: " << std::endl;
+                chipimgproc::info(std::cout, grid_raw_img.mat());
+                std::cout << std::endl;
+                auto margin_res = margin_(
+                    margin_method_,
+                    margin::Param<GLID> {
+                        seg_rate_, 
+                        &tiled_mat,
+                        true,
+                        v_margin_res_
+                    }
+                );
+                return margin_res;
+            } else {
+                return dirty_margin_res;
             }
-        );
+        }();
         return nucleona::make_tuple(
             true,
             std::move(tiled_mat), 
@@ -174,6 +184,7 @@ struct SingleGeneral {
     float                     seg_rate_          { 0.6 }                         ;
     marker::Layout            marker_layout_                                     ;
     std::ostream*             msg_               { &nucleona::stream::null_out } ;
+    bool                      disable_bg_fix_    { false }                       ;
 
     std::function<
         void(const cv::Mat&)
