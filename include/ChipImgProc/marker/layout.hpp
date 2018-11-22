@@ -90,12 +90,14 @@ struct Layout {
     }
     void set_single_mk_pat( 
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl,
-        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px
+        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
+        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px_mask
     ) {
         pat_num = single;
         for( auto& mk : mks ) {
-            mk.candi_mks_cl = candi_pats_cl;
-            mk.candi_mks_px = candi_pats_px;
+            mk.candi_mks_cl      = candi_pats_cl;
+            mk.candi_mks_px      = candi_pats_px;
+            mk.candi_mks_px_mask = candi_mks_px_mask;
         }
     } 
     void set_mk_pat_reg_mat( 

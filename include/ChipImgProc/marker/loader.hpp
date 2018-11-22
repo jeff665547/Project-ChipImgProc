@@ -9,7 +9,7 @@
 namespace chipimgproc{ namespace marker{
 
 struct Loader {
-    static cv::Mat_<std::uint8_t> from_txt(
+    static auto from_txt(
         std::istream& is, 
         std::ostream& logger = nucleona::stream::null_out
     ) {
