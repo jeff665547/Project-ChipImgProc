@@ -57,7 +57,7 @@ struct Loader {
                         mat_m.push_back(0);
                         break;
                     default:
-                        mat_m.push_back(1);
+                        mat_m.push_back(255);
                         break;
                 }
             }
@@ -74,8 +74,8 @@ struct Loader {
         logger << "load mask: " << std::endl;
         logger << mask << std::endl;
         return nucleona::make_tuple(
-            std::move(res),
-            std::move(mask)
+            res.clone(),
+            mask.clone()
         );
     }
 };

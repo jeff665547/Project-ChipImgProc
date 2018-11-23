@@ -50,27 +50,6 @@ struct SingleGeneral {
             candi_pats_px_mask
         ); // TODO: raw marker image required
     }
-    // void set_marker_layout( 
-    //     const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl,
-    //     const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
-    //     const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px_mask,
-    //     int rows = 3, 
-    //     int cols = 3,
-    //     std::uint32_t invl_x_cl = 37, 
-    //     std::uint32_t invl_y_cl = 37,
-    //     std::uint32_t invl_x_px = 1091, // can get this value from micron to pixel
-    //     std::uint32_t invl_y_px = 1091,
-    //     const cv::Point& min_p = {0, 0}
-    // ) {
-    //     set_marker_layout(
-    //         candi_pats_cl,
-    //         candi_mks_px,
-    //         rows, cols, 
-    //         invl_x_cl, invl_y_cl,
-    //         invl_x_px, invl_y_px,
-    //         min_p
-    //     );
-    // }
     void set_marker_layout( const marker::Layout& mkl ) {
         marker_layout_ = mkl;
     }

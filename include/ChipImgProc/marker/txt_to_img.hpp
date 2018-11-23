@@ -14,6 +14,12 @@ struct TxtToImg {
         float cell_c_px,
         float border_px
     ) {
+        // auto ext = cell_r_px * 0.2;
+        // cell_r_px += ext;
+        // cell_c_px += ext;
+        // border_px -= ext;
+        std::cout << "mask_cl: " << std::endl;
+        std::cout << mask_cl << std::endl;
         cell_r_px *= 16;
         cell_c_px *= 16;
         border_px *= 16;
@@ -31,7 +37,7 @@ struct TxtToImg {
             (int)std::round(img_row), 
             (int)std::round(img_col)
         );
-        cv::Mat_<std::uint8_t> mask = cv::Mat_<std::uint8_t>::ones(
+        cv::Mat_<std::uint8_t> mask = cv::Mat_<std::uint8_t>::zeros(
             (int)std::round(img_row), 
             (int)std::round(img_col)
         );
@@ -51,7 +57,6 @@ struct TxtToImg {
             }
             i ++;
         }
-        std::cout << mask << std::endl;
         cv::Mat img_tmp; 
         cv::Mat mask_tmp;
         for( int i = 0; i < 4; i ++ ) {
@@ -61,8 +66,8 @@ struct TxtToImg {
             mask = mask_tmp.clone();
         }
         return nucleona::make_tuple(
-            std::move(img_tmp), 
-            std::move(mask_tmp)
+            img_tmp.clone(), 
+            mask_tmp.clone()
         );
     }
 };

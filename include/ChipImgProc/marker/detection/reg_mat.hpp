@@ -5,18 +5,19 @@
 #include <ChipImgProc/const.h>
 #include <ChipImgProc/marker/detection/mk_region.hpp>
 #include <Nucleona/tuple.hpp>
+#include <Nucleona/range.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
 
 struct RegMat {
     template<class T>
-    std::vector<MKRegion> operator()(
+    auto generate_raw_marker_regions(
         const cv::Mat_<T>&      src, 
         const Layout&           mk_layout, 
         const MatUnit&          unit,
-        std::ostream&           out        = nucleona::stream::null_out,
-        const ViewerCallback&   v_bin      = nullptr,
-        const ViewerCallback&   v_search   = nullptr,
-        const ViewerCallback&   v_marker   = nullptr
+        std::ostream&           out        ,
+        const ViewerCallback&   v_bin      ,
+        const ViewerCallback&   v_search   ,
+        const ViewerCallback&   v_marker   
     ) const {
         // marker interval between marker
         auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
@@ -73,7 +74,22 @@ struct RegMat {
             }
             y_last_i = y_i;
         }
-        auto tgt = norm_u8(src); // TODO:
+        return marker_regions;
+    }
+    template<class T, class FUNC>
+    auto template_matching(
+        const cv::Mat_<T>&      src, 
+        const Layout&           mk_layout, 
+        const MatUnit&          unit,
+        FUNC&&                  each_score_region,
+        std::ostream&           out        ,
+        const ViewerCallback&   v_bin      ,
+        const ViewerCallback&   v_search   ,
+        const ViewerCallback&   v_marker   
+    ) const {
+        auto marker_regions = generate_raw_marker_regions(src, mk_layout, 
+            unit, out, v_bin, v_search, v_marker);
+        auto tgt = norm_u8(src, 0, 0); // TODO:
         info(out, tgt);
         if(v_bin) {
             v_bin(tgt);
@@ -99,21 +115,17 @@ struct RegMat {
                     sub_tgt.cols - mk.cols + 1
                 );
                 cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED, mask);
+                auto tmp = norm_u8(sub_candi_score, 0, 0);
                 if(sub_score.empty()) 
                     sub_score = sub_candi_score;
                 else 
                     sub_score += sub_candi_score;
             }
-            double min, max;
-            cv::Point min_loc, max_loc;
-            cv::minMaxLoc(sub_score, &min, &max, &min_loc, &max_loc);
-            max_loc.x  += mk_r.x                ;
-            max_loc.y  += mk_r.y                ;
-            mk_r.x      = max_loc.x             ;
-            mk_r.y      = max_loc.y             ;
-            mk_r.width  = candi_mks.at(0).cols  ;
-            mk_r.height = candi_mks.at(0).rows  ;
-            mk_r.info(out);
+            auto mk_cols = candi_mks.at(0).cols;
+            auto mk_rows = candi_mks.at(0).rows;
+            each_score_region(
+                sub_score, mk_r, mk_cols, mk_rows
+            );
             if(v_marker) {
                 cv::rectangle(view, mk_r, 128, 3);
             }
@@ -125,6 +137,33 @@ struct RegMat {
             v_marker(view);
         }
         return marker_regions;
+
+    }
+    template<class T>
+    std::vector<MKRegion> operator()(
+        const cv::Mat_<T>&      src, 
+        const Layout&           mk_layout, 
+        const MatUnit&          unit,
+        std::ostream&           out        = nucleona::stream::null_out,
+        const ViewerCallback&   v_bin      = nullptr,
+        const ViewerCallback&   v_search   = nullptr,
+        const ViewerCallback&   v_marker   = nullptr
+    ) const {
+        return template_matching(
+            src, mk_layout, unit, 
+            [&out](auto&& sub_score, auto&& mk_r, auto&& mk_cols, auto&& mk_rows) {
+                double min, max;
+                cv::Point min_loc, max_loc;
+                cv::minMaxLoc(sub_score, &min, &max, &min_loc, &max_loc);
+                max_loc.x  += mk_r.x                ;
+                max_loc.y  += mk_r.y                ;
+                mk_r.x      = max_loc.x             ;
+                mk_r.y      = max_loc.y             ;
+                mk_r.width  = mk_cols               ;
+                mk_r.height = mk_rows               ;
+                mk_r.info(out);
+            }, out, v_bin, v_search, v_marker
+        );
     }
 };
 
