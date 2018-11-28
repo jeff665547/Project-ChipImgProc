@@ -162,7 +162,7 @@ struct TiledMat
     }
     /**
      * @brief The internal tile index.
-     * @detail The index store the mapping of grid position and tile list.
+     * @details The index store the mapping of grid position and tile list.
      *         For example: index()(10, 5) -> 201, 
      *         means the get_tiles()[201] is at grid level position (10, 5).
      */

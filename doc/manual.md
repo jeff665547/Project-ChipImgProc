@@ -23,7 +23,23 @@ HunterGate(
     SHA1 b06f89371cee76e7055f1e0e583c82e9cb583e93
 )
 ```
+4. Configure & build your project
 
+For Windows:
+```
+mkdir build
+cd build
+cmake .. -G "MinGW Makefiles"
+cmake --build . 
+```
+
+For Linux:
+```
+mkdir build
+cd build
+cmake ..
+cmake --build . 
+```
 ### Add ChipImgProc dependencies to your project
 
 Add following code after ```project(...)```.

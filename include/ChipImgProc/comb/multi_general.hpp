@@ -11,7 +11,9 @@ namespace chipimgproc{ namespace comb{
  *  @brief Chip image process pipeline for multi FOV image.
  *  @tparam FLOAT The float point type used during image process, depend on user application.
  *  @tparam GLID  The integer type used during image prcoess, depend on image size.
- *  @details Multi-FOV image process pipeline runs the Single-FOV algorithm(SingleGeneral) multiple times and stitch. 
+ *  @details Multi-FOV image process pipeline runs the Single-FOV algorithm(SingleGeneral) multiple times and stitch.
+ *  Basic usage can see unit test: <BR> 
+ *  @snippet ChipImgProc/comb/multi_general_test.cpp usage
  */
 template<
     class FLOAT = float,

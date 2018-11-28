@@ -9,7 +9,7 @@
 namespace chipimgproc{ 
 /**
  *  @brief Spen the row and column and generate the point list.
- *  @detail For example: call make_points<Point>(2,2) will generate a list [(0,0), (1,0), (0,1), (1,1)]
+ *  @details For example: call make_points<Point>(2,2) will generate a list [(0,0), (1,0), (0,1), (1,1)]
  *  @tparam P The return points type.
  *  @param rows The row number of points.
  *  @param cols The column number of points.

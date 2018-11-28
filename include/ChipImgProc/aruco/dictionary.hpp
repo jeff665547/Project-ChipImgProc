@@ -90,7 +90,7 @@ class Dictionary : public std::vector<std::uint64_t> {
 
     /**
      * @brief   Compute the max number of correction bits based on user specified ID list.
-     *          Suppose the there are m markers. The time complexity would be O(m^2).
+     *          Suppose there are m markers. The time complexity would be O(m^2).
      * 
      * @param   ids   A list of marker IDs defined in the dictionary
      * @return  max   Hamming distance of specified id list
