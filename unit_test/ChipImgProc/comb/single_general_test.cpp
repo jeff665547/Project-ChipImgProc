@@ -22,12 +22,6 @@ TEST(single_image_general_gridding, basic_test) {
     auto zion_pat_px_path = nucleona::test::data_dir() / "zion_pat_295px.tif";
     chipimgproc::comb::SingleGeneral<> gridder;
     gridder.set_logger(std::cout);
-    gridder.set_rot_cali_viewer([]( const cv::Mat& m ){
-        cv::imwrite("debug_rot_cali.tiff", m);
-    });
-    gridder.set_margin_res_viewer([](const cv::Mat& m){
-        cv::imwrite("debug_margin.tiff", m);
-    });
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
     auto mk = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
     candi_mk_pats_cl.push_back(mk);
@@ -37,6 +31,7 @@ TEST(single_image_general_gridding, basic_test) {
         pat_img(zion_pat_px_path.string())
     );
 
+    gridder.set_margin_method("auto_min_cv");
     gridder.set_marker_layout(
         candi_mk_pats_cl, candi_mk_pats_px
     );
@@ -54,8 +49,20 @@ TEST(single_image_general_gridding, basic_test) {
     int i = 0;
     for(auto p : test_img_paths ) {
         cv::Mat img = cv::imread(p.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-        cv::imwrite("debug_src.tiff", img);
+        cv::imwrite("debug_src.tiff", chipimgproc::viewable(img));
         chipimgproc::info(std::cout, img);
+        gridder.set_rot_cali_viewer([i](const auto& img){
+            cv::imwrite("rot_cali_res" + std::to_string(i) + ".tiff", img);
+        });
+        gridder.set_grid_res_viewer([i](const auto& img){
+            cv::imwrite("grid_res" + std::to_string(i) + ".tiff", img);
+        });
+        gridder.set_margin_res_viewer([i](const auto& img){
+            cv::imwrite("margin_res" + std::to_string(i) + ".tiff", img);
+        });
+        gridder.set_marker_seg_viewer([i](const auto& img){
+            cv::imwrite("marker_seg" + std::to_string(i) + ".tiff", img);
+        });
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
@@ -209,6 +216,7 @@ TEST(single_image_general_gridding, missing_marker_test) {
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
     cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
 }
+/// [usage]
 TEST(single_image_general_gridding, banff_test) {
     using FLOAT = float;
     std::ifstream marker_in(
@@ -283,3 +291,4 @@ TEST(single_image_general_gridding, banff_test) {
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
     cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
 }
+/// [usage]
