@@ -5,6 +5,7 @@
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/stat/mats.hpp>
 #include <ChipImgProc/analysis/probe_sort.hpp>
+/// [usage]
 // TEST(multi_image_general_gridding, basic_test) {
 //     using FLOAT = float;
 //     std::ifstream marker_in(
@@ -64,3 +65,4 @@
 //     std::cout << std::endl;
 //     cv::imwrite("means_dump.tiff", chipimgproc::viewable(md));
 // }
+/// [usage]

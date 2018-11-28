@@ -10,28 +10,26 @@
 namespace chipimgproc::aruco {
 /**
  *  @brief  Encoding ArUco marker into 64bit integer and stored as a vector.
- *  @details Heres a simple usage example
+ *  @details Here shows an example
  *  @snippet ChipImgProc/aruco_test.cpp usage
  */
 class Dictionary : public std::vector<std::uint64_t> {
   public:
     /**
-     *  @brief Dictionary constructor.
-     *  @param coding_bits      The encoding bits number of ArUco marker.
-     *  @param maxcor_bits      The max hamming distance between two ArUco markers, 
+     *  @brief  Dictionary constructor.
+     *  @param  coding_bits  The value defines the size of an ArUco marker
+     *  @param  maxcor_bits  The maximum number of bits for marker correction
      */
     Dictionary(const std::int32_t coding_bits, const std::int32_t maxcor_bits)
       : coding_bits_(coding_bits)
       , maxcor_bits_(maxcor_bits) {
     }
     /**
-     *  @brief Generate dictionary from json.
-     *  @param  j_dict  The dictionary specified in json format. 
-     *                  The json format example: 
-     * 
+     *  @brief  Generate dictionary from json.
+     *  @param  j_dict  ArUco dictionary specified in json format. 
+     *                  For example:
      *  @code
      *  {
-     * 
      *    "coding_bits": 6
      *  , "maxcor_bits": 5
      *  , "bitmap_list": {
@@ -55,7 +53,7 @@ class Dictionary : public std::vector<std::uint64_t> {
      *    }
      *  }
      *  @endcode
-     *  @return A ArUco marker dictionary.
+     *  @return  A Dictionary object
      */
     static Dictionary from_json( const nlohmann::json& j_dict ) {
         Dictionary dict(
@@ -75,25 +73,27 @@ class Dictionary : public std::vector<std::uint64_t> {
     }
 
     /**
-     * @brief Get coding bits.
-     * @return The dictionary coding bits.
+     * @brief   Get the max number of coding bits
+     * @return  The number of coding bits
      */
     auto coding_bits(void) const {
         return coding_bits_;
     }
 
     /**
-     * @brief Get maxcor bits.
-     * @return The dictionary maxcor bits.
+     * @brief   Get the max number of correction bits
+     * @return  The max number of correction bits
      */
     auto maxcor_bits(void) const {
         return maxcor_bits_;
     }
 
     /**
-     * @brief Get maxcor bits of specified id list.
-     * @param ids id list of dictionary.
-     * @return max hamming distance of specified id list.
+     * @brief   Compute the max number of correction bits based on user specified ID list.
+     *          Suppose there are m markers. The time complexity would be O(m^2).
+     * 
+     * @param   ids   A list of marker IDs defined in the dictionary
+     * @return  max   Hamming distance of specified id list
      */
     auto compute_maxcor_bits(const std::vector<std::int32_t>& ids) const {
         std::int32_t min_distance = coding_bits_ * coding_bits_;
@@ -110,12 +110,17 @@ class Dictionary : public std::vector<std::uint64_t> {
     }
   
     /**
-     *  @brief Verify a query code is in candidates id list, and output the idendified id.
-     *  @param       query          The query code.
-     *  @param[out]  index          The output identified index.
-     *  @param       candidates     The candidate searched ids.
-     *  @param       maxcor_bits    The max hamming distance of query and output.
-     *  @return      true if identifed success false if fail.
+     *  @brief       Identify the query code from a given candidate marker ID list.
+     *               This function will output the closest candidate 
+     *               if the hamming distance between the query and closest one
+     *               is less than the max number of correction bits.
+     * 
+     *  @param       query        The query code.
+     *  @param[out]  index        The closest marker ID in candidate list.
+     *  @param       candidates   A list of candidate marker IDs.
+     *  @param       maxcor_bits  The max number of correction bits.
+     *  @return      True if the query code is approximately in the candidate list.
+     *               False if the search fails.
      */
     bool identify(
         const std::uint64_t query
@@ -137,10 +142,14 @@ class Dictionary : public std::vector<std::uint64_t> {
     }
 
     /**
-     *  @brief Verify a query code is in this dictionary, and output the idendified id.
-     *  @param       query          The query code.
-     *  @param[out]  index          The output identified index.
-     *  @return      true if identifed success false if fail.
+     *  @brief       Identify whether the query code is approximately belong to the dictionary, and
+     *               output the index of the closest one.
+     * 
+     *  @param       query  The query code.
+     *  @param[out]  index  The index of the closest code in dictionary.
+     *                      Set the value to -1 if the search fails.
+     *  @return      True if the query code is approximately in the dictionary.
+     *               False if the search fails.
      */
     bool identify(
         const std::uint64_t query

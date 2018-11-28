@@ -1,3 +1,8 @@
+/**
+ * @file ChipImgProc/comb/single_general.hpp
+ * @brief The combined chip image process algorthm for single FOV.
+ * @author Chia-Hua Chang
+ */
 #pragma once
 #include <ChipImgProc/rotation/line_detection.hpp>
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
@@ -15,8 +20,24 @@
 
 namespace chipimgproc{ namespace comb{
 
-// using FLOAT = float;
-// using GLID = std::uint16_t;
+/**
+ *  @brief Chip image process pipelin for single FOV image.
+ *  @tparam FLOAT The float point type used during image process, depend on user application.
+ *  @tparam GLID  The integer type used during image prcoess, depend on image size.
+ *  
+ *  @details The image process pipeline follows these steps: <BR>
+ *  1. Marker detection. See: chipimgproc::marker::detection::RegMat <BR>
+ *  2. Rotation estimate. See: chipimgproc::rotation::MarkerVec <BR>
+ *  3. Rotation calibration. See: chipimgproc::rotation::Calibrate <BR>
+ *  4. Marker detection again. See: chipimgproc::marker::detection::RegMat <BR>
+ *  5. Grid line estimate and generate. See: chipimgproc::Gridding <BR>
+ *  6. Each grid cell margin, use to prevent probe defect. See: chipimgproc::Margin <BR>
+ *  7. Background process. See: chipimgproc::bgb::ChunkLocalMean <BR>
+ *  9. Each grid cell margin again, because the background process may change the best margin position.
+ * 
+ *  Basic usage can see unit test: <BR> 
+ *  @snippet ChipImgProc/comb/single_general_test.cpp usage
+ */
 template<
     class FLOAT = float, 
     class GLID  = std::uint16_t
@@ -25,7 +46,19 @@ struct SingleGeneral {
 
     using Gridline = GLID;
     using TiledMatT = TiledMat<Gridline>;
-
+    /**
+     *  @brief Set marker layout used in next image process task.
+     *  @details set_marker_layout must call before firset call operator invoked, otherwise the behavior is undefined.
+     *  @param candi_pats_cl   Candidate marker pattern in grid cell level.
+     *  @param candi_pats_px   Candidate marker pattern in pixel level.
+     *  @param rows            Marker numbers on row.
+     *  @param cols            Marker numbers on column.
+     *  @param invl_x_cl       Distance between marker along x direction in grid cell level.
+     *  @param invl_y_cl       Distance between marker along y direction in grid cell level.
+     *  @param invl_x_px       Distance between marker along x direction in pixel level.
+     *  @param invl_y_px       Distance between marker along y direction in pixel level.
+     *  @param min_p           The most left top marker position on image.
+     */
     void set_marker_layout( 
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
@@ -50,34 +83,79 @@ struct SingleGeneral {
             candi_pats_px_mask
         ); // TODO: raw marker image required
     }
+    /**
+     *  @brief Set marker layout used in next image process task.
+     *  @details set_marker_layout must call before firset call operator invoked, otherwise the behavior is undefined.
+     *  @param mkl marker layout object.
+     */
     void set_marker_layout( const marker::Layout& mkl ) {
         marker_layout_ = mkl;
     }
+    /**
+     *  @brief Set verbose logger used in next image process task.
+     *  @details If the set_logger is not set the default behavior is no verbose.
+     */
     void set_logger( std::ostream& out) {
         msg_ = &out;
     }
+    /**
+     *  @brief Set margin method, there are two margin method: "mid_seg: and "auto_min_cv" 
+     *  @details The mid_seg can see: chipimgproc::margin::MidSeg. <BR> 
+     *          The auto_min_cv can see: chipimgproc::AutoMinCV. <BR>
+     *          By default, the method is "mid_seg"
+     *  @param method Can be "mid_seg" or "auto_min_cv"
+     */
     void set_margin_method ( const std::string& method ) {
         margin_method_ = method;
     }
+    /**
+     *  @brief Set margin segment rate.
+     *  @param rate The segment rate, range is [0, 1).
+     */
     void set_seg_rate( float rate ) {
         seg_rate_ = rate;
     }
+    /**
+     *  @brief Set image viewer. Useful for debug.
+     *  @param v Viewer function callback, function type is void(const cv::Mat&). 
+     *           v function will be invoked at begin of image process.
+     */
     template<class FUNC> 
     void set_sample_viewer( const FUNC& v ) {
         v_sample_ = v;
     }
+    /**
+     *  @brief Set rotation calibration image viewer. Useful for debug.
+     *  @param v Viewer function call back, function type is void(const cv::Mat&). 
+     *           v function will invoked after image rotation calibration step done.
+     */
     template<class FUNC>
     void set_rot_cali_viewer(const FUNC& v) {
         v_rot_cali_res_ = v;
     }
+    /**
+     *  @brief Set grid result image viewer. Useful for debug.
+     *  @param v Viewer function call back, function type is void(const cv::Mat&). 
+     *           v function will invoked after image gridding step done.
+     */
     template<class FUNC>
     void set_grid_res_viewer(const FUNC& v ) {
         v_grid_res_ = v;
     }
+    /**
+     *  @brief Set margin result image viewer. Useful for debug.
+     *  @param v Viewer function call back, function type is void(const cv::Mat&). 
+     *           v function will invoked after image margin step done.
+     */
     template<class FUNC>
     void set_margin_res_viewer(const FUNC& v) {
         v_margin_res_ = v;
     }
+    /**
+     *  @brief Set marker detecion image viewer. Useful for debug.
+     *  @param v Viewer function call back, function type is void(const cv::Mat&). 
+     *           v function will invoked after image marker detection step done.
+     */
     template<class FUNC>
     void set_marker_seg_viewer(const FUNC& v) {
         v_marker_seg_ = v;
@@ -85,6 +163,14 @@ struct SingleGeneral {
     void disable_background_fix(bool flag) {
         disable_bg_fix_ = flag;
     }
+    /**
+     *  @brief The main function of image process pipeline.
+     *  @details See SingleGeneral.
+     *  @param src Input image, currently only support 16 bit image.
+     *  @param id A task tag for console viewing, useful for debug.
+     *  @return A tuple of type std::tuple<bool, chipimgproc::TiledMat, chipimgproc::stat::Mats, float>, 
+     *          which represent (image QC, image process result, statistic result, rotation angle in degree)
+     */
     auto operator() (const cv::Mat& src, const std::string& id = "") {
         std::function<void(const cv::Mat&)> func;
         *msg_ << "img id: " << id << std::endl;
