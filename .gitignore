@@ -63,3 +63,4 @@ stage/
 # data/
 workdir/
 doc/output
+version.h
