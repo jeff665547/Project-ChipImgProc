@@ -8,6 +8,7 @@
 #include <ChipImgProc/stat/mats.hpp>
 #include <ChipImgProc/stitch/gridline_based.hpp>
 #include <ChipImgProc/marker/txt_to_img.hpp>
+#include "../make_layout.hpp"
 template<class T>
 auto get_gridder(
     const std::string& patname, 
@@ -22,40 +23,19 @@ auto get_gridder(
     std::uint32_t invl_y_px,
     float um2px_r
 ) {
-    chipimgproc::marker::TxtToImg txt_to_img;
-    std::ifstream marker_in(
-        ( nucleona::test::data_dir() / patname).string()
-    );
     T gridder;
     gridder.disable_background_fix(true);
     gridder.set_logger(std::cout);
-    std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
-    auto [mk, mask] = chipimgproc::marker::Loader::from_txt(marker_in, std::cout);
-    candi_mk_pats_cl.push_back(mk);
-
-    std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
-    std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px_mask;
-    auto [mk_img, mask_img] = txt_to_img(
-        mk, mask,
-        cell_r_px * um2px_r,
-        cell_c_px * um2px_r,
-        border_px * um2px_r
-    );
-    candi_mk_pats_px.push_back(mk_img);
-    cv::imwrite("mask_img.tif", mask_img);
-    cv::imwrite("mk_img.tif",mk_img);
-    candi_mk_pats_px_mask.push_back(mask_img);
-
-
     gridder.set_margin_method("auto_min_cv");
-    gridder.set_marker_layout(
-        candi_mk_pats_cl, 
-        candi_mk_pats_px,
-        candi_mk_pats_px_mask,
-        rows, cols, 
-        invl_x_cl, invl_y_cl, 
-        invl_x_px, invl_y_px
-    );
+    gridder.set_marker_layout(make_layout(
+        patname, 
+        cell_r_px, cell_c_px,
+        border_px,
+        rows, cols,
+        invl_x_cl, invl_y_cl,
+        invl_x_px, invl_y_px,
+        um2px_r
+    ));
     return gridder;
 
 }
