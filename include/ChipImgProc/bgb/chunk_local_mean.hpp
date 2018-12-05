@@ -101,7 +101,7 @@ constexpr struct ChunkLocalMean
                 
                 }
             }
-            std::cout << "means_tmp.size(): " << means_tmp.size() << std::endl;
+            logger << "means_tmp.size(): " << means_tmp.size() << std::endl;
             // trimmed right and left outlier
             means_tmp |= ranges::action::sort;
             float sum = 0;
@@ -110,6 +110,7 @@ constexpr struct ChunkLocalMean
             }
             // count local background mean
             const auto chunk_bg_mean = sum / means_tmp.size();
+            logger << "chunk_bg_mean: " << chunk_bg_mean << std::endl;
             // replace raw image pixel, should make a better distribution
             f_ch_mat.mat().template forEach<float>([&chunk_bg_mean](float& px, const int* pos){
                 auto tmp = px - chunk_bg_mean;
