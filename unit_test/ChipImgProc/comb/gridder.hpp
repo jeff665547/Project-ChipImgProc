@@ -24,7 +24,7 @@ auto get_gridder(
     float um2px_r
 ) {
     T gridder;
-    gridder.disable_background_fix(true);
+    // gridder.disable_background_fix(true);
     gridder.set_logger(std::cout);
     gridder.set_margin_method("auto_min_cv");
     gridder.set_marker_layout(make_layout(

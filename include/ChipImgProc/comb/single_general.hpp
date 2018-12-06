@@ -181,10 +181,10 @@ struct SingleGeneral {
             static_cast<const cv::Mat_<std::uint16_t>&>(src), 
             marker_layout_, 
             chipimgproc::MatUnit::PX, 
-            *msg_,
-            nullptr,
-            func,
-            v_marker_seg_
+            *msg_
+            // nullptr,
+            // func,
+            // v_marker_seg_
         );
         auto theta = rot_estimator_(marker_regs, *msg_);
         cv::Mat tmp = src.clone();
@@ -195,7 +195,10 @@ struct SingleGeneral {
         );
         marker_regs = marker_detection_(
             static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
-            marker_layout_, MatUnit::PX, *msg_
+            marker_layout_, MatUnit::PX, *msg_,
+            nullptr,
+            func,
+            v_marker_seg_
         );
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);
         auto tiled_mat  = TiledMat<>::make_from_grid_res(
