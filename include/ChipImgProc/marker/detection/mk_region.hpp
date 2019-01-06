@@ -6,6 +6,7 @@ namespace chipimgproc{ namespace marker{ namespace detection{
 struct MKRegion : public cv::Rect {
     int x_i;
     int y_i;
+    double score;
 
     template<class T>
     using Group = std::map<int, std::vector<T>>;

@@ -76,6 +76,24 @@ struct RegMat {
         }
         return marker_regions;
     }
+    void filter_low_score_marker(
+        std::vector<MKRegion>& mk_regs
+    ) const {
+        // TODO: fix use of erase
+        std::vector<int> idx;
+        for(int i = 0; i < mk_regs.size(); i ++ ) {
+            idx.push_back(i);
+        }
+        std::sort(idx.begin(), idx.end(), [&mk_regs](auto a, auto b){
+            return mk_regs.at(a).score < mk_regs.at(b).score;
+        });
+        auto trim_num = mk_regs.size() / 4;
+        idx.resize(trim_num);
+
+        for(auto& id : idx) {
+            mk_regs.erase(mk_regs.begin() + id);
+        }
+    }
     template<class T, class FUNC>
     auto template_matching(
         const cv::Mat_<T>&      src, 
@@ -126,7 +144,10 @@ struct RegMat {
             each_score_region(
                 sub_score, mk_r, mk_cols, mk_rows
             );
-            if(v_marker) {
+        }
+        filter_low_score_marker(marker_regions);
+        if(v_marker) {
+            for(auto& mk_r : marker_regions) {
                 cv::rectangle(view, mk_r, 128, 3);
             }
         }
@@ -155,6 +176,20 @@ struct RegMat {
                 double min, max;
                 cv::Point min_loc, max_loc;
                 cv::minMaxLoc(sub_score, &min, &max, &min_loc, &max_loc);
+                max_loc.x = 0;
+                max_loc.y = 0;
+                std::size_t num = 0;
+                for(int y = 0; y < sub_score.rows; y ++ ) {
+                    for(int x = 0; x < sub_score.cols; x ++ ) {
+                        if(sub_score(y, x) + std::numeric_limits<float>::epsilon() >= max) {
+                            max_loc.x += x;                            
+                            max_loc.y += y;                            
+                            num++;
+                        }
+                    }
+                }
+                max_loc.x = (double)max_loc.x / num;
+                max_loc.y = (double)max_loc.y / num;
                 max_loc.x  += mk_r.x                ;
                 max_loc.y  += mk_r.y                ;
                 mk_r.x      = max_loc.x             ;
@@ -162,6 +197,7 @@ struct RegMat {
                 mk_r.width  = mk_cols               ;
                 mk_r.height = mk_rows               ;
                 mk_r.info(out);
+                mk_r.score  = max;
             }, out, v_bin, v_search, v_marker
         );
     }

@@ -17,7 +17,7 @@
 #include <ChipImgProc/gridding/reg_mat.hpp>
 #include <ChipImgProc/bgb/chunk_local_mean.hpp>
 #include <Nucleona/tuple.hpp>
-
+#include <ChipImgProc/marker/detection/infer.hpp>
 namespace chipimgproc{ namespace comb{
 
 /**
@@ -200,6 +200,12 @@ struct SingleGeneral {
             func,
             v_marker_seg_
         );
+        marker_regs = marker::detection::infer(
+            static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
+            marker_regs,
+            v_marker_seg_
+        );
+
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);
         auto tiled_mat  = TiledMat<>::make_from_grid_res(
             grid_res, tmp, marker_layout_
