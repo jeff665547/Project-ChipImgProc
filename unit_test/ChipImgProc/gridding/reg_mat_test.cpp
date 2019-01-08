@@ -7,6 +7,7 @@
 #include <ChipImgProc/rotation/calibrate.hpp>
 #include <ChipImgProc/gridding/reg_mat.hpp>
 #include "../make_layout.hpp"
+#include <ChipImgProc/marker/detection/infer.hpp>
 auto pat_img(const std::string& id) {
     auto zion_pat_px_path = nucleona::test::data_dir() / id;
     auto mk_px_ = cv::imread(zion_pat_px_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
@@ -36,6 +37,7 @@ TEST(reg_mat_layout, operator_call_test) {
     auto theta = marker_fit(mk_regs, std::cout);
     rot_cali(img, theta);
     mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
+    mk_regs = chipimgproc::marker::detection::infer(img, mk_regs);
     auto gl_res = gridding(img, mk_layout, mk_regs, std::cout, [](const auto& m){
         cv:imwrite("debug_gridding.tiff", m);
     });
@@ -59,6 +61,7 @@ TEST(reg_mat_layout, hard_case) {
     auto theta = marker_fit(mk_regs, std::cout);
     rot_cali(img, theta);
     mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
+    mk_regs = chipimgproc::marker::detection::infer(img, mk_regs);
     auto gl_res = gridding(img, mk_layout, mk_regs, std::cout, [](const auto& m){
         cv:imwrite("debug_gridding.tiff", m);
     });

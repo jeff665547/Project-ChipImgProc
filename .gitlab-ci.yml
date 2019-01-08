@@ -9,7 +9,7 @@ Win_CI:
         - cd build
         - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DINSTALL_DEPS=ON -DHUNTER_ROOT="D:\.hunter"
         - cmake --build . --target install
-        - ctest
+        - ctest --verbose
     only:
         - master
     tags:
@@ -29,7 +29,7 @@ CentOS_CI:
         - cd build
         - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON
         - cmake --build . --target install
-        - ctest
+        - ctest --verbose
     only:
         - master
     tags:

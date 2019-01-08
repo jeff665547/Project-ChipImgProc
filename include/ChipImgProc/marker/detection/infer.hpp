@@ -8,7 +8,7 @@ constexpr struct Infer {
     auto operator() ( 
         const cv::Mat_<T>&      src, 
         std::vector<MKRegion>&  mk_regs,
-        const ViewerCallback&   v_marker   
+        const ViewerCallback&   v_marker  = nullptr 
     ) const {
         std::vector<double> x_anchor;
         std::vector<double> y_anchor;
