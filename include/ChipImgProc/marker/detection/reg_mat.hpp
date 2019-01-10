@@ -148,7 +148,7 @@ struct RegMat {
         filter_low_score_marker(marker_regions);
         if(v_marker) {
             for(auto& mk_r : marker_regions) {
-                cv::rectangle(view, mk_r, 128, 3);
+                cv::rectangle(view, mk_r, 128, 1);
             }
         }
         if(v_search) {

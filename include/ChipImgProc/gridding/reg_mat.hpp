@@ -17,7 +17,7 @@ struct RegMat {
         std::uint32_t mk_invl_cl,
         int marker_edge_cl
     ) const {
-        std::vector<std::vector<int>> res;
+        std::vector<std::vector<float>> res;
         for( auto&& p : grouped_ps ) {
             res.emplace_back();
             auto& grid_anchors = res.back();
@@ -42,7 +42,7 @@ struct RegMat {
         return res;
     }
 
-    auto consensus( const std::vector<std::vector<int>>& anchors_group ) const {
+    auto consensus( const std::vector<std::vector<float>>& anchors_group ) const {
         auto size = anchors_group.front().size();
         for( auto&& as : anchors_group ) {
             if( as.size() != size ) {
@@ -52,11 +52,11 @@ struct RegMat {
 
         std::vector<std::uint32_t> res;
         for(decltype(size) i = 0; i < size; i ++ ) {
-            std::size_t sum = 0;
+            float sum = 0;
             for( auto&& as : anchors_group ) {
                 sum += as.at(i);
             }
-            res.push_back(sum / anchors_group.size());
+            res.push_back(std::round(sum / anchors_group.size()));
         }
         return res;
     }
@@ -72,11 +72,15 @@ struct RegMat {
           cv::Mat&                      in_src
         , const MKLayout&               mk_layout
         , std::vector<MKRegion>&        mk_regs
+        // , int                           fov_w_cl
+        // , int                           fov_h_cl
         , std::ostream&                 msg         = nucleona::stream::null_out
         , const std::function<
             void(const cv::Mat&)
           >&                            v_result    = nullptr
     ) const {
+        int fov_w_cl = 172;
+        int fov_h_cl = 172;
         Result result;
         auto x_grouped_ps = MKRegion::x_group_points(mk_regs);
         auto y_grouped_ps = MKRegion::y_group_points(mk_regs);
