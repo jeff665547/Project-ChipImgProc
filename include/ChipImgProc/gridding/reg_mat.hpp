@@ -72,15 +72,11 @@ struct RegMat {
           cv::Mat&                      in_src
         , const MKLayout&               mk_layout
         , std::vector<MKRegion>&        mk_regs
-        // , int                           fov_w_cl
-        // , int                           fov_h_cl
         , std::ostream&                 msg         = nucleona::stream::null_out
         , const std::function<
             void(const cv::Mat&)
           >&                            v_result    = nullptr
     ) const {
-        int fov_w_cl = 172;
-        int fov_h_cl = 172;
         Result result;
         auto x_grouped_ps = MKRegion::x_group_points(mk_regs);
         auto y_grouped_ps = MKRegion::y_group_points(mk_regs);
