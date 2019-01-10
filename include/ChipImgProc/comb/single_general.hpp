@@ -182,7 +182,7 @@ struct SingleGeneral {
         cv::Mat tmp = src.clone();
         do{
             auto marker_regs = marker_detection_(
-                static_cast<const cv::Mat_<std::uint16_t>&>(src), 
+                static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
                 marker_layout_, 
                 chipimgproc::MatUnit::PX, 
                 *msg_
