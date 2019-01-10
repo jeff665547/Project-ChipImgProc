@@ -176,23 +176,31 @@ struct SingleGeneral {
         *msg_ << "img id: " << id << std::endl;
         if(v_sample_)
             v_sample_(viewable(src));
-        // detect marker
-        auto marker_regs = marker_detection_(
-            static_cast<const cv::Mat_<std::uint16_t>&>(src), 
-            marker_layout_, 
-            chipimgproc::MatUnit::PX, 
-            *msg_
-            // nullptr,
-            // func,
-            // v_marker_seg_
-        );
-        auto theta = rot_estimator_(marker_regs, *msg_);
+        std::vector<marker::detection::MKRegion> marker_regs;
+        float theta_sum = 0;
+        float theta_off = 0;
         cv::Mat tmp = src.clone();
-        rot_calibrator_(
-            tmp,
-            theta,
-            v_rot_cali_res_
-        );
+        do{
+            auto marker_regs = marker_detection_(
+                static_cast<const cv::Mat_<std::uint16_t>&>(src), 
+                marker_layout_, 
+                chipimgproc::MatUnit::PX, 
+                *msg_
+                // nullptr,
+                // func,
+                // v_marker_seg_
+            );
+            theta_off = rot_estimator_(marker_regs, *msg_);
+            theta_sum += theta_off;
+            tmp = src.clone();
+            rot_calibrator_(
+                tmp,
+                theta_sum,
+                v_rot_cali_res_
+            );
+        } while(std::abs(theta_off) > 0.01);
+        auto theta = theta_sum;
+        // detect marker
         marker_regs = marker_detection_(
             static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
             marker_layout_, MatUnit::PX, *msg_,

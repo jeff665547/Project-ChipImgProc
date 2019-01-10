@@ -78,23 +78,37 @@ struct RegMat {
           >&                            v_result    = nullptr
     ) const {
         Result result;
-        auto x_grouped_ps = MKRegion::x_group_points(mk_regs);
-        auto y_grouped_ps = MKRegion::y_group_points(mk_regs);
-        auto x_grid_pos_group = grid_anchors_group(
-            y_grouped_ps, 
-            [](const auto& p){ return p.x; }, 
-            mk_layout.mk_invl_x_cl,
-            mk_layout.get_marker_width_cl()
-        );
-        auto y_grid_pos_group = grid_anchors_group(
-            x_grouped_ps, 
-            [](const auto& p){ return p.y; }, 
-            mk_layout.mk_invl_y_cl,
-            mk_layout.get_marker_height_cl()
-        );
-        auto x_grid_anchor = consensus(x_grid_pos_group);
-        auto y_grid_anchor = consensus(y_grid_pos_group);
-
+        int fov_w_cl = 172;
+        int fov_h_cl = 172;
+        // find left top and right botton  mk region
+        MKRegion* left_top = &(mk_regs.front());
+        MKRegion* right_bottom = &(mk_regs.front());
+        for(auto&& mk_r : mk_regs) {
+            if(
+                mk_r.x_i <= left_top->x_i && 
+                mk_r.y_i <= left_top->y_i
+            ) {
+                left_top = &mk_r;
+            }
+            if(
+                mk_r.x_i >= right_bottom->x_i && 
+                mk_r.y_i >= right_bottom->y_i
+            ) {
+                right_bottom = &mk_r;
+            }
+        }
+        std::vector<std::uint32_t> x_grid_anchor;
+        std::vector<std::uint32_t> y_grid_anchor; 
+        auto fov_h_px = right_bottom->y + right_bottom->height - left_top->y;
+        auto fov_w_px = right_bottom->x + right_bottom->width - left_top->x;
+        float cl_h_px = fov_h_px / (float)fov_h_cl;
+        float cl_w_px = fov_w_px / (float)fov_w_cl;
+        for(int i = 0; i < fov_h_cl + 1; i ++ ) {
+            y_grid_anchor.push_back((std::uint32_t)(left_top->y + (i * cl_h_px)));
+        }
+        for(int j = 0; j < fov_w_cl + 1; j ++ ) {
+            x_grid_anchor.push_back((std::uint32_t)(left_top->x + (j * cl_w_px)));
+        }
         cv::Rect roi(
             x_grid_anchor.front(), y_grid_anchor.front(),
             x_grid_anchor.back() - x_grid_anchor.front(),
