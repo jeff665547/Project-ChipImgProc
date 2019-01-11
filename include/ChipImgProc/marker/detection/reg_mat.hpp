@@ -181,7 +181,7 @@ struct RegMat {
                 std::size_t num = 0;
                 for(int y = 0; y < sub_score.rows; y ++ ) {
                     for(int x = 0; x < sub_score.cols; x ++ ) {
-                        if(sub_score(y, x) + std::numeric_limits<float>::epsilon() >= max) {
+                        if(sub_score(y, x) + 0.05 >= max) {
                             max_loc.x += x;                            
                             max_loc.y += y;                            
                             num++;
