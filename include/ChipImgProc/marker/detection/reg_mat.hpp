@@ -6,6 +6,7 @@
 #include <ChipImgProc/marker/detection/mk_region.hpp>
 #include <Nucleona/tuple.hpp>
 #include <Nucleona/range.hpp>
+#include <ChipImgProc/algo/fixed_capacity_set.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
 
 struct RegMat {
@@ -173,23 +174,33 @@ struct RegMat {
         return template_matching(
             src, mk_layout, unit, 
             [&out](auto&& sub_score, auto&& mk_r, auto&& mk_cols, auto&& mk_rows) {
-                double min, max;
-                cv::Point min_loc, max_loc;
-                cv::minMaxLoc(sub_score, &min, &max, &min_loc, &max_loc);
-                max_loc.x = 0;
-                max_loc.y = 0;
-                std::size_t num = 0;
+                auto max_points = make_fixed_capacity_set<cv::Point>(20, [&sub_score](
+                    const cv::Point& p0, const cv::Point& p1
+                ){
+                    auto& s0 = sub_score(p0.y, p0.x);
+                    auto& s1 = sub_score(p1.y, p1.x);
+                    if( s0 == s1 ) {
+                        if( p0.x == p1.x ) {
+                            return p0.y < p1.y;
+                        } else return p0.x < p1.x;
+                    } else return s0 < s1;
+                });
+                cv::Point max_loc;
+                float max_score = 0;
                 for(int y = 0; y < sub_score.rows; y ++ ) {
                     for(int x = 0; x < sub_score.cols; x ++ ) {
-                        if(sub_score(y, x) + 0.05 >= max) {
-                            max_loc.x += x;                            
-                            max_loc.y += y;                            
-                            num++;
-                        }
+                        auto& score = sub_score(y, x);
+                        max_points.emplace(cv::Point(x, y));
                     }
                 }
-                max_loc.x = (double)max_loc.x / num;
-                max_loc.y = (double)max_loc.y / num;
+                for(auto&& p : max_points) {
+                    max_loc.x += p.x;
+                    max_loc.y += p.y;
+                    max_score += sub_score(p.y, p.x);
+                }
+                max_loc.x / max_points.size();
+                max_loc.y / max_points.size();
+
                 max_loc.x  += mk_r.x                ;
                 max_loc.y  += mk_r.y                ;
                 mk_r.x      = max_loc.x             ;
@@ -197,7 +208,7 @@ struct RegMat {
                 mk_r.width  = mk_cols               ;
                 mk_r.height = mk_rows               ;
                 mk_r.info(out);
-                mk_r.score  = max;
+                mk_r.score  = max_score;
             }, out, v_bin, v_search, v_marker
         );
     }

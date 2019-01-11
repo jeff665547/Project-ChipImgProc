@@ -78,6 +78,7 @@ struct RegMat {
           >&                            v_result    = nullptr
     ) const {
         Result result;
+        // TODO: remove magic number
         int fov_w_cl = 172;
         int fov_h_cl = 172;
         // find left top and right botton  mk region
