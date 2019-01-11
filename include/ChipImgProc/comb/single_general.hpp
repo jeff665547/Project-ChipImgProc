@@ -18,6 +18,7 @@
 #include <ChipImgProc/bgb/chunk_local_mean.hpp>
 #include <Nucleona/tuple.hpp>
 #include <ChipImgProc/marker/detection/infer.hpp>
+#include <ChipImgProc/marker/detection/filter_low_score_marker.hpp>
 namespace chipimgproc{ namespace comb{
 
 /**
@@ -177,7 +178,7 @@ struct SingleGeneral {
         if(v_sample_)
             v_sample_(viewable(src));
         std::vector<marker::detection::MKRegion> marker_regs;
-        float theta_sum = 0;
+        float theta = 0;
         float theta_off = 0;
         cv::Mat tmp = src.clone();
         do{
@@ -190,28 +191,31 @@ struct SingleGeneral {
                 // func,
                 // v_marker_seg_
             );
+            marker::detection::filter_low_score_marker(marker_regs);
             theta_off = rot_estimator_(marker_regs, *msg_);
-            theta_sum += theta_off;
+            theta += theta_off;
             tmp = src.clone();
             rot_calibrator_(
                 tmp,
-                theta_sum,
+                theta,
                 v_rot_cali_res_
             );
         } while(std::abs(theta_off) > 0.01);
-        auto theta = theta_sum;
         // detect marker
-        marker_regs = marker_detection_(
+        marker_regs = marker_detection_( // TODO: use full layout based method
             static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
             marker_layout_, MatUnit::PX, *msg_,
             nullptr,
             func,
             v_marker_seg_
         );
+        marker::detection::filter_low_score_marker(marker_regs);
         marker_regs = marker::detection::infer(
             static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
             marker_regs,
-            v_marker_seg_
+            [](auto&& mat) {
+                cv::imwrite("after_infer.tiff", mat);
+            }
         );
 
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);

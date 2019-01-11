@@ -77,24 +77,24 @@ struct RegMat {
         }
         return marker_regions;
     }
-    void filter_low_score_marker(
-        std::vector<MKRegion>& mk_regs
-    ) const {
-        // TODO: fix use of erase
-        std::vector<int> idx;
-        for(int i = 0; i < mk_regs.size(); i ++ ) {
-            idx.push_back(i);
-        }
-        std::sort(idx.begin(), idx.end(), [&mk_regs](auto a, auto b){
-            return mk_regs.at(a).score < mk_regs.at(b).score;
-        });
-        auto trim_num = mk_regs.size() / 4;
-        idx.resize(trim_num);
+    // void filter_low_score_marker(
+    //     std::vector<MKRegion>& mk_regs
+    // ) const {
+    //     // TODO: fix use of erase
+    //     std::vector<int> idx;
+    //     for(int i = 0; i < mk_regs.size(); i ++ ) {
+    //         idx.push_back(i);
+    //     }
+    //     std::sort(idx.begin(), idx.end(), [&mk_regs](auto a, auto b){
+    //         return mk_regs.at(a).score < mk_regs.at(b).score;
+    //     });
+    //     auto trim_num = mk_regs.size() / 4;
+    //     idx.resize(trim_num);
 
-        for(auto& id : idx) {
-            mk_regs.erase(mk_regs.begin() + id);
-        }
-    }
+    //     for(auto& id : idx) {
+    //         mk_regs.erase(mk_regs.begin() + id);
+    //     }
+    // }
     template<class T, class FUNC>
     auto template_matching(
         const cv::Mat_<T>&      src, 
@@ -146,7 +146,7 @@ struct RegMat {
                 sub_score, mk_r, mk_cols, mk_rows
             );
         }
-        filter_low_score_marker(marker_regions);
+        // filter_low_score_marker(marker_regions);
         if(v_marker) {
             for(auto& mk_r : marker_regions) {
                 cv::rectangle(view, mk_r, 128, 1);
@@ -198,8 +198,8 @@ struct RegMat {
                     max_loc.y += p.y;
                     max_score += sub_score(p.y, p.x);
                 }
-                max_loc.x / max_points.size();
-                max_loc.y / max_points.size();
+                max_loc.x /= max_points.size();
+                max_loc.y /= max_points.size();
 
                 max_loc.x  += mk_r.x                ;
                 max_loc.y  += mk_r.y                ;

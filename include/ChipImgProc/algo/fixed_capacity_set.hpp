@@ -3,16 +3,17 @@
 #include <Nucleona/language.hpp>
 namespace chipimgproc {
 
-template<class... ARGS>
+template<class T, class... Args>
 struct FixedCapacitySet 
-: public std::set<ARGS...> {
-    using Base = std::set<ARGS...>;
-    FixedCapacitySet(std::size_t n, ARGS&&... args)
+: public std::set<T, Args...> {
+    using Base = std::set<T, Args...>;
+
+    FixedCapacitySet(std::size_t n, Args&&... args)
     : Base(FWD(args)...)
     , max_size_ (n)
     {}
-    template<class... T>
-    decltype(auto) emplace(T&&... obj) {
+    template<class... Params>
+    decltype(auto) emplace(Params&&... obj) {
         typename Base::key_type key(FWD(obj)...);
         if(Base::size() < max_size_) {
             last_emplace_ = Base::emplace(std::move(key));
