@@ -7,6 +7,7 @@
 #include <Nucleona/tuple.hpp>
 #include <Nucleona/range.hpp>
 #include <ChipImgProc/algo/fixed_capacity_set.hpp>
+#include <ChipImgProc/marker/detection/pos_comp_by_score.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
 
 struct RegMat {
@@ -15,10 +16,7 @@ struct RegMat {
         const cv::Mat_<T>&      src, 
         const Layout&           mk_layout, 
         const MatUnit&          unit,
-        std::ostream&           out        ,
-        const ViewerCallback&   v_bin      ,
-        const ViewerCallback&   v_search   ,
-        const ViewerCallback&   v_marker   
+        std::ostream&           out
     ) const {
         // marker interval between marker
         auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
@@ -107,8 +105,8 @@ struct RegMat {
         const ViewerCallback&   v_marker   
     ) const {
         auto marker_regions = generate_raw_marker_regions(src, mk_layout, 
-            unit, out, v_bin, v_search, v_marker);
-        auto tgt = norm_u8(src, 0, 0); // TODO:
+            unit, out);
+        auto tgt = norm_u8(src, 0.001, 0.001); // TODO:
         info(out, tgt);
         if(v_bin) {
             v_bin(tgt);
@@ -174,17 +172,9 @@ struct RegMat {
         return template_matching(
             src, mk_layout, unit, 
             [&out](auto&& sub_score, auto&& mk_r, auto&& mk_cols, auto&& mk_rows) {
-                auto max_points = make_fixed_capacity_set<cv::Point>(20, [&sub_score](
-                    const cv::Point& p0, const cv::Point& p1
-                ){
-                    auto& s0 = sub_score(p0.y, p0.x);
-                    auto& s1 = sub_score(p1.y, p1.x);
-                    if( s0 == s1 ) {
-                        if( p0.x == p1.x ) {
-                            return p0.y < p1.y;
-                        } else return p0.x < p1.x;
-                    } else return s0 < s1;
-                });
+                auto max_points = make_fixed_capacity_set<cv::Point>(
+                    20, PosCompByScore(sub_score)
+                );
                 cv::Point max_loc;
                 float max_score = 0;
                 for(int y = 0; y < sub_score.rows; y ++ ) {

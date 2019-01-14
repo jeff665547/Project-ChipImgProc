@@ -19,6 +19,7 @@
 #include <Nucleona/tuple.hpp>
 #include <ChipImgProc/marker/detection/infer.hpp>
 #include <ChipImgProc/marker/detection/filter_low_score_marker.hpp>
+#include <ChipImgProc/marker/detection/reg_mat_no_rot.hpp>
 namespace chipimgproc{ namespace comb{
 
 /**
@@ -202,20 +203,23 @@ struct SingleGeneral {
             );
         } while(std::abs(theta_off) > 0.01);
         // detect marker
-        marker_regs = marker_detection_( // TODO: use full layout based method
-            static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
-            marker_layout_, MatUnit::PX, *msg_,
-            nullptr,
-            func,
-            v_marker_seg_
-        );
-        marker::detection::filter_low_score_marker(marker_regs);
-        marker_regs = marker::detection::infer(
-            static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
-            marker_regs,
-            [](auto&& mat) {
-                cv::imwrite("after_infer.tiff", mat);
-            }
+        // marker_regs = marker_detection_( // TODO: use full layout based method
+        //     static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
+        //     marker_layout_, MatUnit::PX, *msg_,
+        //     nullptr,
+        //     func,
+        //     v_marker_seg_
+        // );
+        // marker::detection::filter_low_score_marker(marker_regs);
+        // marker_regs = marker::detection::infer(
+        //     static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
+        //     marker_regs,
+        //     [](auto&& mat) {
+        //         cv::imwrite("after_infer.tiff", mat);
+        //     }
+        // );
+        marker_regs = marker::detection::reg_mat_no_rot(
+            tmp, marker_layout_, MatUnit::PX, *msg_, v_marker_seg_
         );
 
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);
@@ -255,14 +259,6 @@ struct SingleGeneral {
                     marker_layout_, 
                     std::cout
                 );
-                {
-                    grid_raw_img.mat().convertTo(
-                        tiled_mat.get_cali_img(), CV_16UC1, 1.0
-                    );
-                    // tiled_mat.view([](const cv::Mat_<std::uint16_t>& mat){
-                    //     cv::imwrite("debug_bg_cali.tiff", mat);
-                    // });
-                }
                 std::cout << "after integer fix: " << std::endl;
                 std::cout << "tiled_mat: " << std::endl;
                 chipimgproc::info(std::cout, tiled_mat.get_cali_img());
@@ -279,6 +275,11 @@ struct SingleGeneral {
                         v_margin_res_
                     }
                 );
+                {
+                    grid_raw_img.mat().convertTo(
+                        tiled_mat.get_cali_img(), CV_16UC1, 1.0
+                    );
+                }
                 return margin_res;
             } else {
                 return dirty_margin_res;

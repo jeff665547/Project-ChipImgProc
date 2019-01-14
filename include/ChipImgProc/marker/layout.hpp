@@ -23,6 +23,10 @@ friend struct Layout;
                 );
         }
     }
+    cv::Point& get_pos(const MatUnit& unit) {
+        const auto& this_ref = *this;        
+        return const_cast<cv::Point&>(this_ref.get_pos(unit));
+    }
     const auto& get_candi_mks( const MatUnit& unit) const {
         switch(unit) {
             case MatUnit::CELL:
@@ -59,9 +63,8 @@ struct Layout {
         return mks.at(mk_map(r, c));
     }
     Des& get_marker_des(int r, int c) {
-        return const_cast<Des&>(
-            static_cast<const decltype(this)>(this)->get_marker_des(r,c)
-        );
+        const auto& this_ref = *this;        
+        return const_cast<Des&>(this_ref.get_marker_des(r, c));
     }
     void set_reg_mat_dist(
         int rows, int cols, 
@@ -80,6 +83,8 @@ struct Layout {
                 mk_map(r, c) = idx;
                 mks.at(idx).pos_cl_.x = min_p.x + invl_x_cl * c;
                 mks.at(idx).pos_cl_.y = min_p.y + invl_y_cl * r;
+                mks.at(idx).pos_px_.x = min_p.x + invl_x_px * c;
+                mks.at(idx).pos_px_.y = min_p.y + invl_y_px * r;
             }
         }
         mk_invl_x_cl = invl_x_cl;

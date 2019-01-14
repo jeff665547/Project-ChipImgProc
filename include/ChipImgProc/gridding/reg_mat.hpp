@@ -78,9 +78,9 @@ struct RegMat {
           >&                            v_result    = nullptr
     ) const {
         Result result;
-        // TODO: remove magic number
-        int fov_w_cl = 172;
-        int fov_h_cl = 172;
+        auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(MatUnit::CELL);
+        int fov_w_cl = ( mk_invl_x * (mk_layout.mk_map.cols - 1) ) + mk_layout.get_marker_width_cl();
+        int fov_h_cl = ( mk_invl_y * (mk_layout.mk_map.rows - 1) ) + mk_layout.get_marker_height_cl();
         // find left top and right botton  mk region
         MKRegion* left_top = &(mk_regs.front());
         MKRegion* right_bottom = &(mk_regs.front());
@@ -105,10 +105,10 @@ struct RegMat {
         float cl_h_px = fov_h_px / (float)fov_h_cl;
         float cl_w_px = fov_w_px / (float)fov_w_cl;
         for(int i = 0; i < fov_h_cl + 1; i ++ ) {
-            y_grid_anchor.push_back((std::uint32_t)(left_top->y + (i * cl_h_px)));
+            y_grid_anchor.push_back((std::uint32_t)std::round(left_top->y + (i * cl_h_px)));
         }
         for(int j = 0; j < fov_w_cl + 1; j ++ ) {
-            x_grid_anchor.push_back((std::uint32_t)(left_top->x + (j * cl_w_px)));
+            x_grid_anchor.push_back((std::uint32_t)std::round(left_top->x + (j * cl_w_px)));
         }
         cv::Rect roi(
             x_grid_anchor.front(), y_grid_anchor.front(),
