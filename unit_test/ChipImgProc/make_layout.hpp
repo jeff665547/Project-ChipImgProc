@@ -8,15 +8,13 @@
 
 auto make_layout(
     const std::string& patname, 
-    float cell_r_px,
-    float cell_c_px,
-    float border_px,
+    float cell_r_um,
+    float cell_c_um,
+    float border_um,
     int rows, 
     int cols,
     std::uint32_t invl_x_cl, 
     std::uint32_t invl_y_cl,
-    std::uint32_t invl_x_px, // can get this value from micron to pixel
-    std::uint32_t invl_y_px,
     float um2px_r
 ) {
     std::ifstream marker_in(
@@ -30,15 +28,17 @@ auto make_layout(
     std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px_mask;
     auto [mk_img, mask_img] = txt_to_img(
         mk, mask,
-        cell_r_px * um2px_r,
-        cell_c_px * um2px_r,
-        border_px * um2px_r
+        cell_r_um * um2px_r,
+        cell_c_um * um2px_r,
+        border_um * um2px_r
     );
     candi_mk_pats_px.push_back(mk_img);
     cv::imwrite("mask_img.tif", mask_img);
     cv::imwrite("mk_img.tif",mk_img);
     candi_mk_pats_px_mask.push_back(mask_img);
     chipimgproc::marker::Layout mk_layout;
+    std::uint32_t invl_x_px = std::round(invl_x_cl * (cell_c_um + border_um) * um2px_r); // can get this value from micron to pixel
+    std::uint32_t invl_y_px = std::round(invl_y_cl * (cell_r_um + border_um) * um2px_r);
     mk_layout.set_reg_mat_dist(
         rows, cols, {0, 0}, 
         invl_x_cl, invl_y_cl, 
@@ -57,7 +57,6 @@ auto make_zion_layout(float um2px_r) {
         9, 9, 2,
         3, 3, 
         37, 37,
-        1091, 1091,
         um2px_r
     );
 }
@@ -67,7 +66,6 @@ auto make_banff_layout(const std::string& pat_name, float um2px_r) {
         4, 4, 1, 
         3, 3, 
         81, 81, 
-        1085, 1085, 
         um2px_r
     );
 }

@@ -182,15 +182,17 @@ struct SingleGeneral {
         float theta = 0;
         float theta_off = 0;
         cv::Mat tmp = src.clone();
+        int iteration_times = 0;
+        int iteration_max_times = 6;
+        int start_record_theta_time = 2;
+        float theta_threshold = 0.01;
+        std::vector<float> candidate_theta;
         do{
             auto marker_regs = marker_detection_(
                 static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
                 marker_layout_, 
                 chipimgproc::MatUnit::PX, 
                 *msg_
-                // nullptr,
-                // func,
-                // v_marker_seg_
             );
             marker::detection::filter_low_score_marker(marker_regs);
             theta_off = rot_estimator_(marker_regs, *msg_);
@@ -201,23 +203,27 @@ struct SingleGeneral {
                 theta,
                 v_rot_cali_res_
             );
-        } while(std::abs(theta_off) > 0.01);
+            if( iteration_times > start_record_theta_time ) {
+                candidate_theta.push_back(theta);
+            }
+            iteration_times ++;
+            if( iteration_times >= iteration_max_times) break;
+        } while(std::abs(theta_off) > theta_threshold);
+        if( std::abs(theta_off) > theta_threshold ) {
+            *msg_ << "theta not convergence" << std::endl;
+            float sum = 0;
+            for(auto&& t : candidate_theta) {
+                sum += t;
+            }
+            theta = sum / candidate_theta.size();
+            tmp = src.clone();
+            rot_calibrator_(
+                tmp,
+                theta,
+                v_rot_cali_res_
+            );
+        }
         // detect marker
-        // marker_regs = marker_detection_( // TODO: use full layout based method
-        //     static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
-        //     marker_layout_, MatUnit::PX, *msg_,
-        //     nullptr,
-        //     func,
-        //     v_marker_seg_
-        // );
-        // marker::detection::filter_low_score_marker(marker_regs);
-        // marker_regs = marker::detection::infer(
-        //     static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
-        //     marker_regs,
-        //     [](auto&& mat) {
-        //         cv::imwrite("after_infer.tiff", mat);
-        //     }
-        // );
         marker_regs = marker::detection::reg_mat_no_rot(
             tmp, marker_layout_, MatUnit::PX, *msg_, v_marker_seg_
         );

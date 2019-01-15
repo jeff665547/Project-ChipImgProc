@@ -190,6 +190,7 @@ struct RegMat {
                 }
                 max_loc.x /= max_points.size();
                 max_loc.y /= max_points.size();
+                max_score /= max_points.size();
 
                 max_loc.x  += mk_r.x                ;
                 max_loc.y  += mk_r.y                ;

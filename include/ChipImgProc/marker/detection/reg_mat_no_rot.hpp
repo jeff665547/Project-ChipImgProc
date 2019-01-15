@@ -19,8 +19,8 @@ constexpr struct RegMatNoRot {
         auto mk_y_num = mk_layout.mk_map.rows;
         auto mk_height = mk_layout.get_marker_height(unit);
         auto mk_width = mk_layout.get_marker_width(unit);
-        auto mk_layout_width = (mk_x_num - 1) * (mk_width + mk_invl_x) + mk_width;
-        auto mk_layout_height = (mk_y_num - 1) * (mk_height + mk_invl_y) + mk_height;
+        auto mk_layout_width = (mk_x_num - 1) *  mk_invl_x + mk_width;
+        auto mk_layout_height = (mk_y_num - 1) * mk_invl_y + mk_height;
         auto scan_rect_width  = src.cols - mk_layout_width + mk_width;
         auto scan_rect_height = src.rows - mk_layout_height + mk_height;
 
@@ -74,11 +74,11 @@ constexpr struct RegMatNoRot {
         for( int i = 0; i < mk_layout.mk_map.rows; i ++ ) {
             for( int j = 0; j < mk_layout.mk_map.cols; j ++ ) {
                 auto& mk = mk_layout.get_marker_des(i, j);
-                mk.get_pos(unit).x += max_loc.x;
-                mk.get_pos(unit).y += max_loc.y;
+                // mk.get_pos(unit).x += max_loc.x;
+                // mk.get_pos(unit).y += max_loc.y;
                 MKRegion mk_reg;
-                mk_reg.x = mk.get_pos(unit).x;
-                mk_reg.y = mk.get_pos(unit).y;
+                mk_reg.x = mk.get_pos(unit).x + max_loc.x;
+                mk_reg.y = mk.get_pos(unit).y + max_loc.y;
                 mk_reg.width = mk_layout.get_marker_width(unit);
                 mk_reg.height = mk_layout.get_marker_height(unit);
                 mk_reg.x_i = j;
