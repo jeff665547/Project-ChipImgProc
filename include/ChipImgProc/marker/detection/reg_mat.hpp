@@ -6,6 +6,8 @@
 #include <ChipImgProc/marker/detection/mk_region.hpp>
 #include <Nucleona/tuple.hpp>
 #include <Nucleona/range.hpp>
+#include <ChipImgProc/algo/fixed_capacity_set.hpp>
+#include <ChipImgProc/marker/detection/pos_comp_by_score.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
 
 struct RegMat {
@@ -14,10 +16,7 @@ struct RegMat {
         const cv::Mat_<T>&      src, 
         const Layout&           mk_layout, 
         const MatUnit&          unit,
-        std::ostream&           out        ,
-        const ViewerCallback&   v_bin      ,
-        const ViewerCallback&   v_search   ,
-        const ViewerCallback&   v_marker   
+        std::ostream&           out
     ) const {
         // marker interval between marker
         auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
@@ -76,24 +75,24 @@ struct RegMat {
         }
         return marker_regions;
     }
-    void filter_low_score_marker(
-        std::vector<MKRegion>& mk_regs
-    ) const {
-        // TODO: fix use of erase
-        std::vector<int> idx;
-        for(int i = 0; i < mk_regs.size(); i ++ ) {
-            idx.push_back(i);
-        }
-        std::sort(idx.begin(), idx.end(), [&mk_regs](auto a, auto b){
-            return mk_regs.at(a).score < mk_regs.at(b).score;
-        });
-        auto trim_num = mk_regs.size() / 4;
-        idx.resize(trim_num);
+    // void filter_low_score_marker(
+    //     std::vector<MKRegion>& mk_regs
+    // ) const {
+    //     // TODO: fix use of erase
+    //     std::vector<int> idx;
+    //     for(int i = 0; i < mk_regs.size(); i ++ ) {
+    //         idx.push_back(i);
+    //     }
+    //     std::sort(idx.begin(), idx.end(), [&mk_regs](auto a, auto b){
+    //         return mk_regs.at(a).score < mk_regs.at(b).score;
+    //     });
+    //     auto trim_num = mk_regs.size() / 4;
+    //     idx.resize(trim_num);
 
-        for(auto& id : idx) {
-            mk_regs.erase(mk_regs.begin() + id);
-        }
-    }
+    //     for(auto& id : idx) {
+    //         mk_regs.erase(mk_regs.begin() + id);
+    //     }
+    // }
     template<class T, class FUNC>
     auto template_matching(
         const cv::Mat_<T>&      src, 
@@ -106,8 +105,8 @@ struct RegMat {
         const ViewerCallback&   v_marker   
     ) const {
         auto marker_regions = generate_raw_marker_regions(src, mk_layout, 
-            unit, out, v_bin, v_search, v_marker);
-        auto tgt = norm_u8(src, 0, 0); // TODO:
+            unit, out);
+        auto tgt = norm_u8(src, 0.001, 0.001); // TODO:
         info(out, tgt);
         if(v_bin) {
             v_bin(tgt);
@@ -145,10 +144,10 @@ struct RegMat {
                 sub_score, mk_r, mk_cols, mk_rows
             );
         }
-        filter_low_score_marker(marker_regions);
+        // filter_low_score_marker(marker_regions);
         if(v_marker) {
             for(auto& mk_r : marker_regions) {
-                cv::rectangle(view, mk_r, 128, 3);
+                cv::rectangle(view, mk_r, 128, 1);
             }
         }
         if(v_search) {
@@ -173,23 +172,25 @@ struct RegMat {
         return template_matching(
             src, mk_layout, unit, 
             [&out](auto&& sub_score, auto&& mk_r, auto&& mk_cols, auto&& mk_rows) {
-                double min, max;
-                cv::Point min_loc, max_loc;
-                cv::minMaxLoc(sub_score, &min, &max, &min_loc, &max_loc);
-                max_loc.x = 0;
-                max_loc.y = 0;
-                std::size_t num = 0;
+                auto max_points = make_fixed_capacity_set<cv::Point>(
+                    20, PosCompByScore(sub_score)
+                );
+                cv::Point max_loc;
+                float max_score = 0;
                 for(int y = 0; y < sub_score.rows; y ++ ) {
                     for(int x = 0; x < sub_score.cols; x ++ ) {
-                        if(sub_score(y, x) + std::numeric_limits<float>::epsilon() >= max) {
-                            max_loc.x += x;                            
-                            max_loc.y += y;                            
-                            num++;
-                        }
+                        auto& score = sub_score(y, x);
+                        max_points.emplace(cv::Point(x, y));
                     }
                 }
-                max_loc.x = (double)max_loc.x / num;
-                max_loc.y = (double)max_loc.y / num;
+                for(auto&& p : max_points) {
+                    max_loc.x += p.x;
+                    max_loc.y += p.y;
+                    max_score += sub_score(p.y, p.x);
+                }
+                max_loc.x /= max_points.size();
+                max_loc.y /= max_points.size();
+
                 max_loc.x  += mk_r.x                ;
                 max_loc.y  += mk_r.y                ;
                 mk_r.x      = max_loc.x             ;
@@ -197,7 +198,7 @@ struct RegMat {
                 mk_r.width  = mk_cols               ;
                 mk_r.height = mk_rows               ;
                 mk_r.info(out);
-                mk_r.score  = max;
+                mk_r.score  = max_score;
             }, out, v_bin, v_search, v_marker
         );
     }

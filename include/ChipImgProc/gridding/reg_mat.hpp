@@ -17,7 +17,7 @@ struct RegMat {
         std::uint32_t mk_invl_cl,
         int marker_edge_cl
     ) const {
-        std::vector<std::vector<int>> res;
+        std::vector<std::vector<float>> res;
         for( auto&& p : grouped_ps ) {
             res.emplace_back();
             auto& grid_anchors = res.back();
@@ -42,7 +42,7 @@ struct RegMat {
         return res;
     }
 
-    auto consensus( const std::vector<std::vector<int>>& anchors_group ) const {
+    auto consensus( const std::vector<std::vector<float>>& anchors_group ) const {
         auto size = anchors_group.front().size();
         for( auto&& as : anchors_group ) {
             if( as.size() != size ) {
@@ -52,11 +52,11 @@ struct RegMat {
 
         std::vector<std::uint32_t> res;
         for(decltype(size) i = 0; i < size; i ++ ) {
-            std::size_t sum = 0;
+            float sum = 0;
             for( auto&& as : anchors_group ) {
                 sum += as.at(i);
             }
-            res.push_back(sum / anchors_group.size());
+            res.push_back(std::round(sum / anchors_group.size()));
         }
         return res;
     }
@@ -78,23 +78,38 @@ struct RegMat {
           >&                            v_result    = nullptr
     ) const {
         Result result;
-        auto x_grouped_ps = MKRegion::x_group_points(mk_regs);
-        auto y_grouped_ps = MKRegion::y_group_points(mk_regs);
-        auto x_grid_pos_group = grid_anchors_group(
-            y_grouped_ps, 
-            [](const auto& p){ return p.x; }, 
-            mk_layout.mk_invl_x_cl,
-            mk_layout.get_marker_width_cl()
-        );
-        auto y_grid_pos_group = grid_anchors_group(
-            x_grouped_ps, 
-            [](const auto& p){ return p.y; }, 
-            mk_layout.mk_invl_y_cl,
-            mk_layout.get_marker_height_cl()
-        );
-        auto x_grid_anchor = consensus(x_grid_pos_group);
-        auto y_grid_anchor = consensus(y_grid_pos_group);
-
+        auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(MatUnit::CELL);
+        int fov_w_cl = ( mk_invl_x * (mk_layout.mk_map.cols - 1) ) + mk_layout.get_marker_width_cl();
+        int fov_h_cl = ( mk_invl_y * (mk_layout.mk_map.rows - 1) ) + mk_layout.get_marker_height_cl();
+        // find left top and right botton  mk region
+        MKRegion* left_top = &(mk_regs.front());
+        MKRegion* right_bottom = &(mk_regs.front());
+        for(auto&& mk_r : mk_regs) {
+            if(
+                mk_r.x_i <= left_top->x_i && 
+                mk_r.y_i <= left_top->y_i
+            ) {
+                left_top = &mk_r;
+            }
+            if(
+                mk_r.x_i >= right_bottom->x_i && 
+                mk_r.y_i >= right_bottom->y_i
+            ) {
+                right_bottom = &mk_r;
+            }
+        }
+        std::vector<std::uint32_t> x_grid_anchor;
+        std::vector<std::uint32_t> y_grid_anchor; 
+        auto fov_h_px = right_bottom->y + right_bottom->height - left_top->y;
+        auto fov_w_px = right_bottom->x + right_bottom->width - left_top->x;
+        float cl_h_px = fov_h_px / (float)fov_h_cl;
+        float cl_w_px = fov_w_px / (float)fov_w_cl;
+        for(int i = 0; i < fov_h_cl + 1; i ++ ) {
+            y_grid_anchor.push_back((std::uint32_t)std::round(left_top->y + (i * cl_h_px)));
+        }
+        for(int j = 0; j < fov_w_cl + 1; j ++ ) {
+            x_grid_anchor.push_back((std::uint32_t)std::round(left_top->x + (j * cl_w_px)));
+        }
         cv::Rect roi(
             x_grid_anchor.front(), y_grid_anchor.front(),
             x_grid_anchor.back() - x_grid_anchor.front(),

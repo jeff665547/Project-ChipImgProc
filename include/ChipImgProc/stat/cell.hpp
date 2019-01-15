@@ -15,7 +15,7 @@ struct Cell
         
         res.mean    = mean(0);
         res.stddev  = stddev(0);
-        res.cv      = res.stddev / (res.mean + 1e-16);
+        res.cv      = res.stddev / res.mean;
         res.num     = mat.cols * mat.rows;
         return res;
     }

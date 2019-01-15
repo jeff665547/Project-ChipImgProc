@@ -93,9 +93,16 @@ struct AutoMinCV
     {
         stat::Mats<FLOAT> res(rows(tiled_src), cols(tiled_src));
         auto& tiles = tiled_src.get_tiles();
+        float basic_margin_rate = 0.17;
         for( int y = 0; y < rows(tiled_src); y ++ ) {
             for ( int x = 0; x < cols(tiled_src); x ++ ) {
                 auto& t = tiled_src.tile_at(y, x);
+                auto x_basic_margin = basic_margin_rate * t.width;
+                auto y_basic_margin = basic_margin_rate * t.height;
+                t.x += x_basic_margin;
+                t.y += y_basic_margin;
+                t.width -= x_basic_margin;
+                t.height -= y_basic_margin;
                 int windows_width  = std::round(t.width  * seg_rate);
                 int windows_height = std::round(t.height * seg_rate);
                 auto min_cv_data = find_min_cv(

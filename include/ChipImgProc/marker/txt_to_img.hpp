@@ -27,11 +27,13 @@ struct TxtToImg {
         auto r_cell_bd = cell_r_px + border_px;
         auto c_cell_bd = cell_c_px + border_px;
         auto img_row = 
-            border_px + 
-            r_cell_bd * mat.rows;
+            // border_px + 
+            r_cell_bd * mat.rows
+            - border_px;
         auto img_col = 
-            border_px + 
-            c_cell_bd * mat.cols;
+            // border_px + 
+            c_cell_bd * mat.cols
+            - border_px;
 
         cv::Mat_<std::uint8_t> img = cv::Mat_<std::uint8_t>::zeros(
             (int)std::round(img_row), 
@@ -42,9 +44,9 @@ struct TxtToImg {
             (int)std::round(img_col)
         );
         int i = 0;
-        for( auto r = border_px; r < img.rows; r += r_cell_bd ) {
+        for( auto r = 0; r < img.rows; r += r_cell_bd ) {
             int j = 0;
-            for( auto c = border_px; c < img.cols; c += c_cell_bd ) {
+            for( auto c = 0; c < img.cols; c += c_cell_bd ) {
                 cv::Rect cell(
                     (int)std::round(c), 
                     (int)std::round(r), 
