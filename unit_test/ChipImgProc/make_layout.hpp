@@ -60,6 +60,15 @@ auto make_zion_layout(float um2px_r) {
         um2px_r
     );
 }
+auto make_zion_layout2(const std::string& pat_name, float um2px_r) {
+    return make_layout(
+        pat_name,
+        9, 9, 2,
+        3, 3, 
+        37, 37,
+        um2px_r
+    );
+}
 auto make_banff_layout(const std::string& pat_name, float um2px_r) {
     return make_layout(
         pat_name, 

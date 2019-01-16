@@ -8,5 +8,6 @@ target_link_libraries(${__screw_target} PUBLIC
     ChipImgProc-utils
     ChipImgProc-sharpness
     Boost::program_options
+    Nucleona::Nucleona
 )
 screw_add_launch_task(${__screw_target})

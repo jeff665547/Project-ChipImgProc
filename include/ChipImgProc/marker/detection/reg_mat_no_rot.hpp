@@ -7,12 +7,11 @@
 #include <ChipImgProc/marker/detection/pos_comp_by_score.hpp>
 namespace chipimgproc::marker::detection {
 constexpr struct RegMatNoRot {
-    std::vector<MKRegion> operator()(
-        const cv::Mat_<std::uint16_t>&      src,
-        Layout&                 mk_layout,
-        const MatUnit&          unit,
-        std::ostream&           out        = nucleona::stream::null_out,
-        const ViewerCallback&   v_marker   = nullptr
+    cv::Mat_<float> score_mat(
+        cv::Mat                             src_u8,
+        Layout&                             mk_layout,
+        const MatUnit&                      unit,
+        std::ostream&                       out        = nucleona::stream::null_out
     ) const {
         auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
         auto mk_x_num = mk_layout.mk_map.cols;
@@ -21,10 +20,9 @@ constexpr struct RegMatNoRot {
         auto mk_width = mk_layout.get_marker_width(unit);
         auto mk_layout_width = (mk_x_num - 1) *  mk_invl_x + mk_width;
         auto mk_layout_height = (mk_y_num - 1) * mk_invl_y + mk_height;
-        auto scan_rect_width  = src.cols - mk_layout_width + mk_width;
-        auto scan_rect_height = src.rows - mk_layout_height + mk_height;
+        auto scan_rect_width  = src_u8.cols - mk_layout_width + mk_width;
+        auto scan_rect_height = src_u8.rows - mk_layout_height + mk_height;
 
-        cv::Mat src_8u = norm_u8(src, 0.001, 0.001);
         cv::Mat_<float> score_sum(
             scan_rect_height - mk_height + 1,
             scan_rect_width - mk_width + 1
@@ -37,7 +35,7 @@ constexpr struct RegMatNoRot {
                 scan_rect_width,
                 scan_rect_height
             );
-            cv::Mat scan_target_mat = src_8u(scan_region);
+            cv::Mat scan_target_mat = src_u8(scan_region);
             auto& mk_pat = mk_des.get_candi_mks(unit).at(0);
             cv::Mat_<float> score(
                 scan_target_mat.rows - mk_pat.rows + 1,
@@ -51,6 +49,15 @@ constexpr struct RegMatNoRot {
             }
             score_sum += score;
         }
+        return score_sum;
+    }
+    std::vector<MKRegion> infer_marker_regions(
+        const cv::Mat_<float>&  score_matrix,
+        Layout&                 mk_layout,
+        const MatUnit&          unit,
+        std::ostream&           out        = nucleona::stream::null_out
+    ) const {
+        auto& score_sum = score_matrix;
         auto max_points = make_fixed_capacity_set<cv::Point>(
             20, PosCompByScore(score_sum)
         );
@@ -87,6 +94,22 @@ constexpr struct RegMatNoRot {
             }
         }
 
+        return mk_regs;
+    }
+    std::vector<MKRegion> operator()(
+        const cv::Mat_<std::uint16_t>&      src,
+        Layout&                 mk_layout,
+        const MatUnit&          unit,
+        std::ostream&           out        = nucleona::stream::null_out,
+        const ViewerCallback&   v_marker   = nullptr
+    ) const {
+        cv::Mat src_u8 = norm_u8(src, 0.001, 0.001);
+        auto score_sum = score_mat(
+            src_u8, mk_layout, unit, out
+        );
+        auto mk_regs = infer_marker_regions(
+            score_sum, mk_layout, unit, out 
+        );
         if(v_marker) {
             auto view = viewable(src);
             for(auto& mk_r : mk_regs) {

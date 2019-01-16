@@ -4,6 +4,7 @@
 #include <string>
 #include <istream>
 #include <Nucleona/stream/null_buffer.hpp>
+#include <Nucleona/tuple.hpp>
 namespace chipimgproc{ namespace marker{
 
 struct TxtToImg {
@@ -12,14 +13,15 @@ struct TxtToImg {
         const cv::Mat_<std::uint8_t>& mask_cl,
         float cell_r_px,
         float cell_c_px,
-        float border_px
-    ) {
+        float border_px,
+        std::ostream& log = nucleona::stream::null_out
+    ) const {
         // auto ext = cell_r_px * 0.2;
         // cell_r_px += ext;
         // cell_c_px += ext;
         // border_px -= ext;
-        std::cout << "mask_cl: " << std::endl;
-        std::cout << mask_cl << std::endl;
+        log << "mask_cl: " << std::endl;
+        log << mask_cl << std::endl;
         cell_r_px *= 16;
         cell_c_px *= 16;
         border_px *= 16;

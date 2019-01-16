@@ -2,6 +2,7 @@
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/const.h>
 #include <Nucleona/tuple.hpp>
+#include <ChipImgProc/marker/txt_to_img.hpp>
 namespace chipimgproc{ namespace marker{
 struct Des {
 friend struct Layout;
@@ -219,7 +220,54 @@ struct Layout {
     std::uint32_t           mk_invl_y_cl              ; // used in reg_mat
     std::uint32_t           mk_invl_x_px              ; // used in reg_mat
     std::uint32_t           mk_invl_y_px              ; // used in reg_mat
+    
+
 };
+constexpr struct MakeSinglePatternRegMatLayout
+{
+    auto operator()(
+        const cv::Mat_<std::uint8_t>& mk,
+        const cv::Mat_<std::uint8_t>& mask,
+        float cell_r_um,
+        float cell_c_um,
+        float border_um,
+        int rows, 
+        int cols,
+        std::uint32_t invl_x_cl, 
+        std::uint32_t invl_y_cl,
+        float um2px_r
+    ) const {
+        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
+        candi_mk_pats_cl.push_back(mk);
+        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
+        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px_mask;
+        auto [mk_img, mask_img] = txt_to_img_(
+            mk, mask,
+            cell_r_um * um2px_r,
+            cell_c_um * um2px_r,
+            border_um * um2px_r
+        );
+        candi_mk_pats_px.push_back(mk_img);
+        candi_mk_pats_px_mask.push_back(mask_img);
+        chipimgproc::marker::Layout mk_layout;
+        std::uint32_t invl_x_px = std::round(invl_x_cl * (cell_c_um + border_um) * um2px_r); // can get this value from micron to pixel
+        std::uint32_t invl_y_px = std::round(invl_y_cl * (cell_r_um + border_um) * um2px_r);
+        mk_layout.set_reg_mat_dist(
+            rows, cols, {0, 0}, 
+            invl_x_cl, invl_y_cl, 
+            invl_x_px, invl_y_px
+        );
+        mk_layout.set_single_mk_pat(
+            candi_mk_pats_cl, 
+            candi_mk_pats_px,
+            candi_mk_pats_px_mask
+        );
+        return mk_layout;
+    }
+private:
+    chipimgproc::marker::TxtToImg txt_to_img_;
+} make_single_pattern_reg_mat_layout;
+
 
 
 }}
