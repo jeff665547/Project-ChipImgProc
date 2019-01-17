@@ -8,7 +8,7 @@ if( BUILD_TESTS)
     include(ExternalProject)
     ExternalProject_Add(TestData
         GIT_REPOSITORY 
-            "ssh://gitlab-ci-token:$ENV{CI_JOB_TOKEN}:@gitlab.centrilliontech.com.tw:10022/centrillion/ChipImgProcTestData.git" 
+            "https://gitlab-ci-token:$ENV{CI_JOB_TOKEN}:@gitlab.centrilliontech.com.tw:10022/centrillion/ChipImgProcTestData" 
         GIT_TAG
             "900c1caba9f4955eab112624154d6c1f9c6e239d"
         CMAKE_ARGS
