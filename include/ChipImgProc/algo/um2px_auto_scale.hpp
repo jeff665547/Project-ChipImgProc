@@ -3,6 +3,7 @@
 #include <ChipImgProc/marker/txt_to_img.hpp>
 #include <ChipImgProc/marker/detection/reg_mat_no_rot.hpp>
 #include <Nucleona/proftool/timer.hpp>
+#include <Nucleona/tuple.hpp>
 namespace chipimgproc::algo {
 
 struct Um2PxAutoScale {
@@ -31,7 +32,11 @@ struct Um2PxAutoScale {
         image_ = norm_u8(image, 0.001, 0.001);
     }
 
-    float linear_steps(
+    std::tuple<
+        float, 
+        cv::Mat, 
+        marker::Layout
+    > linear_steps(
         float mid, float step, int num,
         std::ostream& log = nucleona::stream::null_out
     ) const {
@@ -42,13 +47,15 @@ struct Um2PxAutoScale {
         double max_score = 0;
         float max_um2px_r = 0;
         auto cur_r = mid - (num * step);
+        chipimgproc::marker::Layout layout;
+        cv::Mat_<float> score_sum;
         for(int i = 0; i < 2 * num; i ++ ) {
-            auto layout = marker::make_single_pattern_reg_mat_layout(
+            layout = marker::make_single_pattern_reg_mat_layout(
                 marker_, mk_mask_, cell_h_um_, cell_w_um_,
                 border_um_, rows_, cols_, invl_x_cl_, invl_y_cl_,
                 cur_r 
             );
-            auto score_sum = marker::detection::reg_mat_no_rot.score_mat(
+            score_sum = marker::detection::reg_mat_no_rot.score_mat(
                 image_, layout, MatUnit::PX, log
             );
             double cur_max;
@@ -60,7 +67,11 @@ struct Um2PxAutoScale {
             }
             cur_r += step;
         }
-        return max_um2px_r;
+        return std::make_tuple(
+            max_um2px_r, 
+            score_sum.clone(),
+            layout
+        );
     }
 
 private:

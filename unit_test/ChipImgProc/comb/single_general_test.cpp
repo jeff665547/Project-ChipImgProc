@@ -13,6 +13,8 @@ TEST(single_image_general_gridding, basic_test) {
     std::vector<TiledMatT>                           tiled_mats  ;
     std::vector<chipimgproc::stat::Mats<FLOAT>>      stat_mats_s ;
 
+    gridder.set_chip_cell_info(9, 9, 2);
+    gridder.enable_um2px_r_auto_scale(2.68);
     int i = 0;
     for(auto p : test_img_paths ) {
         cv::Mat img = cv::imread(p.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
@@ -33,6 +35,7 @@ TEST(single_image_general_gridding, basic_test) {
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
+        
         auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
         stat_mats_s.push_back(stat_mats);

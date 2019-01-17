@@ -45,6 +45,7 @@ friend struct Layout;
     }
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_cl;
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_px;
+    std::vector<cv::Mat_<std::uint8_t>> candi_mks_cl_mask; 
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_px_mask;
 private:
     cv::Point pos_cl_;
@@ -97,11 +98,13 @@ struct Layout {
     void set_single_mk_pat( 
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
+        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl_mask,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px_mask
     ) {
         pat_num = single;
         for( auto& mk : mks ) {
             mk.candi_mks_cl      = candi_pats_cl;
+            mk.candi_mks_cl_mask = candi_pats_cl_mask;
             mk.candi_mks_px      = candi_pats_px;
             mk.candi_mks_px_mask = candi_pats_px_mask;
         }
@@ -238,7 +241,10 @@ constexpr struct MakeSinglePatternRegMatLayout
         float um2px_r
     ) const {
         std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
+        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl_mask;
         candi_mk_pats_cl.push_back(mk);
+        candi_mk_pats_cl_mask.push_back(mask);
+
         std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
         std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px_mask;
         auto [mk_img, mask_img] = txt_to_img_(
@@ -260,6 +266,7 @@ constexpr struct MakeSinglePatternRegMatLayout
         mk_layout.set_single_mk_pat(
             candi_mk_pats_cl, 
             candi_mk_pats_px,
+            candi_mk_pats_cl_mask,
             candi_mk_pats_px_mask
         );
         return mk_layout;

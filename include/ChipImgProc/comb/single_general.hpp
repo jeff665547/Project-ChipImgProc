@@ -20,6 +20,8 @@
 #include <ChipImgProc/marker/detection/infer.hpp>
 #include <ChipImgProc/marker/detection/filter_low_score_marker.hpp>
 #include <ChipImgProc/marker/detection/reg_mat_no_rot.hpp>
+#include <ChipImgProc/algo/um2px_auto_scale.hpp>
+
 namespace chipimgproc{ namespace comb{
 
 /**
@@ -63,6 +65,7 @@ struct SingleGeneral {
      */
     void set_marker_layout( 
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl,
+        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl_mask,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px_mask,
         int rows = 3, 
@@ -81,9 +84,19 @@ struct SingleGeneral {
         );
         marker_layout_.set_single_mk_pat( 
             candi_pats_cl, 
+            candi_pats_cl_mask,
             candi_pats_px,
             candi_pats_px_mask
         ); // TODO: raw marker image required
+    }
+    void set_chip_cell_info(float h_um, float w_um, float sp_um) {
+        cell_h_um_ = h_um;
+        cell_w_um_ = w_um;
+        space_um_ = sp_um;
+    }
+    void enable_um2px_r_auto_scale(float um2px_r) {
+        um2px_r_detection_ = true;
+        curr_um2px_r_ = um2px_r;
     }
     /**
      *  @brief Set marker layout used in next image process task.
@@ -165,6 +178,11 @@ struct SingleGeneral {
     void disable_background_fix(bool flag) {
         disable_bg_fix_ = flag;
     }
+    float get_um2px_r() {
+        if(curr_um2px_r_ < 0) 
+            throw std::runtime_error("um to pixel rate not detected");
+        return curr_um2px_r_;
+    }
     /**
      *  @brief The main function of image process pipeline.
      *  @details See SingleGeneral.
@@ -173,19 +191,22 @@ struct SingleGeneral {
      *  @return A tuple of type std::tuple<bool, chipimgproc::TiledMat, chipimgproc::stat::Mats, float>, 
      *          which represent (image QC, image process result, statistic result, rotation angle in degree)
      */
-    auto operator() (const cv::Mat& src, const std::string& id = "") {
+    auto operator() (
+        const cv::Mat& src, 
+        const std::string& id = ""
+    ) {
         std::function<void(const cv::Mat&)> func;
         *msg_ << "img id: " << id << std::endl;
         if(v_sample_)
             v_sample_(viewable(src));
         std::vector<marker::detection::MKRegion> marker_regs;
-        float theta = 0;
-        float theta_off = 0;
-        cv::Mat tmp = src.clone();
-        int iteration_times = 0;
-        int iteration_max_times = 6;
+        float theta                 = 0;
+        float theta_off             = 0;
+        cv::Mat tmp                 = src.clone();
+        int iteration_times         = 0;
+        int iteration_max_times     = 6;
         int start_record_theta_time = 2;
-        float theta_threshold = 0.01;
+        float theta_threshold       = 0.01;
         std::vector<float> candidate_theta;
         do{
             auto marker_regs = marker_detection_(
@@ -224,9 +245,38 @@ struct SingleGeneral {
             );
         }
         // detect marker
-        marker_regs = marker::detection::reg_mat_no_rot(
-            tmp, marker_layout_, MatUnit::PX, *msg_, v_marker_seg_
-        );
+        if(um2px_r_detection_) {
+            if( cell_w_um_ < 0 ) throw std::runtime_error("um2px_r detection require cell micron info but not set");
+            algo::Um2PxAutoScale auto_scaler(
+                src, 
+                marker_layout_.mks.at(0).candi_mks_cl.at(0),
+                marker_layout_.mks.at(0).candi_mks_cl_mask.at(0),
+                cell_w_um_,
+                cell_h_um_,
+                space_um_,
+                marker_layout_.mk_map.rows,
+                marker_layout_.mk_map.cols,
+                marker_layout_.mk_invl_x_cl,
+                marker_layout_.mk_invl_y_cl
+            );
+            auto[best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(
+                curr_um2px_r_, 0.002, 7, *msg_
+            );
+            curr_um2px_r_       = best_um2px_r;
+            marker_layout_ = mk_layout;
+            marker_regs    = marker::detection::reg_mat_no_rot.infer_marker_regions(
+                score_mat, marker_layout_, MatUnit::PX, *msg_
+            );
+            um2px_r_detection_ = false; 
+            // assume all chip images run in single process (which means object not destroied)
+            // is use same reader scanned, so the um2px_r not re-detected by default.
+            // um2px_r can be re-detected by manual invoke enable function.
+        }
+        else {
+            marker_regs    = marker::detection::reg_mat_no_rot(
+                tmp, marker_layout_, MatUnit::PX, *msg_, v_marker_seg_
+            );
+        }
 
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);
         auto tiled_mat  = TiledMat<>::make_from_grid_res(
@@ -304,6 +354,11 @@ struct SingleGeneral {
     marker::Layout            marker_layout_                                     ;
     std::ostream*             msg_               { &nucleona::stream::null_out } ;
     bool                      disable_bg_fix_    { false }                       ;
+    float                     curr_um2px_r_      {-1}                            ;
+    bool                      um2px_r_detection_ {false}                         ;
+    float                     cell_h_um_         {-1}                            ;
+    float                     cell_w_um_         {-1}                            ;
+    float                     space_um_          {-1}                            ;
 
     std::function<
         void(const cv::Mat&)
@@ -329,7 +384,6 @@ struct SingleGeneral {
     chipimgproc::gridding::RegMat                gridder_            ;
     chipimgproc::Margin<FLOAT, GLID>             margin_             ;
     chipimgproc::roi::RegMatMarkerLayout         roi_bounder_        ;
-
 };
 
 }}
