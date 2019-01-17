@@ -41,5 +41,5 @@ list(APPEND BUNDLE_RT_DIRS ${OpenCV_DIR}/x${BITS}/${OpenCV_RUNTIME}/lib)
 # range v3
 hunter_add_package(range-v3)
 find_package(range-v3 CONFIG REQUIRED)
-
+find_package(Threads REQUIRED)
 include(${SCREW_DIR}/hunter_root.cmake)

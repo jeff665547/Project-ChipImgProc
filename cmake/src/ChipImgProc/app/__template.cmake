@@ -9,5 +9,6 @@ target_link_libraries(${__screw_target} PUBLIC
     ChipImgProc-sharpness
     Boost::program_options
     Nucleona::Nucleona
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 screw_add_launch_task(${__screw_target})
