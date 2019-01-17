@@ -6,7 +6,7 @@ if( BUILD_TESTS)
 
     include(ExternalProject)
     ExternalProject_Add(TestData
-        URL ${CMAKE_SOURCE_DIR}/lib/ChipImgProcTestData
+        SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/ChipImgProcTestData
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/unit_test
     )
