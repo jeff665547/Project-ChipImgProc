@@ -1,0 +1,3 @@
+[submodule "lib/ChipImgProcTestData"]
+	path = lib/ChipImgProcTestData
+	url = ../../centrillion/ChipImgProcTestData.git
