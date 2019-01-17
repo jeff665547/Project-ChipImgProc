@@ -3,6 +3,8 @@ Win_CI:
         GIT_SUBMODULE_STRATEGY: normal
     stage: build
     script: 
+        - git submodule init
+        - git submodule update
         - rmdir stage /s /q
         - rmdir build /s /q
         - mkdir build
@@ -20,6 +22,8 @@ CentOS_CI:
         GIT_SUBMODULE_STRATEGY: normal
     stage: build
     script: 
+        - git submodule init
+        - git submodule update
         - source /opt/rh/devtoolset-7/enable
         - source /opt/rh/python27/enable
         - source /opt/rh/rh-python35/enable
