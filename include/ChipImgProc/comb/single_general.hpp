@@ -248,7 +248,7 @@ struct SingleGeneral {
         if(um2px_r_detection_) {
             if( cell_w_um_ < 0 ) throw std::runtime_error("um2px_r detection require cell micron info but not set");
             algo::Um2PxAutoScale auto_scaler(
-                src, 
+                tmp, 
                 marker_layout_.mks.at(0).candi_mks_cl.at(0),
                 marker_layout_.mks.at(0).candi_mks_cl_mask.at(0),
                 cell_w_um_,
@@ -262,7 +262,7 @@ struct SingleGeneral {
             auto[best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(
                 curr_um2px_r_, 0.002, 7, *msg_
             );
-            curr_um2px_r_       = best_um2px_r;
+            curr_um2px_r_  = best_um2px_r;
             marker_layout_ = mk_layout;
             marker_regs    = marker::detection::reg_mat_no_rot.infer_marker_regions(
                 score_mat, marker_layout_, MatUnit::PX, *msg_

@@ -46,31 +46,39 @@ struct Um2PxAutoScale {
         });
         double max_score = 0;
         float max_um2px_r = 0;
+        chipimgproc::marker::Layout max_layout;
+        cv::Mat_<float> max_score_sum;
+
         auto cur_r = mid - (num * step);
-        chipimgproc::marker::Layout layout;
-        cv::Mat_<float> score_sum;
         for(int i = 0; i < 2 * num; i ++ ) {
-            layout = marker::make_single_pattern_reg_mat_layout(
+            auto layout = marker::make_single_pattern_reg_mat_layout(
                 marker_, mk_mask_, cell_h_um_, cell_w_um_,
                 border_um_, rows_, cols_, invl_x_cl_, invl_y_cl_,
                 cur_r 
             );
-            score_sum = marker::detection::reg_mat_no_rot.score_mat(
+            auto score_sum = marker::detection::reg_mat_no_rot.score_mat(
                 image_, layout, MatUnit::PX, log
             );
+            // {
+            //     auto score_view = norm_u8(score_sum, 0, 0);
+            //     cv::imwrite("score_" + std::to_string(cur_r) + ".tiff", score_view);
+            // }
             double cur_max;
             cv::Point max_loc;
             cv::minMaxLoc(score_sum, 0, &cur_max, 0, &max_loc);
             if( cur_max > max_score ) {
                 max_score = cur_max;
                 max_um2px_r = cur_r;
+                max_layout = layout;
+                max_score_sum = score_sum.clone();
             }
             cur_r += step;
         }
+        log << "um2px_auto_scale result: " << max_um2px_r << std::endl;
         return std::make_tuple(
             max_um2px_r, 
-            score_sum.clone(),
-            layout
+            max_score_sum.clone(),
+            max_layout
         );
     }
 

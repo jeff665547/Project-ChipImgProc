@@ -13,8 +13,6 @@ TEST(single_image_general_gridding, basic_test) {
     std::vector<TiledMatT>                           tiled_mats  ;
     std::vector<chipimgproc::stat::Mats<FLOAT>>      stat_mats_s ;
 
-    gridder.set_chip_cell_info(9, 9, 2);
-    gridder.enable_um2px_r_auto_scale(2.68);
     int i = 0;
     for(auto p : test_img_paths ) {
         cv::Mat img = cv::imread(p.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
@@ -60,7 +58,7 @@ TEST(single_image_general_gridding, basic_test) {
 }
 TEST(single_image_general_gridding, hard_case_test) {
     using FLOAT = float;
-    auto gridder = get_zion_gridder(2.41);
+    auto gridder = get_zion_gridder(2.4145);
     auto test_img_paths = {
         nucleona::test::data_dir() / "202_20180612170327" / "0-0-CY3_1M.tiff",
         nucleona::test::data_dir() / "202_20180612170327" / "0-1-CY3_1M.tiff",

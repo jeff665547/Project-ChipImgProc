@@ -33,6 +33,8 @@ auto get_gridder(
         invl_x_cl, invl_y_cl,
         um2px_r
     ));
+    gridder.set_chip_cell_info(cell_r_um, cell_c_um, border_um);
+    gridder.enable_um2px_r_auto_scale(um2px_r);
     return gridder;
 
 }
