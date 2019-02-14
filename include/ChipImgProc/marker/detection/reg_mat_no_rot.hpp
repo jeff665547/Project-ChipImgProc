@@ -27,6 +27,7 @@ constexpr struct RegMatNoRot {
             scan_rect_height - mk_height + 1,
             scan_rect_width - mk_width + 1
         );
+        score_sum = 0;
         for(auto&& mk_des : mk_layout.mks) {
             auto scan_start_point = mk_des.get_pos(unit);
             cv::Rect scan_region(
