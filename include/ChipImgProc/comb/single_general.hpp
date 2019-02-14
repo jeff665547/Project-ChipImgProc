@@ -322,6 +322,11 @@ struct SingleGeneral {
                 std::cout << "grid_raw_img: " << std::endl;
                 chipimgproc::info(std::cout, grid_raw_img.mat());
                 std::cout << std::endl;
+                {
+                    grid_raw_img.mat().convertTo(
+                        tiled_mat.get_cali_img(), CV_16UC1, 1.0
+                    );
+                }
                 auto margin_res = margin_(
                     margin_method_,
                     margin::Param<GLID> {
@@ -331,11 +336,6 @@ struct SingleGeneral {
                         v_margin_res_
                     }
                 );
-                {
-                    grid_raw_img.mat().convertTo(
-                        tiled_mat.get_cali_img(), CV_16UC1, 1.0
-                    );
-                }
                 return margin_res;
             } else {
                 return dirty_margin_res;
