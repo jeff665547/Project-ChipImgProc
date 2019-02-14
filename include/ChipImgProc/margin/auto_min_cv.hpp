@@ -25,7 +25,7 @@ namespace chipimgproc { namespace margin{
 template<class FLOAT>
 struct AutoMinCV
 {
-    stat::Cell<FLOAT> count_cv ( const cv::Mat_<int32_t>& mat )
+    stat::Cell<FLOAT> count_cv ( const cv::Mat& mat )
     {
         return stat::Cell<FLOAT>::make(mat);
     }
@@ -49,7 +49,6 @@ struct AutoMinCV
                 );
 
                 auto window = src( rect );
-                // integer_check( window );
                 auto win_res_ele = count_cv( window );
                 if ( win_res_ele.cv < min.cv )
                 {
@@ -117,8 +116,16 @@ struct AutoMinCV
                     t = min_cv_data.win;
             }
         }
-        if(v_result)
+        auto& mat = tiled_src.get_cali_img();
+        if(mat.depth() == CV_32F || mat.depth() == CV_64F){
+            auto tmp = mat.clone();
+            tmp.convertTo(
+                mat, CV_16UC1, 1.0
+            );
+        }
+        if(v_result) {
             tiled_src.view(v_result);
+        }
         return res;
     };
 };

@@ -42,7 +42,7 @@ struct MultiGeneral : public SingleGeneral<FLOAT, GLID> {
         int i = 0;
         for( auto&& p : img_paths ) {
             cv::Mat img = cv::imread(p.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-            auto [qc, tiled_mat, stat_mats, theta] = Base::operator()(
+            auto [qc, tiled_mat, stat_mats, theta, bg_value] = Base::operator()(
                 img, p.replace_extension("").string()
             );
             tiled_mats.push_back(tiled_mat);

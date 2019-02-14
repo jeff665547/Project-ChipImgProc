@@ -51,6 +51,7 @@ constexpr struct ChunkLocalMean
         , std::size_t               chunk_y_num
         , float                     background_trimmed_percent
         , marker::Layout&           layout
+        , bool                      replace
         , std::ostream&             logger
     ) const
     {
@@ -111,11 +112,13 @@ constexpr struct ChunkLocalMean
             const auto chunk_bg_mean = sum / means_tmp.size();
             logger << "chunk_bg_mean: " << chunk_bg_mean << std::endl;
             // replace raw image pixel, should make a better distribution
-            f_ch_mat.mat().template forEach<float>([&chunk_bg_mean](float& px, const int* pos){
-                auto tmp = px - chunk_bg_mean;
-                if( tmp > raw_img_px_floor ) px = tmp;
-                else px = raw_img_px_floor;
-            });
+            if( replace ) {
+                f_ch_mat.mat().template forEach<float>([&chunk_bg_mean](float& px, const int* pos){
+                    auto tmp = px - chunk_bg_mean;
+                    if( tmp > raw_img_px_floor ) px = tmp;
+                    else px = raw_img_px_floor;
+                });
+            }
             bg_means.push_back(chunk_bg_mean);
         }
         return bg_means;

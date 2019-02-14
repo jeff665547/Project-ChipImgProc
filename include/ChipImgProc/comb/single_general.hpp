@@ -289,7 +289,8 @@ struct SingleGeneral {
         );
         // basic gridding done, start calibrate matrix content
         // generate dirty mean, no background calibration
-        auto margin_res = [&]() {
+        auto [margin_res, bg_value] = [&]() {
+            auto tiles = tiled_mat.get_tiles();
             auto dirty_margin_res = margin_( // TODO: cv mean or direct segmentation ?
                                 margin_method_,
                                 margin::Param<GLID> {
@@ -308,11 +309,12 @@ struct SingleGeneral {
                 chipimgproc::info(std::cout, grid_raw_img.mat());
                 std::cout << std::endl;
                 // start background calibration
-                bgb::chunk_local_mean(
+                auto bg_value = bgb::chunk_local_mean(
                     dirty_margin_res.stat_mats.mean,
                     grid_raw_img,   // int image -> float image
                     3, 3, 0.05,     // TODO: parameterize
                     marker_layout_, 
+                    true, 
                     std::cout
                 );
                 std::cout << "after integer fix: " << std::endl;
@@ -322,11 +324,8 @@ struct SingleGeneral {
                 std::cout << "grid_raw_img: " << std::endl;
                 chipimgproc::info(std::cout, grid_raw_img.mat());
                 std::cout << std::endl;
-                {
-                    grid_raw_img.mat().convertTo(
-                        tiled_mat.get_cali_img(), CV_16UC1, 1.0
-                    );
-                }
+                tiled_mat.get_cali_img() = grid_raw_img.mat();
+                tiled_mat.get_tiles() = tiles;
                 auto margin_res = margin_(
                     margin_method_,
                     margin::Param<GLID> {
@@ -336,16 +335,29 @@ struct SingleGeneral {
                         v_margin_res_
                     }
                 );
-                return margin_res;
+                return nucleona::make_tuple(
+                    std::move(margin_res), std::move(bg_value)
+                );
             } else {
-                return dirty_margin_res;
+                auto bg_value = bgb::chunk_local_mean(
+                    dirty_margin_res.stat_mats.mean,
+                    grid_raw_img,   // int image -> float image
+                    3, 3, 0.05,     // TODO: parameterize
+                    marker_layout_, 
+                    false, 
+                    std::cout
+                );
+                return nucleona::make_tuple(
+                    std::move(dirty_margin_res), std::move(bg_value)
+                );
             }
         }();
         return nucleona::make_tuple(
             true,
             std::move(tiled_mat), 
             std::move(margin_res.stat_mats), 
-            std::move(theta)
+            std::move(theta),
+            std::move(bg_value)
         );
     }
   private:

@@ -34,7 +34,7 @@ TEST(single_image_general_gridding, basic_test) {
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
         
-        auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
+        auto [qc, tiled_mat, stat_mats, theta, bg_value] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
         stat_mats_s.push_back(stat_mats);
         i ++;
@@ -78,7 +78,7 @@ TEST(single_image_general_gridding, hard_case_test) {
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
-        auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
+        auto [qc, tiled_mat, stat_mats, theta, bg_value] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
         stat_mats_s.push_back(stat_mats);
         i ++;
@@ -122,7 +122,7 @@ TEST(single_image_general_gridding, missing_marker_test) {
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
-        auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
+        auto [qc, tiled_mat, stat_mats, theta, bg_value] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
         stat_mats_s.push_back(stat_mats);
         i ++;
@@ -169,7 +169,7 @@ TEST(single_image_general_gridding, banff_test) {
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
-        auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
+        auto [qc, tiled_mat, stat_mats, theta, bg_value] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
         stat_mats_s.push_back(stat_mats);
         i ++;
@@ -210,7 +210,7 @@ TEST(single_image_general_gridding, banff_grid_hard_test) {
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
-        auto [qc, tiled_mat, stat_mats, theta] = gridder(img, p.replace_extension("").string());
+        auto [qc, tiled_mat, stat_mats, theta, bg_value] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
         stat_mats_s.push_back(stat_mats);
         i ++;
