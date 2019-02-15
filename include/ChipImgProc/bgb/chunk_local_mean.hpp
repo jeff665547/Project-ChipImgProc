@@ -64,6 +64,7 @@ constexpr struct ChunkLocalMean
         auto grid_chunk_y_size   = grid.rows   / chunk_y_num;
         auto grfimg_chunk_x_size = grfimg.mat().cols / chunk_x_num;
         auto grfimg_chunk_y_size = grfimg.mat().rows / chunk_y_num;
+        // TODO: remain handling
 
         auto grid_chunk = mat_chunk(
             grid, 
@@ -109,7 +110,19 @@ constexpr struct ChunkLocalMean
                 sum += means_tmp.at(i);
             }
             // count local background mean
-            const auto chunk_bg_mean = sum / means_tmp.size();
+            float chunk_bg_mean = 0;
+            if(means_tmp.empty()) { // if no background exist, borrow background from other chunk
+                if(bg_means.empty()) {  // if no other chunk, consider current chunk background is 0
+                    chunk_bg_mean = 0;
+                } else {
+                    for(auto&& borrow_bg : bg_means) {
+                        chunk_bg_mean += borrow_bg;
+                    }
+                    chunk_bg_mean /= bg_means.size();
+                }
+            } else {
+                chunk_bg_mean = sum / means_tmp.size();
+            }
             logger << "chunk_bg_mean: " << chunk_bg_mean << std::endl;
             // replace raw image pixel, should make a better distribution
             if( replace ) {
