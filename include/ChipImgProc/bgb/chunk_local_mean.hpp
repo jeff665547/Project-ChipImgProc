@@ -60,21 +60,21 @@ constexpr struct ChunkLocalMean
         auto& grfimg = grimg;
         grfimg.mat().convertTo( grfimg.mat(), CV_32F );
 
-        auto grid_chunk_x_size   = grid.cols   / chunk_x_num;
-        auto grid_chunk_y_size   = grid.rows   / chunk_y_num;
+        // auto grid_chunk_x_size   = grid.cols   / chunk_x_num;
+        // auto grid_chunk_y_size   = grid.rows   / chunk_y_num;
         auto grfimg_chunk_x_size = grfimg.mat().cols / chunk_x_num;
         auto grfimg_chunk_y_size = grfimg.mat().rows / chunk_y_num;
         // TODO: remain handling
 
         auto grid_chunk = mat_chunk(
             grid, 
-            grid_chunk_x_size, 
-            grid_chunk_y_size
+            chunk_x_num,
+            chunk_y_num
         );
         auto grfimg_chunk = mat_chunk(
             grfimg, 
-            grid_chunk_x_size, 
-            grid_chunk_y_size
+            chunk_x_num,
+            chunk_y_num
         );
         auto mk_mask = gen_mk_mask(layout, grid.size());
         std::vector<float> bg_means;

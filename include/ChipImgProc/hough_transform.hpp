@@ -4,7 +4,7 @@
 // #include <CCD/para_thread_pool/para_thread_pool.hpp>
 // #include <CCD/utility/tune_scope.hpp>
 #include <Nucleona/parallel/thread_pool.hpp>
-#include <Nucleona/range/irange.hpp>
+#include <Nucleona/range.hpp>
 #include <iostream>
 namespace chipimgproc
 {

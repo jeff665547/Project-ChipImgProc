@@ -74,10 +74,7 @@ struct MultiTiledMat
         const std::vector<cv::Point>&             cell_st_pts,
         const std::vector<cv::Point>&             fov_index = {}
     )
-    : detail::IndexedRange<FLOAT, GLID>(
-        detail::TilesWrapper<FLOAT>::tiles_,
-        detail::IndexWrapper<GLID>::index_
-    )
+    : detail::IndexedRange<FLOAT, GLID>()
     {
         // initial cali_imgs_
         for(auto& m: imgs) {
@@ -129,6 +126,11 @@ struct MultiTiledMat
                 this->tiles_.at(px).push_back(dst_tile);
             });
         }
+        (detail::IndexedRange<FLOAT, GLID>&)(*this) = 
+            detail::IndexedRange<FLOAT, GLID>(
+                detail::TilesWrapper<FLOAT>::tiles_,
+                detail::IndexWrapper<GLID>::index_
+            );
         for( int i = 0; i < cell_st_pts.size(); i ++ ) {
             auto& m = imgs.at(i);
             auto& st_ps = cell_st_pts.at(i);

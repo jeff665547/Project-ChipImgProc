@@ -4,7 +4,7 @@
  */
 #pragma once
 #include <ChipImgProc/utils.h>
-#include <Nucleona/range/irange.hpp>
+#include <Nucleona/range.hpp>
 namespace chipimgproc{
 
 

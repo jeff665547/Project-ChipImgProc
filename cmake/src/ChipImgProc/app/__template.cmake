@@ -11,4 +11,5 @@ target_link_libraries(${__screw_target} PUBLIC
     Nucleona::Nucleona
     ${CMAKE_THREAD_LIBS_INIT}
 )
+target_compile_definitions(${__screw_target} PRIVATE NUCLEONA_RANGE_USE_V3)
 screw_add_launch_task(${__screw_target})

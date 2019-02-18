@@ -36,24 +36,25 @@ protected:
 template<class MAT, class ACC_FUNC>
 struct AccBind 
 : public AccBindImpl<MAT, ACC_FUNC>
-, public TransformRange<MAT&, std::decay_t<ACC_FUNC> >
+, public ranges::transform_view<
+    ranges::view::all_t<MAT>, ACC_FUNC>
 {
-    AccBind(MAT&& mat, ACC_FUNC&& acc_func)
-    : AccBindImpl   <MAT , ACC_FUNC>(FWD(mat), FWD(acc_func))
-    , TransformRange<MAT&, std::decay_t<ACC_FUNC>>(
-        nucleona::range::transform(
-            this->inter_, 
-            nucleona::copy(this->acc_func_),
-            typename std::decay_t<MAT>::iterator_category()
-        )
+    AccBind(MAT&& mat, ACC_FUNC acc_func)
+    : AccBindImpl   <MAT , ACC_FUNC>(FWD(mat), nucleona::copy(acc_func))
+    , ranges::transform_view<
+        ranges::view::all_t<MAT>, 
+        ACC_FUNC
+    >(
+        ranges::view::all(static_cast<MAT&&>(mat)),
+        std::move(acc_func)
     )
     {}
     using AccBindImpl<MAT, ACC_FUNC>::operator();
 };
 
 template<class MAT, class ACC_FUNC>
-decltype(auto) bind_acc(MAT&& mat, ACC_FUNC&& acc_func) {
-    return AccBind<MAT, ACC_FUNC>(FWD(mat), FWD(acc_func));
+decltype(auto) bind_acc(MAT&& mat, ACC_FUNC acc_func) {
+    return AccBind<MAT, ACC_FUNC>(FWD(mat), std::move(acc_func));
 }
 
 }}

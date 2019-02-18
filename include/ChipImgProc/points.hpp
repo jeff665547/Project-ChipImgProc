@@ -17,7 +17,7 @@ namespace chipimgproc{
  */
 template<class P>
 decltype(auto) make_points(int rows, int cols) {
-    return nucleona::range::transform(
+    return ranges::view::transform(
         nucleona::range::irange_0(rows * cols),
         [rows, cols, c = 0, r = 0](auto i) mutable {
             P p{c, r};
