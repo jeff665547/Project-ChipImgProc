@@ -1,7 +1,6 @@
 #pragma once
 #include <ChipImgProc/comb/single_general.hpp>
 #include <ChipImgProc/comb/multi_general.hpp>
-#include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/multi_tiled_mat.hpp>

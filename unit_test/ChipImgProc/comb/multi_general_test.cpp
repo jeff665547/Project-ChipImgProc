@@ -1,6 +1,7 @@
 #include <ChipImgProc/comb/multi_general.hpp>
 #include "gridder.hpp"
 #include <ChipImgProc/analysis/probe_sort.hpp>
+#include <Nucleona/app/cli/gtest.hpp>
 /// [usage]
 TEST(multi_image_general_gridding, basic_test) {
     using FLOAT = float;

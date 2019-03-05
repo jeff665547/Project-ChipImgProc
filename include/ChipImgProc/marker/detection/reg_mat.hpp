@@ -132,7 +132,7 @@ struct RegMat {
                     sub_tgt.cols - mk.cols + 1
                 );
                 cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED, mask);
-                auto tmp = norm_u8(sub_candi_score, 0, 0);
+                // auto tmp = norm_u8(sub_candi_score, 0, 0);
                 if(sub_score.empty()) 
                     sub_score = sub_candi_score;
                 else 
