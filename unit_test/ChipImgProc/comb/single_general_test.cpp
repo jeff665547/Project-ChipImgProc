@@ -216,3 +216,54 @@ TEST(single_image_general_gridding, banff_grid_hard_test) {
         i ++;
     }
 }
+
+TEST(single_image_general_gridding, yz01_test) {
+    using FLOAT = float;
+    auto gridder = get_yz01_gridder("yz01_rc/pat_AM1.tsv", 2.4145);
+    std::vector<boost::filesystem::path> test_img_paths;
+    for(int i = 0; i < 7; i ++) {
+        for(int j = 0; j < 7; j ++) {
+            test_img_paths.push_back(
+                nucleona::test::data_dir() / "yz01_test" / 
+                    (std::to_string(i) + "-" + std::to_string(j) +"-CY3.tiff")
+            );
+        }
+    }
+    using TiledMatT = typename decltype(gridder)::TiledMatT; 
+    using Gridline  = typename decltype(gridder)::Gridline;
+    std::vector<TiledMatT>                           tiled_mats  ;
+    std::vector<chipimgproc::stat::Mats<FLOAT>>      stat_mats_s ;
+
+    int i = 0;
+    for(auto p : test_img_paths ) {
+        cv::Mat img = cv::imread(p.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+        cv::imwrite("debug_src.tiff", img);
+        chipimgproc::info(std::cout, img);
+        gridder.set_marker_seg_viewer([i](const cv::Mat& m ){
+            cv::imwrite("debug_marker_seg_result_"+ std::to_string(i) +".tiff", m);
+        });
+        gridder.set_grid_res_viewer([&i](const cv::Mat& m){
+            cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
+        });
+        auto [qc, tiled_mat, stat_mats, theta, bg_value] = gridder(img, p.replace_extension("").string());
+        tiled_mats.push_back(tiled_mat);
+        stat_mats_s.push_back(stat_mats);
+        i ++;
+    }
+    int w_d = 202;
+    int h_d = 202;
+    
+    std::vector<cv::Point_<int>> st_ps;
+    for(int y = 0; y < 7; y ++) {
+        for(int x = 0; x < 7; x ++ ) {
+            st_ps.push_back(cv::Point_<int>(x * w_d, y * h_d));
+        }
+    }
+
+    chipimgproc::MultiTiledMat<FLOAT, Gridline> multi_tiled_mat(
+        tiled_mats, stat_mats_s, st_ps
+    );
+    cv::Mat md;
+    multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
+    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
+}

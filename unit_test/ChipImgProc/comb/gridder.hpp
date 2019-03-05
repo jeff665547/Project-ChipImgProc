@@ -55,6 +55,13 @@ auto get_banff_gridder(const std::string& pat_name, float um2px_r) {
     );
     return gridder;
 }
+auto get_yz01_gridder(const std::string& pat_name, float um2px_r) {
+    auto gridder = get_gridder<chipimgproc::comb::SingleGeneral<>>(
+        pat_name, 
+        3, 3, 1, 3, 3, 101, 101, um2px_r
+    );
+    return gridder;
+}
 auto get_zion_multi_gridder(float um2px_r) {
     auto gridder = get_gridder<chipimgproc::comb::MultiGeneral<>>(
         "zion_pat.tsv",
