@@ -14,7 +14,7 @@ TEST(um2px_auto_scale, basic_test_zion) {
     chipimgproc::algo::Um2PxAutoScale auto_scaler(
         img, mk_img, mk_mask_img, 9, 9, 2, 3, 3, 37, 37
     );
-    auto [best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(2.4145, 0.002, 5, std::cout );
+    auto [best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(2.4145, 0.002, 5, {}, std::cout );
     std::cout << best_um2px_r << std::endl;
 }
 
@@ -29,6 +29,6 @@ TEST(um2px_auto_scale, basic_test_banff) {
     chipimgproc::algo::Um2PxAutoScale auto_scaler(
         img, mk_img, mk_mask_img, 4, 4, 1, 3, 3, 81, 81
     );
-    auto [best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(2.4145, 0.002, 5, std::cout );
+    auto [best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(2.4145, 0.002, 5, {}, std::cout );
     std::cout << best_um2px_r << std::endl;
 }

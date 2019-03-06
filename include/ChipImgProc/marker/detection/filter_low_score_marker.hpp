@@ -16,10 +16,16 @@ constexpr struct FilterLowScoreMarker {
         });
         auto trim_num = mk_regs.size() / 4;
         idx.resize(trim_num);
-
+        std::sort(idx.begin(), idx.end(), std::greater<int>());
+        std::vector<cv::Point> low_score_mks_idx;
         for(auto& id : idx) {
+            auto& mk_r = mk_regs.at(id);
+            low_score_mks_idx.push_back(
+                cv::Point(mk_r.x_i, mk_r.y_i)
+            );
             mk_regs.erase(mk_regs.begin() + id);
         }
+        return low_score_mks_idx;
     }
 
 } filter_low_score_marker;

@@ -207,7 +207,9 @@ struct SingleGeneral {
         int iteration_max_times     = 6;
         int start_record_theta_time = 2;
         float theta_threshold       = 0.01;
-        std::vector<float> candidate_theta;
+        std::vector<float>       candidate_theta;
+        std::vector<cv::Point>   low_score_marker_idx;
+        // iterative rotation calibration
         do{
             auto marker_regs = marker_detection_(
                 static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
@@ -215,7 +217,8 @@ struct SingleGeneral {
                 chipimgproc::MatUnit::PX, 
                 *msg_
             );
-            marker::detection::filter_low_score_marker(marker_regs);
+            low_score_marker_idx = 
+                marker::detection::filter_low_score_marker(marker_regs);
             theta_off = rot_estimator_(marker_regs, *msg_);
             theta += theta_off;
             tmp = src.clone();
@@ -260,7 +263,7 @@ struct SingleGeneral {
                 marker_layout_.mk_invl_y_cl
             );
             auto[best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(
-                curr_um2px_r_, 0.002, 7, *msg_
+                curr_um2px_r_, 0.002, 7, low_score_marker_idx, *msg_
             );
             curr_um2px_r_  = best_um2px_r;
             marker_layout_ = mk_layout;
@@ -274,7 +277,8 @@ struct SingleGeneral {
         }
         else {
             marker_regs    = marker::detection::reg_mat_no_rot(
-                tmp, marker_layout_, MatUnit::PX, *msg_, v_marker_seg_
+                tmp, marker_layout_, MatUnit::PX, 
+                low_score_marker_idx, *msg_, v_marker_seg_
             );
         }
 

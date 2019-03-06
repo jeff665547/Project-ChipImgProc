@@ -38,6 +38,7 @@ struct Um2PxAutoScale {
         marker::Layout
     > linear_steps(
         float mid, float step, int num,
+        const std::vector<cv::Point>& ignore_mk_regs = {},
         std::ostream& log = nucleona::stream::null_out
     ) const {
         auto holder = nucleona::proftool::make_timer([&log](auto&& du){
@@ -57,7 +58,7 @@ struct Um2PxAutoScale {
                 cur_r 
             );
             auto score_sum = marker::detection::reg_mat_no_rot.score_mat(
-                image_, layout, MatUnit::PX, log
+                image_, layout, MatUnit::PX, ignore_mk_regs, log
             );
             // {
             //     auto score_view = norm_u8(score_sum, 0, 0);
