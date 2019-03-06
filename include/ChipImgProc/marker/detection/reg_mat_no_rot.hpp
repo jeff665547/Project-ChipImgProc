@@ -11,7 +11,8 @@ constexpr struct RegMatNoRot {
         cv::Mat                             src_u8,
         Layout&                             mk_layout,
         const MatUnit&                      unit,
-        std::ostream&                       out        = nucleona::stream::null_out
+        const std::vector<cv::Point>&       ignore_mk_regs = {},
+        std::ostream&                       out            = nucleona::stream::null_out
     ) const {
         auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
         auto mk_x_num = mk_layout.mk_map.cols;
@@ -28,27 +29,34 @@ constexpr struct RegMatNoRot {
             scan_rect_width - mk_width + 1
         );
         score_sum = 0;
-        for(auto&& mk_des : mk_layout.mks) {
-            auto scan_start_point = mk_des.get_pos(unit);
-            cv::Rect scan_region(
-                scan_start_point.x, 
-                scan_start_point.y,
-                scan_rect_width,
-                scan_rect_height
-            );
-            cv::Mat scan_target_mat = src_u8(scan_region);
-            auto& mk_pat = mk_des.get_candi_mks(unit).at(0);
-            cv::Mat_<float> score(
-                scan_target_mat.rows - mk_pat.rows + 1,
-                scan_target_mat.cols - mk_pat.cols + 1
-            );
-            if( unit == MatUnit::PX) {
-                auto& mk_mask = mk_des.get_candi_mks_mask_px().at(0);
-                cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED, mk_mask);
-            } else if (unit == MatUnit::CELL) {
-                cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED);
+        for(int i = 0; i < mk_layout.mk_map.rows; i ++ ) {
+            for(int j = 0; j < mk_layout.mk_map.cols; j ++ ) {
+                auto& mk_des = mk_layout.get_marker_des(i, j);
+                if(std::find(
+                    ignore_mk_regs.begin(), ignore_mk_regs.end(), 
+                    cv::Point(j, i)
+                ) != ignore_mk_regs.end()) continue; // hit the ignore list
+                auto scan_start_point = mk_des.get_pos(unit);
+                cv::Rect scan_region(
+                    scan_start_point.x, 
+                    scan_start_point.y,
+                    scan_rect_width,
+                    scan_rect_height
+                );
+                cv::Mat scan_target_mat = src_u8(scan_region);
+                auto& mk_pat = mk_des.get_candi_mks(unit).at(0);
+                cv::Mat_<float> score(
+                    scan_target_mat.rows - mk_pat.rows + 1,
+                    scan_target_mat.cols - mk_pat.cols + 1
+                );
+                if( unit == MatUnit::PX) {
+                    auto& mk_mask = mk_des.get_candi_mks_mask_px().at(0);
+                    cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED, mk_mask);
+                } else if (unit == MatUnit::CELL) {
+                    cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED);
+                }
+                score_sum += score;
             }
-            score_sum += score;
         }
         return score_sum;
     }
@@ -99,14 +107,15 @@ constexpr struct RegMatNoRot {
     }
     std::vector<MKRegion> operator()(
         const cv::Mat_<std::uint16_t>&      src,
-        Layout&                 mk_layout,
-        const MatUnit&          unit,
-        std::ostream&           out        = nucleona::stream::null_out,
-        const ViewerCallback&   v_marker   = nullptr
+        Layout&                             mk_layout,
+        const MatUnit&                      unit,
+        const std::vector<cv::Point>&       ignore_mk_regs  = {},
+        std::ostream&                       out             = nucleona::stream::null_out,
+        const ViewerCallback&               v_marker        = nullptr
     ) const {
         cv::Mat src_u8 = norm_u8(src, 0.001, 0.001);
         auto score_sum = score_mat(
-            src_u8, mk_layout, unit, out
+            src_u8, mk_layout, unit, ignore_mk_regs, out
         );
         auto mk_regs = infer_marker_regions(
             score_sum, mk_layout, unit, out 
