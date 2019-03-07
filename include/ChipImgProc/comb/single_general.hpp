@@ -98,6 +98,13 @@ struct SingleGeneral {
         um2px_r_detection_ = true;
         curr_um2px_r_ = um2px_r;
     }
+    void disable_um2px_r_auto_scale(float um2px_r) {
+        um2px_r_detection_ = false;
+        curr_um2px_r_ = um2px_r;
+    }
+    void disable_um2px_r_auto_scale() {
+        um2px_r_detection_ = false;
+    }
     /**
      *  @brief Set marker layout used in next image process task.
      *  @details set_marker_layout must call before firset call operator invoked, otherwise the behavior is undefined.
