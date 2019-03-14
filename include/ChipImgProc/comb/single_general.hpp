@@ -190,6 +190,9 @@ struct SingleGeneral {
             throw std::runtime_error("um to pixel rate not detected");
         return curr_um2px_r_;
     }
+    auto get_marker_layout() {
+        return marker_layout_;
+    }
     /**
      *  @brief The main function of image process pipeline.
      *  @details See SingleGeneral.
@@ -283,6 +286,18 @@ struct SingleGeneral {
             // um2px_r can be re-detected by manual invoke enable function.
         }
         else {
+            marker_layout_ = marker::make_single_pattern_reg_mat_layout(
+                marker_layout_.mks.at(0).candi_mks_cl.at(0),
+                marker_layout_.mks.at(0).candi_mks_cl_mask.at(0),
+                cell_w_um_,
+                cell_h_um_,
+                space_um_,
+                marker_layout_.mk_map.rows,
+                marker_layout_.mk_map.cols,
+                marker_layout_.mk_invl_x_cl,
+                marker_layout_.mk_invl_y_cl,
+                curr_um2px_r_
+            );
             marker_regs    = marker::detection::reg_mat_no_rot(
                 tmp, marker_layout_, MatUnit::PX, 
                 low_score_marker_idx, *msg_, v_marker_seg_
