@@ -21,6 +21,7 @@
 #include <ChipImgProc/marker/detection/filter_low_score_marker.hpp>
 #include <ChipImgProc/marker/detection/reg_mat_no_rot.hpp>
 #include <ChipImgProc/algo/um2px_auto_scale.hpp>
+#include <ChipImgProc/marker/roi_append.hpp>
 
 namespace chipimgproc{ namespace comb{
 
@@ -182,6 +183,9 @@ struct SingleGeneral {
     void set_marker_seg_viewer(const FUNC& v) {
         v_marker_seg_ = v;
     }
+    void set_marker_seg_append_path( const std::string& path ) {
+        mk_seg_append_path_ = path;
+    }
     void disable_background_fix(bool flag) {
         disable_bg_fix_ = flag;
     }
@@ -303,8 +307,13 @@ struct SingleGeneral {
                 low_score_marker_idx, *msg_, v_marker_seg_
             );
         }
-
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);
+        if(!mk_seg_append_path_.empty()) {
+            auto marker_append_res = chipimgproc::marker::roi_append(
+                tmp, marker_layout_, *msg_
+            );
+            cv::imwrite(mk_seg_append_path_, marker_append_res);
+        }
         auto tiled_mat  = TiledMat<>::make_from_grid_res(
             grid_res, tmp, marker_layout_
         );
@@ -397,6 +406,7 @@ struct SingleGeneral {
     float                     cell_h_um_         {-1}                            ;
     float                     cell_w_um_         {-1}                            ;
     float                     space_um_          {-1}                            ;
+    std::string               mk_seg_append_path_{""}                            ;
 
     std::function<
         void(const cv::Mat&)
