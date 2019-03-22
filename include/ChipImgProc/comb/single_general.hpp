@@ -183,8 +183,9 @@ struct SingleGeneral {
     void set_marker_seg_viewer(const FUNC& v) {
         v_marker_seg_ = v;
     }
-    void set_marker_seg_append_path( const std::string& path ) {
-        mk_seg_append_path_ = path;
+    template<class FUNC>
+    void set_marker_seg_append_viewer(const FUNC& v) {
+        v_marker_append_ = v;
     }
     void disable_background_fix(bool flag) {
         disable_bg_fix_ = flag;
@@ -308,11 +309,11 @@ struct SingleGeneral {
             );
         }
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);
-        if(!mk_seg_append_path_.empty()) {
+        if(v_marker_append_) {
             auto marker_append_res = chipimgproc::marker::roi_append(
                 tmp, marker_layout_, *msg_
             );
-            cv::imwrite(mk_seg_append_path_, marker_append_res);
+            v_marker_append_(marker_append_res);
         }
         auto tiled_mat  = TiledMat<>::make_from_grid_res(
             grid_res, tmp, marker_layout_
@@ -406,7 +407,6 @@ struct SingleGeneral {
     float                     cell_h_um_         {-1}                            ;
     float                     cell_w_um_         {-1}                            ;
     float                     space_um_          {-1}                            ;
-    std::string               mk_seg_append_path_{""}                            ;
 
     std::function<
         void(const cv::Mat&)
@@ -424,6 +424,10 @@ struct SingleGeneral {
     std::function<
         void(const cv::Mat&)
     >                         v_marker_seg_      { nullptr }                     ;
+
+    std::function<
+        void(const cv::Mat&)
+    >                         v_marker_append_   { nullptr }                     ;
 
     chipimgproc::marker::detection::RegMat       marker_detection_   ;
     chipimgproc::rotation::MarkerVec<FLOAT>      rot_estimator_      ;

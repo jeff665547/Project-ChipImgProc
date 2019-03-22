@@ -37,7 +37,10 @@ TEST(single_image_general_gridding, basic_test) {
         gridder.set_grid_res_viewer([&i](const cv::Mat& m){
             cv::imwrite("debug_grid_result_"+ std::to_string(i) +".tiff", m);
         });
-        gridder.set_marker_seg_append_path("marker_append.tiff");
+        gridder.set_marker_seg_append_viewer([&i](const cv::Mat& m){
+            cv::Mat tmp = (m * 8.192) + 8192;
+            cv::imwrite("marker_append_" + std::to_string(i) + ".tiff", tmp);
+        });
         
         auto [qc, tiled_mat, stat_mats, theta, bg_value] = gridder(img, p.replace_extension("").string());
         tiled_mats.push_back(tiled_mat);
