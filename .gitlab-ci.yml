@@ -2,7 +2,9 @@ Win_CI:
     variables:
         GIT_SUBMODULE_STRATEGY: normal
     stage: build
-    script: 
+    script:
+        - git lfs env
+        - git lfs install
         - git submodule init
         - git submodule update
         - rmdir stage /s /q
