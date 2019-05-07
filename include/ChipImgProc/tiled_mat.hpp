@@ -101,6 +101,18 @@ struct TiledMat
             tile.height += 1;
             cv::rectangle(debug_img, tile, color);
         }
+        for(auto l : gl_x_) {
+            cv::line(debug_img, 
+                cv::Point(l, 0), cv::Point(l, debug_img.rows), 
+                color, 1
+            );
+        }
+        for(auto l : gl_y_) {
+            cv::line(debug_img, 
+                cv::Point(0, l), cv::Point(debug_img.cols, l), 
+                color, 1
+            );
+        }
         func(debug_img);
     }
     /**

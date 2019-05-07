@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <ChipImgProc/margin/auto_min_cv.hpp>
 #include <ChipImgProc/margin/mid_seg.hpp>
+#include <ChipImgProc/margin/only_stat.hpp>
 #include <ChipImgProc/margin/param.hpp>
 #include <ChipImgProc/margin/result.hpp>
 namespace chipimgproc{
@@ -33,6 +34,13 @@ struct Margin {
                 *param.tiled_mat, 
                 param.seg_rate,
                 param.replace_tile,
+                param.v_result
+            );
+            res.stat_mats = tmp;
+        } else if( method == "only_stat") {
+            margin::OnlyStat<FLOAT> only_stat;
+            auto tmp = only_stat(
+                *param.tiled_mat,
                 param.v_result
             );
             res.stat_mats = tmp;
