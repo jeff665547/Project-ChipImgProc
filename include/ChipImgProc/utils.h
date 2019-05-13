@@ -3,6 +3,7 @@
 #include <ChipImgProc/utils/cv.h>
 #include <ChipImgProc/utils/less.hpp>
 #include <ChipImgProc/utils/mat.hpp>
+#include <ChipImgProc/histogram.hpp>
 namespace chipimgproc { 
 
 const char* depth(const cv::Mat& image);
@@ -84,21 +85,38 @@ void cv_windows_config( bool active = true );
 template<class M>
 auto trim_outlier( M&& mm, float ltrim_rate, float utrim_rate )
 {
-    auto m = mm.clone();
-    auto size = m.rows * m.cols;
-    typename std::decay_t<M>::value_type ltrim_size ( size * ltrim_rate );
-    typename std::decay_t<M>::value_type utrim_size ( size * utrim_rate );
-
-    std::nth_element ( m.begin(), m.begin() + ltrim_size, m.end());
-    auto lower = *(m.begin() + ltrim_size);
-
-    auto upper_offset = size - utrim_size - 1;
-    std::nth_element ( m.begin(), m.begin() + upper_offset, m.end());
-    auto upper = *(m.begin() + upper_offset);
-    for ( auto&& v : mm )
-    {
-        if ( v > upper ) v = upper;
-        if ( v < lower ) v = lower; 
+    // const double unit = 1e-4;
+    auto px_count = mm.rows * mm.cols;
+    auto limit = px_count / 10;
+    auto hist = histogram(mm, 256);
+    auto auto_threshold = 5000;
+    int threshold = px_count / auto_threshold;
+    int i = -1;
+    bool found = false;
+    std::size_t count;
+    do {
+        i ++;
+        count = hist[i].second;
+        if( count > limit ) count = 0;
+        found = count > threshold;
+    } while(!found && i < hist.size());
+    int hmin = i;
+    i = hist.size();
+    do {
+        i --;
+        count = hist[i].second;
+        if(count > limit) count = 0;
+        found = count > threshold;
+    } while(!found && i < hist.size());
+    int hmax = i;
+    float lbound, ubound;
+    if(hmax >= hmin) {
+        lbound = hist.lbound + hmin * hist.bin_size;
+        ubound = hist.lbound + hmax * hist.bin_size;
+    }
+    for(auto&& v : mm) {
+        if(v < lbound) v = lbound;
+        if(v > ubound) v = ubound;
     }
     return mm;
 }

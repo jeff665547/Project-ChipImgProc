@@ -4,15 +4,21 @@
 namespace chipimgproc {
 
 constexpr struct Histogram {
-    template<class DataRng, class Value>
-    std::vector<
-        std::pair<
-            float, std::size_t 
-        >
-    > operator()(DataRng&& mat, std::size_t bin_size, Value ubound, Value lbound, bool boundary_check = false) const {
-        std::vector<std::pair<float, std::size_t>> res(
-            (std::size_t)std::ceil((ubound - lbound) / bin_size), {0, 0}
-        );
+    using ResultBase = std::vector<std::pair<
+        float, std::size_t 
+    >>;
+    struct Result : public ResultBase
+    {
+        using Base = ResultBase;
+        using Base::Base;
+        float lbound;
+        float ubound;
+        float bin_size;
+    };
+    template<class DataRng>
+    Result operator()(DataRng&& mat, std::size_t bin_num, double ubound, double lbound, bool boundary_check = false) const {
+        Result res(bin_num);
+        auto bin_size = (ubound - lbound) / bin_num;
         for(std::size_t i = 0; i < res.size(); i ++ ) {
             res.at(i).first = bin_size * i + bin_size / 2 + lbound;
         }
@@ -32,6 +38,9 @@ constexpr struct Histogram {
             }
         }
         // res[0].second = 0;
+        res.lbound = lbound;
+        res.ubound = ubound;
+        res.bin_size = bin_size;
         return res;
     }
     template<class T>
@@ -61,15 +70,18 @@ constexpr struct Histogram {
     }
     
     template<class Value>
-    auto operator()(const cv::Mat_<Value>& mat, double ratio = 0.001, bool boundary_check = false) const {
+    auto operator()(const cv::Mat_<Value>& mat, std::size_t bin_num = 256, bool boundary_check = false) const {
         double min, max;
         cv::minMaxLoc(mat, &min, &max, nullptr, nullptr);
-        auto bin_size = (Value)std::ceil((max - min) * ratio);
-        return operator()(mat, bin_size, 
-            (Value)std::ceil(max), 
-            (Value)std::floor(min), 
+        auto res = operator()(mat, 
+            bin_num,
+            max, min, 
             boundary_check 
         );
+        if(res.back().second == 0) {
+            res.pop_back();
+        }
+        return res;
     }
 } histogram;
 
