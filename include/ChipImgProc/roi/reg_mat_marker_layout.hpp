@@ -8,7 +8,7 @@
 namespace chipimgproc{ namespace roi{
 struct RegMatMarkerLayout {
     cv::Mat norm_u8(const cv::Mat_<float>& m) {
-        auto trimmed_mean = trim_outlier(m.clone(), 0, 0.02); // TODO: smarter way
+        auto trimmed_mean = trim_outlier(m.clone()); // TODO: smarter way
         cv::Mat_<std::uint8_t> bin;
         cv::normalize(trimmed_mean, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
         return bin;

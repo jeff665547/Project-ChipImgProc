@@ -29,7 +29,7 @@ struct Um2PxAutoScale {
     , invl_x_cl_    (invl_x_cl)
     , invl_y_cl_    (invl_y_cl)
     {
-        image_ = norm_u8(image, 0.001, 0.001);
+        image_ = norm_u8(image);
     }
 
     std::tuple<

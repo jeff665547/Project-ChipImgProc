@@ -113,7 +113,7 @@ constexpr struct RegMatNoRot {
         std::ostream&                       out             = nucleona::stream::null_out,
         const ViewerCallback&               v_marker        = nullptr
     ) const {
-        cv::Mat src_u8 = norm_u8(src, 0.001, 0.001);
+        cv::Mat src_u8 = norm_u8(src);
         auto score_sum = score_mat(
             src_u8, mk_layout, unit, ignore_mk_regs, out
         );

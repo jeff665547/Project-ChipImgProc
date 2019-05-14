@@ -61,7 +61,7 @@ constexpr struct Infer {
                 new_mk_regs.push_back(mkr);
             }
         }
-        auto view = norm_u8(src, 0, 0); 
+        auto view = norm_u8(src); 
         if(v_marker) {
             for(auto& mk_r : new_mk_regs) {
                 cv::rectangle(view, mk_r, 128, 1);

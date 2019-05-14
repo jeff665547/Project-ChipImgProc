@@ -106,7 +106,7 @@ struct RegMat {
     ) const {
         auto marker_regions = generate_raw_marker_regions(src, mk_layout, 
             unit, out);
-        auto tgt = norm_u8(src, 0.001, 0.001); // TODO:
+        auto tgt = norm_u8(src); // TODO:
         info(out, tgt);
         if(v_bin) {
             v_bin(tgt);

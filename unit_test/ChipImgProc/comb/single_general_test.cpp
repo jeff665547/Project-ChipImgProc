@@ -102,7 +102,7 @@ TEST(single_image_general_gridding, hard_case_test) {
     );
     cv::Mat md;
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
-    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
+    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md));
     chipimgproc::stitch::GridlineBased gl_stitcher;
     auto gl_st_img = gl_stitcher(multi_tiled_mat);
     cv::imwrite("raw_stitch.tiff", gl_st_img.mat());
@@ -143,7 +143,7 @@ TEST(single_image_general_gridding, missing_marker_test) {
     );
     cv::Mat md;
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
-    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
+    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md));
 }
 /// [usage]
 TEST(single_image_general_gridding, banff_test) {
@@ -193,7 +193,7 @@ TEST(single_image_general_gridding, banff_test) {
     );
     cv::Mat md;
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
-    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
+    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md));
 }
 /// [usage]
 TEST(single_image_general_gridding, banff_grid_hard_test) {
@@ -273,5 +273,5 @@ TEST(single_image_general_gridding, yz01_test) {
     );
     cv::Mat md;
     multi_tiled_mat.dump().convertTo(md, CV_16U, 1);
-    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md, 0.02, 0.02));
+    cv::imwrite("means_dump.tiff", chipimgproc::viewable(md));
 }

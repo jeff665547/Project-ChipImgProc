@@ -83,14 +83,12 @@ MAT imrotate(MAT&& src, const double angle, const double scale = 1)
 void cv_windows_config( bool active = true );
 
 template<class M>
-auto trim_outlier( M&& mm, float ltrim_rate, float utrim_rate )
+auto trim_outlier( M&& mm, int peek_threshold = 40000)
 {
-    // const double unit = 1e-4;
     auto px_count = mm.rows * mm.cols;
+    int threshold = px_count / peek_threshold;
     auto limit = px_count / 10;
     auto hist = histogram(mm, 256);
-    auto auto_threshold = 5000;
-    int threshold = px_count / auto_threshold;
     int i = -1;
     bool found = false;
     std::size_t count;
@@ -121,15 +119,15 @@ auto trim_outlier( M&& mm, float ltrim_rate, float utrim_rate )
     return mm;
 }
 template<class T>
-cv::Mat_<std::uint8_t> norm_u8(const cv::Mat_<T>& m, float ltrim = 0.05, float rtrim = 0.05) {
-    auto trimmed_m = trim_outlier(m.clone(), ltrim, rtrim); // TODO: smarter way
+cv::Mat_<std::uint8_t> norm_u8(const cv::Mat_<T>& m, int peek_threshold = 40000) {
+    auto trimmed_m = trim_outlier(m.clone(), peek_threshold); // TODO: smarter way
     cv::Mat_<std::uint8_t> bin;
     cv::normalize(trimmed_m, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
     return bin;
 }
 template<class T>
-cv::Mat_<std::uint8_t> binarize(const cv::Mat_<T>& m, float ltrim = 0.05, float rtrim = 0.05) {
-    auto trimmed_m = trim_outlier(m.clone(), ltrim, rtrim); // TODO: smarter way
+cv::Mat_<std::uint8_t> binarize(const cv::Mat_<T>& m, int peek_threshold = 40000) {
+    auto trimmed_m = trim_outlier(m.clone(), peek_threshold); // TODO: smarter way
     cv::Mat_<std::uint8_t> bin(m.rows, m.cols);
     cv::threshold(trimmed_m, bin, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
     // cv::normalize(trimmed_m, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
@@ -158,14 +156,17 @@ void mat_copy (
         }
     }
 }
-cv::Mat gray_log( const cv::Mat& in, float trim_rate = 0.0 );
+cv::Mat gray_log( const cv::Mat& in, int peek_threshold = 40000);
 
-bool imwrite(const boost::filesystem::path& fname, const cv::Mat src, float trim_rate );
+bool imwrite(
+    const boost::filesystem::path& fname, 
+    const cv::Mat src, 
+    int peek_threshold = 40000
+);
 
 cv::Mat_<std::uint16_t> viewable(
     const cv::Mat& m, 
-    float ltrim = 0.05, 
-    float rtrim = 0.05
+    int peek_threshold = 40000
 );
 
 using ViewerCallback = std::function<void(const cv::Mat&)>;

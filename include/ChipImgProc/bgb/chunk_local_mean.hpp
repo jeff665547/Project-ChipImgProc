@@ -89,7 +89,7 @@ constexpr struct ChunkLocalMean
             means_tmp.reserve(g_ch_mat_enum);
             cv::Mat_<std::uint8_t> bin;
             {
-                auto tmp = norm_u8(g_ch_mat, 0.01, 0);
+                auto tmp = norm_u8(g_ch_mat);
                 cv::threshold(tmp, bin, 150, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
             }
             // collect none marker and black cell as sampled backgroud data

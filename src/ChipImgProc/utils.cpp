@@ -73,32 +73,31 @@ void cv_windows_config( bool active )
     }
 
 }
-cv::Mat gray_log( const cv::Mat& in, float trim_rate )
+cv::Mat gray_log( const cv::Mat& in, int peek_threshold)
 {
     auto img = in.clone();
     cv::Mat res;
     img.convertTo( res, CV_32F );
     cv::log( res, res );
-    if ( trim_rate != (float)0.0 )
+    if ( peek_threshold != 0 )
     {
         res = trim_outlier( 
-            (cv::Mat_<float>&)res, trim_rate, 0 
+            (cv::Mat_<float>&)res, peek_threshold 
         );
     }
     cv::normalize( res, res, 0, 65535, cv::NORM_MINMAX, CV_16U );
     return res;
 }
 
-bool imwrite(const boost::filesystem::path& fname, const cv::Mat src, float trim_rate )
+bool imwrite(const boost::filesystem::path& fname, const cv::Mat src, int peek_threshold)
 { 
-    auto img = gray_log( src, trim_rate );
+    auto img = gray_log( src, peek_threshold);
     return cv::imwrite(fname.string(), img);
 }
 
 cv::Mat_<std::uint16_t> viewable(
     const cv::Mat& m, 
-    float ltrim, 
-    float rtrim
+    int peek_threshold
 ) {
     cv::Mat_<std::uint16_t> tmp;
     switch(m.depth()) {
@@ -115,7 +114,7 @@ cv::Mat_<std::uint16_t> viewable(
         default:
             throw std::runtime_error("not support depth: " + std::string(depth(m)));
     }
-    trim_outlier(tmp, ltrim, rtrim);
+    trim_outlier(tmp, peek_threshold);
     cv::Mat_<std::uint16_t> res = tmp.clone();
     cv::normalize( tmp, res, 0, 65535, cv::NORM_MINMAX );
     return res;
