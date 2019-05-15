@@ -253,8 +253,8 @@ struct TiledMat
         for(auto& mk_des : mk_layout.mks ) {
             tm.markers_.push_back(
                 cv::Rect(
-                    mk_des.get_pos_cl().x,
-                    mk_des.get_pos_cl().y,
+                    mk_des.get_pos(MatUnit::CELL).x,
+                    mk_des.get_pos(MatUnit::CELL).y,
                     mk_layout.get_marker_width_cl(),
                     mk_layout.get_marker_height_cl()
                 )

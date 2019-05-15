@@ -17,7 +17,7 @@ TEST(reg_mat_layout, operator_call_test) {
 
     // prepare marker
     auto mk_layout = make_zion_layout(2.68);
-    reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 
+    reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0,
         std::cout, 
         [](const cv::Mat& mat){
             cv::imwrite("debug_bin.tiff", mat);
@@ -43,7 +43,7 @@ TEST(reg_mat_layout, hard_case) {
 
     // prepare marker
     auto mk_layout = make_zion_layout(2.41);
-    reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 
+    reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, 
         std::cout, 
         [](const cv::Mat& mat){
             cv::imwrite("debug_bin.tiff", mat);

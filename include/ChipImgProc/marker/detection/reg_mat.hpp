@@ -167,7 +167,7 @@ struct RegMat {
         const ViewerCallback&   v_marker   = nullptr
     ) const {
         return template_matching(
-            src, mk_layout, unit, 
+            src, mk_layout, unit, cand_mk_i, 
             [&out](auto&& sub_score, auto&& mk_r, auto&& mk_cols, auto&& mk_rows) {
                 auto max_points = make_fixed_capacity_set<cv::Point>(
                     20, PosCompByScore(sub_score)

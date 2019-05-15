@@ -230,6 +230,7 @@ struct SingleGeneral {
                 static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
                 marker_layout_, 
                 chipimgproc::MatUnit::PX, 
+                0,
                 *msg_
             );
             low_score_marker_idx = 

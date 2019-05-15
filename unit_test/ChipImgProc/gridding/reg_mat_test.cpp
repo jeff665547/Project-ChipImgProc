@@ -33,10 +33,10 @@ TEST(reg_mat_layout, operator_call_test) {
 
     // prepare marker
     auto mk_layout = make_zion_layout(2.68);
-    auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
+    auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
     auto theta = marker_fit(mk_regs, std::cout);
     rot_cali(img, theta);
-    mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
+    mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
     mk_regs = chipimgproc::marker::detection::infer(img, mk_regs);
     auto gl_res = gridding(img, mk_layout, mk_regs, std::cout, [](const auto& m){
         cv:imwrite("debug_gridding.tiff", m);
@@ -57,10 +57,10 @@ TEST(reg_mat_layout, hard_case) {
 
     // prepare marker
     auto mk_layout = make_zion_layout(2.41);
-    auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
+    auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
     auto theta = marker_fit(mk_regs, std::cout);
     rot_cali(img, theta);
-    mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
+    mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
     mk_regs = chipimgproc::marker::detection::infer(img, mk_regs);
     auto gl_res = gridding(img, mk_layout, mk_regs, std::cout, [](const auto& m){
         cv:imwrite("debug_gridding.tiff", m);

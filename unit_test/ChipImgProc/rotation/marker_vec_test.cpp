@@ -19,7 +19,7 @@ TEST(reg_mat_layout, operator_call_test) {
 
     // prepare marker
     auto mk_layout = make_zion_layout(2.68);
-    auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
+    auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
     auto theta = marker_fit(mk_regs, std::cout);
     std::cout << theta << std::endl;
 }
@@ -36,7 +36,7 @@ TEST(reg_mat_layout, hard_case) {
 
     // prepare marker
     auto mk_layout = make_zion_layout(2.68);
-    auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, std::cout);
+    auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
     auto theta = marker_fit(mk_regs, std::cout);
     std::cout << theta << std::endl;
 }
