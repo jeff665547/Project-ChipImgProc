@@ -6,12 +6,15 @@
 namespace chipimgproc{ namespace marker{
 struct Des {
 friend struct Layout;
-    const cv::Point& get_pos_cl() const {
-        return pos_cl_;
-    }
-    const cv::Point& get_pos_px() const {
-        return pos_px_;
-    }
+    // const cv::Point& get_pos_cl() const {
+    //     return pos_cl_;
+    // }
+    // const cv::Point& get_pos_px() const {
+    //     return pos_px_;
+    // }
+    // const auto& get_candi_mks_mask_px() const {
+    //     return candi_mks_px_mask;
+    // }
     const cv::Point& get_pos(const MatUnit& unit) const {
         switch(unit) {
             case MatUnit::CELL:
@@ -40,13 +43,35 @@ friend struct Layout;
                 );
         }
     }
-    const auto& get_candi_mks_mask_px() const {
-        return candi_mks_px_mask;
+    const auto& get_candi_mks_mask( const MatUnit& unit) const {
+        switch(unit) {
+            case MatUnit::CELL:
+                return candi_mks_cl_mask;
+            case MatUnit::PX:
+                return candi_mks_px_mask;
+            default:
+                throw std::runtime_error(
+                    "get_candi_mks, unsupported unit: " + unit.to_string()
+                );
+        }
+    }
+    const auto& get_best_mk(const MatUnit& unit) const {
+        return get_candi_mks(unit).at(best_mk_idx);
+    }
+    const auto& get_std_mk(const MatUnit& unit) const {
+        return get_candi_mks(unit).at(0);
+    }
+    const auto& get_best_mk_mask(const MatUnit& unit) const {
+        return get_candi_mks_mask(unit).at(best_mk_idx);
+    }
+    const auto& get_std_mk_mask(const MatUnit& unit) const {
+        return get_candi_mks_mask(unit).at(0);
     }
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_cl;
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_px;
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_cl_mask; 
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_px_mask;
+    std::size_t best_mk_idx {0};
 private:
     cv::Point pos_cl_;
     cv::Point pos_px_;

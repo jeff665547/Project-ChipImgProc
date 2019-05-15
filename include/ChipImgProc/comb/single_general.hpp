@@ -267,8 +267,9 @@ struct SingleGeneral {
             if( cell_w_um_ < 0 ) throw std::runtime_error("um2px_r detection require cell micron info but not set");
             algo::Um2PxAutoScale auto_scaler(
                 tmp, 
-                marker_layout_.mks.at(0).candi_mks_cl.at(0),
-                marker_layout_.mks.at(0).candi_mks_cl_mask.at(0),
+                // assume the marker is single pattern regular matrix layout
+                marker_layout_.mks.at(0).get_best_mk(MatUnit::CELL),
+                marker_layout_.mks.at(0).get_best_mk(MatUnit::CELL),
                 cell_w_um_,
                 cell_h_um_,
                 space_um_,
@@ -291,9 +292,10 @@ struct SingleGeneral {
             // um2px_r can be re-detected by manual invoke enable function.
         }
         else {
+            // assume the marker is single pattern regular matrix layout
             marker_layout_ = marker::make_single_pattern_reg_mat_layout(
-                marker_layout_.mks.at(0).candi_mks_cl.at(0),
-                marker_layout_.mks.at(0).candi_mks_cl_mask.at(0),
+                marker_layout_.mks.at(0).get_best_mk(MatUnit::CELL),
+                marker_layout_.mks.at(0).get_best_mk_mask(MatUnit::CELL),
                 cell_w_um_,
                 cell_h_um_,
                 space_um_,

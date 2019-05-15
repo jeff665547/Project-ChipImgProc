@@ -95,13 +95,14 @@ struct RegMat {
     // }
     template<class T, class FUNC>
     auto template_matching(
-        const cv::Mat_<T>&      src, 
-        const Layout&           mk_layout, 
-        const MatUnit&          unit,
-        FUNC&&                  each_score_region,
-        std::ostream&           out        ,
-        const ViewerCallback&   v_bin      ,
-        const ViewerCallback&   v_search   ,
+        const cv::Mat_<T>&      src               , 
+        const Layout&           mk_layout         , 
+        const MatUnit&          unit              ,
+        std::size_t             candi_mk_i        ,
+        FUNC&&                  each_score_region ,
+        std::ostream&           out               ,
+        const ViewerCallback&   v_bin             ,
+        const ViewerCallback&   v_search          ,
         const ViewerCallback&   v_marker   
     ) const {
         auto marker_regions = generate_raw_marker_regions(src, mk_layout, 
@@ -124,20 +125,15 @@ struct RegMat {
             }
             cv::Mat sub_tgt = tgt(mk_r); 
             cv::Mat_<float> sub_score;
-            for(std::size_t i = 0; i < candi_mks.size(); i ++ ) {
-                auto& mk = candi_mks.at(i);
-                auto& mask = candi_mks_mask.at(i);
-                cv::Mat_<float> sub_candi_score(
-                    sub_tgt.rows - mk.rows + 1,
-                    sub_tgt.cols - mk.cols + 1
-                );
-                cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED, mask);
-                // auto tmp = norm_u8(sub_candi_score, 0, 0);
-                if(sub_score.empty()) 
-                    sub_score = sub_candi_score;
-                else 
-                    sub_score += sub_candi_score;
-            }
+            auto& mk = candi_mks.at(candi_mk_i);
+            auto& mask = candi_mks_mask.at(candi_mk_i);
+            cv::Mat_<float> sub_candi_score(
+                sub_tgt.rows - mk.rows + 1,
+                sub_tgt.cols - mk.cols + 1
+            );
+            cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED, mask);
+            // auto tmp = norm_u8(sub_candi_score, 0, 0);
+            sub_score = sub_candi_score;
             auto mk_cols = candi_mks.at(0).cols;
             auto mk_rows = candi_mks.at(0).rows;
             each_score_region(
@@ -164,6 +160,7 @@ struct RegMat {
         const cv::Mat_<T>&      src, 
         const Layout&           mk_layout, 
         const MatUnit&          unit,
+        std::size_t             cand_mk_i  = 0,
         std::ostream&           out        = nucleona::stream::null_out,
         const ViewerCallback&   v_bin      = nullptr,
         const ViewerCallback&   v_search   = nullptr,

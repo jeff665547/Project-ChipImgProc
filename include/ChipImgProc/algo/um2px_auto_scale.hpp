@@ -6,6 +6,7 @@
 #include <Nucleona/tuple.hpp>
 namespace chipimgproc::algo {
 
+// assume the marker is single pattern regular matrix layout
 struct Um2PxAutoScale {
     Um2PxAutoScale(
         const cv::Mat_<std::uint16_t>& image,

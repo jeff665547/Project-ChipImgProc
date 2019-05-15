@@ -25,7 +25,7 @@ constexpr struct ChunkLocalMean
         cv::Mat_<std::uint8_t> mask = cv::Mat::ones(size, CV_8UC1);
         for(auto& mk_des : layout.mks) {
             auto& point = mk_des.get_pos(MatUnit::CELL);
-            auto& candi_mk = mk_des.get_candi_mks(MatUnit::CELL).at(0);
+            auto& candi_mk = mk_des.get_std_mk(MatUnit::CELL);
             candi_mk.forEach([point, &mask](std::uint8_t& px, const int* pos) {
                 int x = point.x + pos[1];
                 int y = point.y + pos[0];
