@@ -14,7 +14,7 @@ TEST(um2px_auto_scale, basic_test_zion) {
     chipimgproc::algo::Um2PxAutoScale auto_scaler(
         img, 9, 9, 2
     );
-    chipimgproc::marker::Layout mk_layout = make_zion_layout2("AM3", 2.4145);
+    chipimgproc::marker::Layout mk_layout = make_zion_layout2("zion_pat_am3.tsv", 2.4145);
     auto [best_um2px_r, score_mat] = auto_scaler.linear_steps(
         mk_layout, 2.4145, 0.002, 5, {}, std::cout 
     );
@@ -34,7 +34,7 @@ TEST(um2px_auto_scale, basic_test_banff) {
     chipimgproc::algo::Um2PxAutoScale auto_scaler(
         img, 4, 4, 1
     );
-    chipimgproc::marker::Layout mk_layout = make_banff_layout("AM3", 2.4145);
+    chipimgproc::marker::Layout mk_layout = make_banff_layout("banff_rc/pat_CY5.tsv", 2.4145);
     auto [best_um2px_r, score_mat] = auto_scaler.linear_steps( 
         mk_layout, 2.4145, 0.002, 5, {}, std::cout );
     std::cout << best_um2px_r << std::endl;
