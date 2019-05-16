@@ -93,6 +93,18 @@ struct Layout {
         const auto& this_ref = *this;        
         return const_cast<Des&>(this_ref.get_marker_des(r, c));
     }
+    auto get_single_pat_marker_des(const MatUnit& unit) const {
+        if(pat_num != single) {
+            throw std::runtime_error(
+                "get_single_pat_marker_des() only support single pattern"
+            );
+        }
+        auto& mk = mks.at(0);
+        return nucleona::make_tuple(
+            mk.get_candi_mks(unit),
+            mk.get_candi_mks_mask(unit)
+        );
+    }
     void set_reg_mat_dist(
         int rows, int cols, 
         const cv::Point& min_p, 
@@ -134,6 +146,32 @@ struct Layout {
             mk.candi_mks_px_mask = candi_pats_px_mask;
         }
     } 
+    void reset_mk_pat(
+        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
+        const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px_mask,
+        std::uint32_t invl_x_px, std::uint32_t invl_y_px
+    ) {
+        auto& min_p = mks.at(0).pos_cl_;
+        if(dist_form == reg_mat) {
+            const auto& rows = mk_map.rows;
+            const auto& cols = mk_map.cols;
+            for(int r = 0; r < rows; r ++ ) {
+                for( int c = 0; c < cols; c ++ ) {
+                    decltype(mk_map)::value_type idx = r * cols + c;
+                    mks.at(idx).pos_px_.x = min_p.x + invl_x_px * c;
+                    mks.at(idx).pos_px_.y = min_p.y + invl_y_px * r;
+                }
+            }
+            mk_invl_x_px = invl_x_px;
+            mk_invl_y_px = invl_y_px;
+        } else {
+            throw std::runtime_error("dist_form: random not yet support");
+        }
+        for( auto& mk : mks ) {
+            mk.candi_mks_px      = candi_pats_px;
+            mk.candi_mks_px_mask = candi_pats_px_mask;
+        }
+    }
     void set_mk_pat_reg_mat( 
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl,
@@ -253,9 +291,62 @@ struct Layout {
 };
 constexpr struct MakeSinglePatternRegMatLayout
 {
+    auto to_px_domain(
+        const std::vector<cv::Mat_<std::uint8_t>>& mks_cl,
+        const std::vector<cv::Mat_<std::uint8_t>>& masks_cl,
+        float cell_r_um,
+        float cell_c_um,
+        float border_um,
+        std::uint32_t invl_x_cl, 
+        std::uint32_t invl_y_cl,
+        float um2px_r
+    ) const {
+        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
+        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px_mask;
+        for(auto&& [mk, mask] : ranges::view::zip(mks_cl, masks_cl)) {
+            auto [mk_img, mask_img] = txt_to_img_(
+                mk, mask,
+                cell_r_um * um2px_r,
+                cell_c_um * um2px_r,
+                border_um * um2px_r
+            );
+            candi_mk_pats_px.push_back(mk_img);
+            candi_mk_pats_px_mask.push_back(mask_img);
+        }
+        std::uint32_t invl_x_px = std::round(invl_x_cl * (cell_c_um + border_um) * um2px_r); // can get this value from micron to pixel
+        std::uint32_t invl_y_px = std::round(invl_y_cl * (cell_r_um + border_um) * um2px_r);
+        return std::make_tuple(
+            candi_mk_pats_px,
+            candi_mk_pats_px_mask,
+            invl_x_px,
+            invl_y_px
+        );
+
+    }
     auto operator()(
-        const cv::Mat_<std::uint8_t>& mk,
-        const cv::Mat_<std::uint8_t>& mask,
+        const std::vector<cv::Mat_<std::uint8_t>>& mks_cl,
+        const std::vector<cv::Mat_<std::uint8_t>>& masks_cl,
+        float cell_r_um,
+        float cell_c_um,
+        float border_um,
+        std::uint32_t invl_x_cl, 
+        std::uint32_t invl_y_cl,
+        float um2px_r,
+        marker::Layout& mk_layout
+    ) const {
+        auto [candi_mk_pats_px, candi_mk_pats_px_mask, invl_x_px, invl_y_px] = 
+            to_px_domain(mks_cl, masks_cl, cell_r_um, cell_c_um, border_um, 
+                invl_x_cl, invl_y_cl, um2px_r
+            );
+        mk_layout.reset_mk_pat(
+            candi_mk_pats_px,
+            candi_mk_pats_px_mask,
+            invl_x_px, invl_y_px
+        );
+    }
+    auto operator()(
+        const cv::Mat_<std::uint8_t>& mks_cl,
+        const cv::Mat_<std::uint8_t>& masks_cl,
         float cell_r_um,
         float cell_c_um,
         float border_um,
@@ -265,36 +356,43 @@ constexpr struct MakeSinglePatternRegMatLayout
         std::uint32_t invl_y_cl,
         float um2px_r
     ) const {
-        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl;
-        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_cl_mask;
-        candi_mk_pats_cl.push_back(mk);
-        candi_mk_pats_cl_mask.push_back(mask);
-
-        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px;
-        std::vector<cv::Mat_<std::uint8_t>> candi_mk_pats_px_mask;
-        auto [mk_img, mask_img] = txt_to_img_(
-            mk, mask,
-            cell_r_um * um2px_r,
-            cell_c_um * um2px_r,
-            border_um * um2px_r
-        );
-        candi_mk_pats_px.push_back(mk_img);
-        candi_mk_pats_px_mask.push_back(mask_img);
-        chipimgproc::marker::Layout mk_layout;
-        std::uint32_t invl_x_px = std::round(invl_x_cl * (cell_c_um + border_um) * um2px_r); // can get this value from micron to pixel
-        std::uint32_t invl_y_px = std::round(invl_y_cl * (cell_r_um + border_um) * um2px_r);
+        auto [candi_mk_pats_px, candi_mk_pats_px_mask, invl_x_px, invl_y_px] = 
+            to_px_domain({mks_cl}, {masks_cl}, cell_r_um, cell_c_um, border_um, 
+                invl_x_cl, invl_y_cl, um2px_r
+            );
+        marker::Layout mk_layout;
         mk_layout.set_reg_mat_dist(
-            rows, cols, {0, 0}, 
-            invl_x_cl, invl_y_cl, 
+            rows, cols, {0,0},
+            invl_x_cl, invl_y_cl,
             invl_x_px, invl_y_px
         );
         mk_layout.set_single_mk_pat(
-            candi_mk_pats_cl, 
+            {mks_cl},
             candi_mk_pats_px,
-            candi_mk_pats_cl_mask,
+            {masks_cl},
             candi_mk_pats_px_mask
         );
         return mk_layout;
+    }
+    auto operator()(
+        marker::Layout& mk_layout, 
+        float cell_r_um,
+        float cell_c_um,
+        float border_um,
+        float um2px_r
+    ) const {
+        auto [mks, masks] = mk_layout.get_single_pat_marker_des(
+            MatUnit::CELL
+        );
+        operator()(
+            mks, masks, 
+            cell_r_um, cell_c_um,
+            border_um,
+            mk_layout.mk_invl_x_cl,
+            mk_layout.mk_invl_y_cl,
+            um2px_r,
+            mk_layout
+        );
     }
 private:
     chipimgproc::marker::TxtToImg txt_to_img_;

@@ -44,7 +44,8 @@ struct RegMatMarkerLayout {
             cv::Point org_point;
         } res {
             max_vote->second > threshold,
-            max_vote->first - mk_layout.get_marker_des(0, 0).get_pos_cl()
+            max_vote->first - mk_layout
+                .get_marker_des(0, 0).get_pos(MatUnit::CELL)
         };
         return res;
     }
@@ -53,6 +54,7 @@ struct RegMatMarkerLayout {
         const marker::Layout&      mk_layout,
         stat::Mats<FLOAT>&         raw_smats,
         TiledMat<GLID>&            tiled_src,
+        std::size_t                candi_mks_id, 
         std::ostream&              out       = nucleona::stream::null_out,
         const std::function<
             void(const cv::Mat&)
@@ -91,18 +93,11 @@ struct RegMatMarkerLayout {
                 );
                 out << "sub region (r,c): (" << r << "," << c << "): " << match_region << std::endl;
                 cv::Mat sub_tgt = tgt(match_region); 
-                cv::Mat_<float> sub_score;
-                for(auto& mk : candi_mks) {
-                    cv::Mat_<float> sub_candi_score(
-                        sub_tgt.rows - mk.rows + 1,
-                        sub_tgt.cols - mk.cols + 1
-                    );
-                    cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED);
-                    if(sub_score.empty()) 
-                        sub_score = sub_candi_score;
-                    else 
-                        sub_score += sub_candi_score;
-                }
+                cv::Mat_<float> sub_score(
+                    sub_tgt.rows - mk.rows + 1,
+                    sub_tgt.cols - mk.cols + 1
+                );
+                cv::matchTemplate(sub_tgt, mk, sub_score, CV_TM_CCORR_NORMED);
                 if(v_score) {
                     cv::Mat tmp;
                     // cv::Mat tmp = sub_score + 1;

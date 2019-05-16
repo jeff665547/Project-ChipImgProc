@@ -267,22 +267,15 @@ struct SingleGeneral {
             if( cell_w_um_ < 0 ) throw std::runtime_error("um2px_r detection require cell micron info but not set");
             algo::Um2PxAutoScale auto_scaler(
                 tmp, 
-                // assume the marker is single pattern regular matrix layout
-                marker_layout_.mks.at(0).get_best_mk(MatUnit::CELL),
-                marker_layout_.mks.at(0).get_best_mk(MatUnit::CELL),
                 cell_w_um_,
                 cell_h_um_,
-                space_um_,
-                marker_layout_.mk_map.rows,
-                marker_layout_.mk_map.cols,
-                marker_layout_.mk_invl_x_cl,
-                marker_layout_.mk_invl_y_cl
+                space_um_
             );
-            auto[best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(
-                curr_um2px_r_, 0.002, 7, low_score_marker_idx, *msg_
+            auto[best_um2px_r, score_mat] = auto_scaler.linear_steps(
+                marker_layout_, curr_um2px_r_, 0.002, 7, 
+                low_score_marker_idx, *msg_
             );
             curr_um2px_r_  = best_um2px_r;
-            marker_layout_ = mk_layout;
             marker_regs    = marker::detection::reg_mat_no_rot.infer_marker_regions(
                 score_mat, marker_layout_, MatUnit::PX, *msg_
             );
@@ -293,16 +286,11 @@ struct SingleGeneral {
         }
         else {
             // assume the marker is single pattern regular matrix layout
-            marker_layout_ = marker::make_single_pattern_reg_mat_layout(
-                marker_layout_.mks.at(0).get_best_mk(MatUnit::CELL),
-                marker_layout_.mks.at(0).get_best_mk_mask(MatUnit::CELL),
+            marker::make_single_pattern_reg_mat_layout(
+                marker_layout_,
                 cell_w_um_,
                 cell_h_um_,
                 space_um_,
-                marker_layout_.mk_map.rows,
-                marker_layout_.mk_map.cols,
-                marker_layout_.mk_invl_x_cl,
-                marker_layout_.mk_invl_y_cl,
                 curr_um2px_r_
             );
             marker_regs    = marker::detection::reg_mat_no_rot(

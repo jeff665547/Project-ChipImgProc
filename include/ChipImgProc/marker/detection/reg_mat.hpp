@@ -119,7 +119,7 @@ struct RegMat {
         for(auto& mk_r : marker_regions) {
             auto& mk_des = mk_layout.get_marker_des(mk_r.y_i, mk_r.x_i);
             auto& candi_mks = mk_des.get_candi_mks(unit);
-            auto& candi_mks_mask = mk_des.get_candi_mks_mask_px();
+            auto& candi_mks_mask = mk_des.get_candi_mks_mask(unit);
             if(v_search) {
                 cv::rectangle(view, mk_r, 128, 3);
             }
@@ -134,8 +134,8 @@ struct RegMat {
             cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED, mask);
             // auto tmp = norm_u8(sub_candi_score, 0, 0);
             sub_score = sub_candi_score;
-            auto mk_cols = candi_mks.at(0).cols;
-            auto mk_rows = candi_mks.at(0).rows;
+            auto mk_cols = mk_des.get_std_mk(unit).cols;
+            auto mk_rows = mk_des.get_std_mk(unit).rows;
             each_score_region(
                 sub_score, mk_r, mk_cols, mk_rows
             );

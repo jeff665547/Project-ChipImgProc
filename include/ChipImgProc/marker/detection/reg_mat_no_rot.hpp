@@ -44,13 +44,13 @@ constexpr struct RegMatNoRot {
                     scan_rect_height
                 );
                 cv::Mat scan_target_mat = src_u8(scan_region);
-                auto& mk_pat = mk_des.get_candi_mks(unit).at(0);
+                auto& mk_pat = mk_des.get_best_mk(unit);
                 cv::Mat_<float> score(
                     scan_target_mat.rows - mk_pat.rows + 1,
                     scan_target_mat.cols - mk_pat.cols + 1
                 );
                 if( unit == MatUnit::PX) {
-                    auto& mk_mask = mk_des.get_candi_mks_mask_px().at(0);
+                    auto& mk_mask = mk_des.get_best_mk_mask(unit);
                     cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED, mk_mask);
                 } else if (unit == MatUnit::CELL) {
                     cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED);
