@@ -3,6 +3,7 @@
 #include <ChipImgProc/const.h>
 #include <Nucleona/tuple.hpp>
 #include <ChipImgProc/marker/txt_to_img.hpp>
+#include <range/v3/all.hpp>
 namespace chipimgproc{ namespace marker{
 struct Des {
 friend struct Layout;

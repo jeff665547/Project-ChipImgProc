@@ -12,10 +12,15 @@ TEST(um2px_auto_scale, basic_test_zion) {
     );
     auto img = chipimgproc::imread(image_path);
     chipimgproc::algo::Um2PxAutoScale auto_scaler(
-        img, mk_img, mk_mask_img, 9, 9, 2, 3, 3, 37, 37
+        img, 9, 9, 2
     );
-    auto [best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(2.4145, 0.002, 5, {}, std::cout );
+    chipimgproc::marker::Layout mk_layout = make_zion_layout2("AM3", 2.4145);
+    auto [best_um2px_r, score_mat] = auto_scaler.linear_steps(
+        mk_layout, 2.4145, 0.002, 5, {}, std::cout 
+    );
     std::cout << best_um2px_r << std::endl;
+    EXPECT_LT(best_um2px_r, 2.4145 + 0.05);
+    EXPECT_GT(best_um2px_r, 2.4145 - 0.05);
 }
 
 TEST(um2px_auto_scale, basic_test_banff) {
@@ -27,8 +32,12 @@ TEST(um2px_auto_scale, basic_test_banff) {
     );
     auto img = chipimgproc::imread(image_path);
     chipimgproc::algo::Um2PxAutoScale auto_scaler(
-        img, mk_img, mk_mask_img, 4, 4, 1, 3, 3, 81, 81
+        img, 4, 4, 1
     );
-    auto [best_um2px_r, score_mat, mk_layout] = auto_scaler.linear_steps(2.4145, 0.002, 5, {}, std::cout );
+    chipimgproc::marker::Layout mk_layout = make_banff_layout("AM3", 2.4145);
+    auto [best_um2px_r, score_mat] = auto_scaler.linear_steps( 
+        mk_layout, 2.4145, 0.002, 5, {}, std::cout );
     std::cout << best_um2px_r << std::endl;
+    EXPECT_LT(best_um2px_r, 2.4145 + 0.05);
+    EXPECT_GT(best_um2px_r, 2.4145 - 0.05);
 }

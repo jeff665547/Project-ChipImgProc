@@ -93,6 +93,7 @@ struct RegMatMarkerLayout {
                 );
                 out << "sub region (r,c): (" << r << "," << c << "): " << match_region << std::endl;
                 cv::Mat sub_tgt = tgt(match_region); 
+                auto& mk = candi_mks.at(candi_mks_id);
                 cv::Mat_<float> sub_score(
                     sub_tgt.rows - mk.rows + 1,
                     sub_tgt.cols - mk.cols + 1
