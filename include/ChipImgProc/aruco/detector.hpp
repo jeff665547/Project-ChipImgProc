@@ -136,7 +136,7 @@ class Detector {
     auto detect_markers(
         cv::Mat input,
         std::ostream& logger = nucleona::stream::null_out
-    ) {
+    ) const {
         
         // convert to 8U
         cv::Mat_<uint8_t> image;

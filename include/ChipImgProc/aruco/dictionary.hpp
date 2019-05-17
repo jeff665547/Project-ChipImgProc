@@ -16,6 +16,10 @@ namespace chipimgproc::aruco {
 class Dictionary : public std::vector<std::uint64_t> {
   public:
     /**
+     *  @brief  Dictionary default constructor.
+     */
+    Dictionary() = default;
+    /**
      *  @brief  Dictionary constructor.
      *  @param  coding_bits  The value defines the size of an ArUco marker
      *  @param  maxcor_bits  The maximum number of bits for marker correction

@@ -94,17 +94,14 @@ struct Layout {
         const auto& this_ref = *this;        
         return const_cast<Des&>(this_ref.get_marker_des(r, c));
     }
-    auto get_single_pat_marker_des(const MatUnit& unit) const {
+    const auto& get_single_pat_marker_des() const {
         if(pat_num != single) {
             throw std::runtime_error(
                 "get_single_pat_marker_des() only support single pattern"
             );
         }
         auto& mk = mks.at(0);
-        return nucleona::make_tuple(
-            mk.get_candi_mks(unit),
-            mk.get_candi_mks_mask(unit)
-        );
+        return mk;
     }
     void set_reg_mat_dist(
         int rows, int cols, 
@@ -382,9 +379,9 @@ constexpr struct MakeSinglePatternRegMatLayout
         float border_um,
         float um2px_r
     ) const {
-        auto [mks, masks] = mk_layout.get_single_pat_marker_des(
-            MatUnit::CELL
-        );
+        auto mk_des = mk_layout.get_single_pat_marker_des();
+        auto& mks = mk_des.get_candi_mks(MatUnit::CELL);
+        auto& masks = mk_des.get_candi_mks_mask(MatUnit::CELL);
         operator()(
             mks, masks, 
             cell_r_um, cell_c_um,

@@ -40,9 +40,6 @@ struct Um2PxAutoScale {
 
         auto cur_r = mid - (num * step);
         for(int i = 0; i < 2 * num; i ++ ) {
-            auto [mks_cl, masks_cl] = mk_layout.get_single_pat_marker_des(
-                MatUnit::CELL
-            );
             marker::Layout layout = mk_layout;
             chipimgproc::marker::make_single_pattern_reg_mat_layout(
                 layout, cell_h_um_, cell_w_um_,
