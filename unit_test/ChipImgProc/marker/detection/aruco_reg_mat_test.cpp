@@ -28,29 +28,19 @@ TEST(aruco_reg_mat, basic_test) {
         15, 16, 17, 18, 19, 02, 20,
         00, 01, 10, 11, 12, 13, 14
     };
-    std::vector<cv::Point> aruco_pt;
-    int x_i(0), y_i(0);
-    for(auto&& ids : aruco_ids_in_image) {
-        if(x_i == 6) {
-            y_i ++;
-            x_i = 0;
-        }
-        aruco_pt.push_back(cv::Point(
-            x_i, y_i
-        ));
-        x_i ++;
-    }
 
     auto layout = make_banff_layout("banff_rc/pat_CY3.tsv", 2.4146);
 
     chipimgproc::marker::detection::ArucoRegMat reg_mat;
-    reg_mat.set_dict(db_path.string());
-    reg_mat.set_detector(
+    reg_mat.set_dict(db_path.string(), "DICT_6X6_250");
+    reg_mat.set_detector_ext(
         3, 1, 1, 13.4, 8.04, 
         frame_template_path.string(),
         frame_mask_path.string(), 
         9, 268, 5, 
-        aruco_ids_in_image
+        aruco_ids_in_image,
+        3, 3,
+        std::cout
     );
 
     auto mk_regs = reg_mat(
@@ -60,6 +50,6 @@ TEST(aruco_reg_mat, basic_test) {
     );
 
     for(auto mk_r : mk_regs) {
-        std::cout << (cv::Rect&)mk_r << std::endl;
+        mk_r.info(std::cout);
     }
 }
