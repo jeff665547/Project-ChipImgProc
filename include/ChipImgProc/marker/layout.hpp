@@ -103,6 +103,14 @@ struct Layout {
         auto& mk = mks.at(0);
         return mk;
     }
+    auto get_single_pat_candi_num() const {
+        return get_single_pat_marker_des().candi_mks_cl.size();
+    }
+    void set_single_pat_best_mk(std::size_t i) {
+        for(auto&& mk : mks) {
+            mk.best_mk_idx = i;
+        }
+    }
     void set_reg_mat_dist(
         int rows, int cols, 
         const cv::Point& min_p, 

@@ -61,6 +61,29 @@ struct Utils {
         return res;
     }
     /**
+     *  @brief  Extract ArUco markers id and point from raw ArUco marker dictionary json.
+     *  @param  id_map The raw Aruco marker dictionary json.
+     *  @return id to point vector.
+     */
+    static std::vector<cv::Point> aruco_points( const nlohmann::json& id_map) {
+        std::vector<cv::Point> res;
+
+        std::int32_t max_id = 0;
+        for(auto it = id_map.begin(); it != id_map.end(); it ++ ) {
+            auto id = std::stoi(it.key());
+            if(max_id < id) {
+                max_id = id;
+            }
+        }
+        res.resize(max_id + 1);
+        for(auto it = id_map.begin(); it != id_map.end(); it ++ ) {
+            auto id = std::stoi(it.key());
+            auto arr = *it;
+            res[id] = cv::Point(arr[0], arr[1]);
+        }
+        return res;
+    }
+    /**
      *  @brief Convert points from float to integer.
      *  @param p_vec A point container which element should be 
      *               a pair of a integer id and a float type point.

@@ -28,6 +28,14 @@ TEST(aruco_reg_mat, basic_test) {
         15, 16, 17, 18, 19, 02, 20,
         00, 01, 10, 11, 12, 13, 14
     };
+    std::vector<cv::Point> aruco_points(53);
+    for(int y = 0; y < 7; y ++ ) {
+        for(int x = 0; x < 7; x ++ ) {
+            aruco_points[
+                aruco_ids_in_image[y * 7 + x] 
+            ] = cv::Point(x, y);
+        }
+    }
 
     auto layout = make_banff_layout("banff_rc/pat_CY3.tsv", 2.4146);
 
@@ -39,7 +47,7 @@ TEST(aruco_reg_mat, basic_test) {
         frame_mask_path.string(), 
         9, 268, 5, 
         aruco_ids_in_image,
-        3, 3,
+        aruco_points,
         std::cout
     );
 

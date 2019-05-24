@@ -198,6 +198,10 @@ struct SingleGeneral {
     auto get_marker_layout() {
         return marker_layout_;
     }
+    void set_ref_rot_degree(const std::optional<float>& rot_degree) {
+        ref_rot_degree_ = rot_degree;
+    }
+
     /**
      *  @brief The main function of image process pipeline.
      *  @details See SingleGeneral.
@@ -224,44 +228,77 @@ struct SingleGeneral {
         float theta_threshold       = 0.01;
         std::vector<float>       candidate_theta;
         std::vector<cv::Point>   low_score_marker_idx;
-        // iterative rotation calibration
-        do{
-            auto marker_regs = marker_detection_(
-                static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
-                marker_layout_, 
-                chipimgproc::MatUnit::PX, 
-                0,
-                *msg_
-            );
-            low_score_marker_idx = 
+        // if has ref rotation degree, test all marker
+        if(ref_rot_degree_) {
+            // set best marker index
+            std::vector<float>          test_thetas     ;
+            std::vector<std::size_t>    test_thetas_i   ;
+            for(
+                std::size_t i = 0; 
+                i < marker_layout_.get_single_pat_candi_num();
+                i ++
+            ) {
+                auto marker_regs = marker_detection_(
+                    static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
+                    marker_layout_, 
+                    chipimgproc::MatUnit::PX, 
+                    i,
+                    *msg_
+                );
                 marker::detection::filter_low_score_marker(marker_regs);
-            theta_off = rot_estimator_(marker_regs, *msg_);
-            theta += theta_off;
-            tmp = src.clone();
-            rot_calibrator_(
-                tmp,
-                theta,
-                v_rot_cali_res_
-            );
-            if( iteration_times > start_record_theta_time ) {
-                candidate_theta.push_back(theta);
+                auto test_theta = rot_estimator_(marker_regs, *msg_);
+                test_thetas.push_back(test_theta);
+                test_thetas_i.push_back(i);
             }
-            iteration_times ++;
-            if( iteration_times >= iteration_max_times) break;
-        } while(std::abs(theta_off) > theta_threshold);
-        if( std::abs(theta_off) > theta_threshold ) {
-            *msg_ << "theta not convergence" << std::endl;
-            float sum = 0;
-            for(auto&& t : candidate_theta) {
-                sum += t;
+            std::sort(test_thetas_i.begin(), test_thetas_i.end(), [&test_thetas, this](
+                auto&& a_i, auto&& b_i
+            ){
+                return std::abs(test_thetas[a_i] - ref_rot_degree_.value()) < 
+                    std::abs(test_thetas[b_i] - ref_rot_degree_.value());
+            });
+            marker_layout_.set_single_pat_best_mk(test_thetas_i[0]);
+            theta = ref_rot_degree_.value();
+            rot_calibrator_(tmp, theta, v_rot_cali_res_);
+        } else {
+            // iterative rotation calibration
+            do{
+                auto marker_regs = marker_detection_(
+                    static_cast<const cv::Mat_<std::uint16_t>&>(tmp), 
+                    marker_layout_, 
+                    chipimgproc::MatUnit::PX, 
+                    0,
+                    *msg_
+                );
+                low_score_marker_idx = 
+                    marker::detection::filter_low_score_marker(marker_regs);
+                theta_off = rot_estimator_(marker_regs, *msg_);
+                theta += theta_off;
+                tmp = src.clone();
+                rot_calibrator_(
+                    tmp,
+                    theta,
+                    v_rot_cali_res_
+                );
+                if( iteration_times > start_record_theta_time ) {
+                    candidate_theta.push_back(theta);
+                }
+                iteration_times ++;
+                if( iteration_times >= iteration_max_times) break;
+            } while(std::abs(theta_off) > theta_threshold);
+            if( std::abs(theta_off) > theta_threshold ) {
+                *msg_ << "theta not convergence" << std::endl;
+                float sum = 0;
+                for(auto&& t : candidate_theta) {
+                    sum += t;
+                }
+                theta = sum / candidate_theta.size();
+                tmp = src.clone();
+                rot_calibrator_(
+                    tmp,
+                    theta,
+                    v_rot_cali_res_
+                );
             }
-            theta = sum / candidate_theta.size();
-            tmp = src.clone();
-            rot_calibrator_(
-                tmp,
-                theta,
-                v_rot_cali_res_
-            );
         }
         // detect marker
         if(um2px_r_detection_) {
@@ -398,6 +435,7 @@ struct SingleGeneral {
     float                     cell_h_um_         {-1}                            ;
     float                     cell_w_um_         {-1}                            ;
     float                     space_um_          {-1}                            ;
+    std::optional<float>      ref_rot_degree_    { 0}                            ;
 
     std::function<
         void(const cv::Mat&)

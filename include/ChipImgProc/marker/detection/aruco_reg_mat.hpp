@@ -33,8 +33,7 @@ struct ArucoRegMat {
       , const double&                     nms_radius                // pixels
       , const std::int32_t&               cell_size                 // pixels
       , const std::vector<std::int32_t>&  ids
-      , const std::uint16_t&              mk_rows
-      , const std::uint16_t&              mk_cols
+      , const std::vector<cv::Point>&     mk_index_map
       , std::ostream&                     logger            = nucleona::stream::null_out
     ) {
         if(!dictionary_set_)
@@ -52,19 +51,10 @@ struct ArucoRegMat {
             ids,
             logger
         );
-        int x_i(0), y_i(0);
-        for(auto&& id : ids) {
-            if(x_i == 6) {
-                y_i ++;
-                x_i = 0;
-            }
-            mk_index_map_.at(id) = cv::Point(x_i, y_i);
-            x_i ++;
-        }
+        mk_index_map_ = mk_index_map;
     }
-    template<class T>
     std::vector<MKRegion> operator()(
-        const cv::Mat_<T>&          src, 
+        const cv::Mat&              src, 
         const Layout&               mk_layout, 
         const MatUnit&              unit,
         std::ostream&               out        = nucleona::stream::null_out,
@@ -72,20 +62,34 @@ struct ArucoRegMat {
         const ViewerCallback&       v_search   = nullptr,
         const ViewerCallback&       v_marker   = nullptr
     ) const {
-        std::vector<MKRegion> res;
         auto& mk_des = mk_layout.get_single_pat_marker_des();
         auto& marker = mk_des.get_std_mk(unit);
+        return operator()(
+            src, marker.cols, marker.rows, out,
+            v_bin, v_search, v_marker
+        );
+    }
+    std::vector<MKRegion> operator()(
+        const cv::Mat&              src, 
+        int                         marker_width,
+        int                         marker_height,
+        std::ostream&               out        = nucleona::stream::null_out,
+        const ViewerCallback&       v_bin      = nullptr,
+        const ViewerCallback&       v_search   = nullptr,
+        const ViewerCallback&       v_marker   = nullptr
+    ) const {
+        std::vector<MKRegion> res;
         auto pts = detector_.detect_markers(src, out);
         res.reserve(pts.size());
         for(auto [i, p] : pts) {
-            auto x = p.x - (marker.cols / 2);
-            auto y = p.y - (marker.rows / 2);
+            auto x = p.x - (marker_width  / 2);
+            auto y = p.y - (marker_height / 2);
             auto& mk_idx = mk_index_map_.at(i);
             MKRegion mk_r;
             mk_r.x = x;
             mk_r.y = y;
-            mk_r.width = marker.cols;
-            mk_r.height = marker.rows;
+            mk_r.width  = marker_width;
+            mk_r.height = marker_height;
             mk_r.x_i = mk_idx.x;
             mk_r.y_i = mk_idx.y;
             mk_r.score = 0;
