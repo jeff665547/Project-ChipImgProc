@@ -102,6 +102,8 @@ struct RegMat {
         std::vector<std::uint32_t> y_grid_anchor; 
         auto fov_h_px = right_bottom->y + right_bottom->height - left_top->y;
         auto fov_w_px = right_bottom->x + right_bottom->width - left_top->x;
+        msg << VDUMP(fov_h_px) << std::endl;
+        msg << VDUMP(fov_w_px) << std::endl;
         float cl_h_px = fov_h_px / (float)fov_h_cl;
         float cl_w_px = fov_w_px / (float)fov_w_cl;
         for(int i = 0; i < fov_h_cl + 1; i ++ ) {

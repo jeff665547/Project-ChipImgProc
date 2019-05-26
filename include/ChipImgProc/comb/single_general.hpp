@@ -22,6 +22,7 @@
 #include <ChipImgProc/marker/detection/reg_mat_no_rot.hpp>
 #include <ChipImgProc/algo/um2px_auto_scale.hpp>
 #include <ChipImgProc/marker/roi_append.hpp>
+#include <ChipImgProc/marker/view.hpp>
 
 namespace chipimgproc{ namespace comb{
 
@@ -201,6 +202,9 @@ struct SingleGeneral {
     void set_ref_rot_degree(const std::optional<float>& rot_degree) {
         ref_rot_degree_ = rot_degree;
     }
+    void set_mk_regs_hint(const std::vector<marker::detection::MKRegion>& mk_rs) {
+        mk_regs_hint_ = mk_rs;
+    }
 
     /**
      *  @brief The main function of image process pipeline.
@@ -331,15 +335,61 @@ struct SingleGeneral {
                 space_um_,
                 curr_um2px_r_
             );
-            marker_regs    = marker::detection::reg_mat_no_rot(
+            // try to justify the best marker regions
+            auto tp_marker_regs = marker::detection::reg_mat_no_rot(
                 tmp, marker_layout_, MatUnit::PX, 
                 low_score_marker_idx, *msg_, v_marker_seg_
             );
+            if(mk_regs_hint_.empty()) {
+                *msg_ << "marker regions no hint, direct use template match result\n";
+                // no choice just accept tp_marker_regs
+                marker_regs = std::move(tp_marker_regs);
+            } else {
+                auto& mk_des = marker_layout_.get_single_pat_marker_des();
+                auto& std_mk_px = mk_des.get_std_mk(MatUnit::PX);
+                for(auto&& mk : mk_regs_hint_) {
+                    mk.width = std_mk_px.cols;
+                    mk.height = std_mk_px.rows;
+                    mk.x = std::round((float)mk.x - mk.width  / 2.0);
+                    mk.y = std::round((float)mk.y - mk.height / 2.0);
+                }
+                auto hint_marker_regs = marker::detection::infer(
+                    static_cast<cv::Mat_<std::uint16_t>&>(tmp), 
+                    mk_regs_hint_,
+                    v_marker_seg_
+                );
+                // test is tp_marker_regs usable.
+                auto tp_theta = rot_estimator_(tp_marker_regs);
+                if(std::abs(tp_theta) > 1) {
+                    *msg_ << "marker regions hint detected and template match markers quality too bad, use hint\n";
+                    // the tp_marker_res is unacceptable, use hint data
+                    marker_regs = std::move(hint_marker_regs);
+                } else {
+                    auto& std_mk_cl = mk_des.get_std_mk(MatUnit::CELL);
+                    const auto px_per_cl_w = std_mk_px.cols / (float)std_mk_cl.cols;
+                    const auto shift_thd_w = px_per_cl_w / 2;
+
+                    const auto px_per_cl_h = std_mk_px.rows / (float)std_mk_cl.rows;
+                    const auto shift_thd_h = px_per_cl_h / 2;
+
+                    if( std::abs(tp_marker_regs.at(0).x - hint_marker_regs.at(0).x) < shift_thd_w && 
+                        std::abs(tp_marker_regs.at(0).y - hint_marker_regs.at(0).y) < shift_thd_h
+                    ) {
+                        *msg_ << "both marker region hint and template match are good, use template match\n";
+                        // close enough, the template match should better use tp_marker_regs
+                        marker_regs = std::move(tp_marker_regs);
+                    } else {
+                        *msg_ << "marker regions hint detected and template match markers too far from hint, use hint\n";
+                        // too far, the template match is probably failed, use hint_marker_regs
+                        marker_regs = std::move(hint_marker_regs);
+                    }
+                }
+            }
         }
         auto grid_res   = gridder_(tmp, marker_layout_, marker_regs, *msg_, v_grid_res_);
         if(v_marker_append_) {
             auto marker_append_res = chipimgproc::marker::roi_append(
-                tmp, marker_layout_, *msg_
+                tmp, marker_layout_, marker_regs, *msg_
             );
             v_marker_append_(marker_append_res);
         }
@@ -425,17 +475,20 @@ struct SingleGeneral {
         );
     }
   private:
-    std::string               margin_method_     { "mid_seg" }                   ; // available algorithm: mid_seg, auto_min_cv
-    float                     seg_rate_          { 0.6 }                         ;
-    marker::Layout            marker_layout_                                     ;
-    std::ostream*             msg_               { &nucleona::stream::null_out } ;
-    bool                      disable_bg_fix_    { false }                       ;
-    float                     curr_um2px_r_      {-1}                            ;
-    bool                      um2px_r_detection_ {false}                         ;
-    float                     cell_h_um_         {-1}                            ;
-    float                     cell_w_um_         {-1}                            ;
-    float                     space_um_          {-1}                            ;
-    std::optional<float>      ref_rot_degree_    { 0}                            ;
+    std::string                         margin_method_     { "mid_seg" }                   ; // available algorithm: mid_seg, auto_min_cv
+    float                               seg_rate_          { 0.6 }                         ;
+    marker::Layout                      marker_layout_                                     ;
+    std::ostream*                       msg_               { &nucleona::stream::null_out } ;
+    bool                                disable_bg_fix_    { false }                       ;
+    float                               curr_um2px_r_      {-1}                            ;
+    bool                                um2px_r_detection_ {false}                         ;
+    float                               cell_h_um_         {-1}                            ;
+    float                               cell_w_um_         {-1}                            ;
+    float                               space_um_          {-1}                            ;
+    std::optional<float>                ref_rot_degree_    { 0}                            ;
+    std::vector<
+        marker::detection::MKRegion
+    >                                   mk_regs_hint_                                      ;
 
     std::function<
         void(const cv::Mat&)
