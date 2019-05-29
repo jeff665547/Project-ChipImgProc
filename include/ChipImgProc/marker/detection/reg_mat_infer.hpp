@@ -1,13 +1,39 @@
 #pragma once
 #include <vector>
 #include <ChipImgProc/marker/detection/mk_region.hpp>
+#include <Nucleona/stream/null_buffer.hpp>
 namespace chipimgproc::marker::detection {
 
-constexpr struct Infer {
+constexpr struct RegMatInfer {
+    void anchor_infer(std::size_t expect, std::vector<double>& ancs, std::ostream& out) const {
+        if(ancs.size() > 1 && ancs.size() < expect) {
+            std::size_t sum = 0;
+            for(std::size_t i = 1; i < ancs.size(); i ++) {
+                auto invl = ancs.at(i) - ancs.at(i-1);
+                sum += invl;
+            }
+            auto mean = sum / (ancs.size() - 1);
+            if(auto under_rate = ancs.front() / mean; under_rate > 1) {
+                std::vector<double> tmp;
+                for(std::size_t i = std::floor(under_rate); i > 0; i --) {
+                    tmp.push_back(ancs.front() - i * mean);
+                }
+                ancs = std::move(tmp);
+            }
+            for(std::size_t i = ancs.size(); i < expect; i ++ ) {
+                ancs.push_back(ancs.back() + mean);
+            }
+        }
+        if(expect > 0 && ancs.size() != expect)
+            out << "marker region inference failed, the detected markers are too few\n";
+    }
     template<class T>
     auto operator() ( 
         const cv::Mat_<T>&      src, 
         std::vector<MKRegion>&  mk_regs,
+        std::size_t             rows = 0,
+        std::size_t             cols = 0,
+        std::ostream&           out = nucleona::stream::null_out,
         const ViewerCallback&   v_marker  = nullptr 
     ) const {
         std::vector<double> x_anchor;
@@ -47,7 +73,12 @@ constexpr struct Infer {
         }
         width /= mk_regs.size();
         height /= mk_regs.size();
-
+        if(x_anchor.size() != cols) throw std::runtime_error(
+            "anchor number not match, probably marker detection failed"
+        );
+        if(y_anchor.size() != rows) throw std::runtime_error(
+            "anchor number not match, probably marker detection failed"
+        );
         std::vector<MKRegion> new_mk_regs;
         for(int y_i = 0; y_i < y_anchor.size(); y_i ++ ) {
             for( int x_i = 0; x_i < x_anchor.size(); x_i ++ ) {
@@ -70,6 +101,6 @@ constexpr struct Infer {
         }
         return new_mk_regs;
     } 
-} infer;
+} reg_mat_infer;
 
 }

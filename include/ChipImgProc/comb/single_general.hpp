@@ -17,7 +17,7 @@
 #include <ChipImgProc/gridding/reg_mat.hpp>
 #include <ChipImgProc/bgb/chunk_local_mean.hpp>
 #include <Nucleona/tuple.hpp>
-#include <ChipImgProc/marker/detection/infer.hpp>
+#include <ChipImgProc/marker/detection/reg_mat_infer.hpp>
 #include <ChipImgProc/marker/detection/filter_low_score_marker.hpp>
 #include <ChipImgProc/marker/detection/reg_mat_no_rot.hpp>
 #include <ChipImgProc/algo/um2px_auto_scale.hpp>
@@ -353,11 +353,15 @@ struct SingleGeneral {
                     mk.x = std::round((float)mk.x - mk.width  / 2.0);
                     mk.y = std::round((float)mk.y - mk.height / 2.0);
                 }
-                auto hint_marker_regs = marker::detection::infer(
+                auto hint_marker_regs = marker::detection::reg_mat_infer(
                     static_cast<cv::Mat_<std::uint16_t>&>(tmp), 
                     mk_regs_hint_,
+                    marker_layout_.mk_map.rows,
+                    marker_layout_.mk_map.cols,
+                    *msg_,
                     v_marker_seg_
                 );
+                *msg_ << VDUMP(hint_marker_regs.size()) << '\n';
                 // test is tp_marker_regs usable.
                 auto tp_theta = rot_estimator_(tp_marker_regs);
                 if(std::abs(tp_theta) > 1) {
