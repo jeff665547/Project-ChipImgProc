@@ -137,7 +137,7 @@ class Detector {
         cv::Mat input,
         std::ostream& logger = nucleona::stream::null_out
     ) const {
-        
+
         // convert to 8U
         cv::Mat_<uint8_t> image;
         if (input.depth() == CV_8U)
@@ -172,7 +172,6 @@ class Detector {
           , small_image.cols - small_templ_.cols + 1
         );
         cv::matchTemplate(small_image, small_templ_, scores, cv::TM_CCORR_NORMED, small_mask_);
-        logger << "nms_count_: " << nms_count_ << '\n';
         for (auto k = 0; k < nms_count_; ++k) {
 
             // coarse alignment + non-maximum suppression
@@ -181,6 +180,10 @@ class Detector {
             cv::circle(scores, loc + offset, nms_radius_ / scale, cv::Scalar(0.0), -1);
             loc.x = std::round(scale * loc.x);
             loc.y = std::round(scale * loc.y);
+            if (loc.x > image.cols - templ_.cols)
+                loc.x = image.cols - templ_.cols;
+            if (loc.y > image.rows - templ_.rows)
+                loc.y = image.rows - templ_.rows;
 
             // fine alignment
             cv::Mat_<uint8_t> view = image(cv::Rect(loc, templ_.size()));
@@ -188,18 +191,25 @@ class Detector {
             double score = -1;
             try{
                 score = cv::findTransformECC(view, templ_, warp_mat, cv::MOTION_EUCLIDEAN, criteria, mask_);
-            } catch( const cv::Exception& e) {
+            } catch(const cv::Exception& e) {
+                logger << "ECC convergence failure. skip this one\n";
                 continue;
             }
+            // logger << "ECC score: " << score << '\n';
 
             // transform the anchor points
             std::vector<cv::Vec<double,2>> dst_points;
-            cv::invertAffineTransform(warp_mat, warp_mat);
-            cv::transform(src_points, dst_points, warp_mat);
+            try {
+                cv::invertAffineTransform(warp_mat, warp_mat);
+                cv::transform(src_points, dst_points, warp_mat);
+            } catch (const cv::Exception& e) {
+                logger << "invert affine transformation failed. skip this one\n";
+                continue;
+            }
 
             // binarization
             cv::Mat_<uint8_t> bw;
-            cv::threshold(view, bw, 128, 1, cv::THRESH_BINARY | cv::THRESH_OTSU);
+            cv::threshold(view, bw, 0, 1, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
             // GUI verbose
             // cv::Mat plane, planes[] {
@@ -215,23 +225,49 @@ class Detector {
             auto last  = total - first;
             auto code  = 0ull;
             auto shift = 0;
+            int32_t i, j;
             cv::Rect region(cv::Point(0, 0), cell_size_);
-            for (auto j = first; j < last; ++j) {
-                auto r = static_cast<double>(j) / (total - 1);
-                for (auto i = first; i < last; ++i) {
-                    auto c = static_cast<double>(i) / (total - 1);
-                    auto p = (dst_points[0] * (1 - c) + dst_points[1] * c) * (1 - r)
-                           + (dst_points[2] * (1 - c) + dst_points[3] * c) * (    r) ;
-                    region.x = std::round(p[0]) - cell_size_.width  / 2;
-                    region.y = std::round(p[1]) - cell_size_.height / 2;
-                    // std::cerr << static_cast<int32_t>(norm(bw(region), cv::NORM_L1)) << " ";
-                    uint64_t bit = norm(bw(region), cv::NORM_L1) > cell_size_.area() * 0.5;
-                    code |= bit << shift++;
+            try {
+                for (j = first; j < last; ++j) {
+                    auto r = static_cast<double>(j) / (total - 1);
+                    for (i = first; i < last; ++i) {
+                        auto c = static_cast<double>(i) / (total - 1);
+                        auto p = (dst_points[0] * (1 - c) + dst_points[1] * c) * (1 - r)
+                               + (dst_points[2] * (1 - c) + dst_points[3] * c) * (    r) ;
+                        region.x = std::round(p[0] - 0.5 * cell_size_.width );
+                        region.y = std::round(p[1] - 0.5 * cell_size_.height);
 
-                    // GUI verbose
-                    // cv::rectangle(plane, region, cv::Scalar(255, 255, 255), 1);
+                        // if (region.x > bw.cols - cell_size_.width) {
+                        //     logger().debug("x boundary handling at line %d", __LINE__);
+                        //     region.x = bw.cols - cell_size_.width;
+                        // } else if (region.x < 0) {
+                        //     logger().debug("x boundary handling at line %d", __LINE__);
+                        //     region.x = 0;
+                        // }
+                        // if (region.y > bw.rows - cell_size_.height) {
+                        //     logger().debug("y boundary handling at line %d", __LINE__);
+                        //     region.y = bw.rows - cell_size_.height;
+                        // } else if (region.y < 0) {
+                        //     logger().debug("y boundary handling at line %d", __LINE__);
+                        //     region.y = 0;
+                        // }
+
+                        // std::cerr << static_cast<int32_t>(norm(bw(region), cv::NORM_L1)) << " ";
+                        uint64_t bit = norm(bw(region), cv::NORM_L1) > cell_size_.area() * 0.5;
+                        code |= bit << shift++;
+
+                        // GUI verbose
+                        // cv::rectangle(plane, region, cv::Scalar(255, 255, 255), 1);
+                    }
+                    // std::cerr << "| ";
                 }
-                // std::cerr << "| ";
+            } catch (const cv::Exception& e) {
+                logger << "binary code extraction failed, skip this one\n";
+                std::stringstream ss;
+                ss << "region: " << region << " / " << "bwsize: " << bw.size();
+                logger << "bit: " <<  i + 1 << ',' << j + 1 << '\n';
+                logger << ss.str() << '\n';
+                continue;
             }
 
             // identify marker id with error bit correction
