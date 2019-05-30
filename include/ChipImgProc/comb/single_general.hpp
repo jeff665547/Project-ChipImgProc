@@ -354,10 +354,10 @@ struct SingleGeneral {
                     mk.y = std::round((float)mk.y - mk.height / 2.0);
                 }
                 auto hint_marker_regs = marker::detection::reg_mat_infer(
-                    static_cast<cv::Mat_<std::uint16_t>&>(tmp), 
                     mk_regs_hint_,
                     marker_layout_.mk_map.rows,
                     marker_layout_.mk_map.cols,
+                    static_cast<cv::Mat_<std::uint16_t>&>(tmp), 
                     *msg_,
                     v_marker_seg_
                 );

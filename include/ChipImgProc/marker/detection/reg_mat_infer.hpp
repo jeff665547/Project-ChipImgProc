@@ -27,12 +27,12 @@ constexpr struct RegMatInfer {
         if(expect > 0 && ancs.size() != expect)
             out << "marker region inference failed, the detected markers are too few\n";
     }
-    template<class T>
+    template<class T = std::uint16_t>
     auto operator() ( 
-        const cv::Mat_<T>&      src, 
         std::vector<MKRegion>&  mk_regs,
         std::size_t             rows = 0,
         std::size_t             cols = 0,
+        const cv::Mat_<T>&      src = cv::Mat_<std::uint16_t>(), 
         std::ostream&           out = nucleona::stream::null_out,
         const ViewerCallback&   v_marker  = nullptr 
     ) const {
@@ -73,10 +73,10 @@ constexpr struct RegMatInfer {
         }
         width /= mk_regs.size();
         height /= mk_regs.size();
-        if(x_anchor.size() != cols) throw std::runtime_error(
+        if(x_anchor.size() < cols) throw std::runtime_error(
             "anchor number not match, probably marker detection failed"
         );
-        if(y_anchor.size() != rows) throw std::runtime_error(
+        if(y_anchor.size() < rows) throw std::runtime_error(
             "anchor number not match, probably marker detection failed"
         );
         std::vector<MKRegion> new_mk_regs;
@@ -93,7 +93,7 @@ constexpr struct RegMatInfer {
             }
         }
         auto view = norm_u8(src); 
-        if(v_marker) {
+        if(v_marker && !src.empty()) {
             for(auto& mk_r : new_mk_regs) {
                 cv::rectangle(view, mk_r, 128, 1);
             }
