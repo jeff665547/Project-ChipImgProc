@@ -64,7 +64,7 @@ struct HoughTransform
         );
 
         cv::Mat_<std::atomic<std::uint16_t>> hist = cv::Mat_<std::atomic<std::uint16_t>>::zeros(unitvecs_.size(), rmax - rmin + 1);
-        chipimgproc::info(std::cout, hist);
+        // chipimgproc::info(std::cout, hist);
         const auto thread_num = 4;
         {
             auto thread_pool = nucleona::parallel::make_thread_pool( thread_num );

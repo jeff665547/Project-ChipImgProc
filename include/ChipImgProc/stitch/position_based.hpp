@@ -72,7 +72,7 @@ private:
             sum_w / sum_weight,
             sum_h / sum_weight
         );
-        std::cout << "vote_cali_rect return: " << res << std::endl;
+        // std::cout << "vote_cali_rect return: " << res << std::endl;
         return res;
     }
     OverlapRes overlap( 

@@ -8,7 +8,7 @@ struct GridlineBased {
     std::vector<GLID> gridline_merge(
         const std::vector<GLID>& gl0,
         SHIFT shift, const std::vector<GLID>& gl1 
-    ) {
+    ) const {
         std::vector<GLID> res = gl0;
         GLID shift_px = res.at(shift) - gl1.at(0);
         GLID j = 0;
@@ -27,7 +27,7 @@ struct GridlineBased {
         GridRawImg<GLID>& m, 
         const GridRawImg<GLID>& raw_img, 
         const cv::Point& st_ps
-    ) {
+    ) const {
         if(m.empty()) {
             m.mat()  = raw_img.mat();
             m.gl_x() = raw_img.gl_x();
@@ -59,7 +59,7 @@ struct GridlineBased {
         }
     }
     template<class FLOAT, class GLID>
-    GridRawImg<GLID> operator() ( const MultiTiledMat<FLOAT, GLID>& mat ) {
+    GridRawImg<GLID> operator() ( const MultiTiledMat<FLOAT, GLID>& mat ) const {
         GridRawImg<GLID> res;
         for( int i = 0; i < mat.get_fov_rows(); i ++ ) {
             for( int j = 0; j < mat.get_fov_cols(); j ++ ) {

@@ -419,13 +419,13 @@ struct SingleGeneral {
                                 }
                               );
             if(!disable_bg_fix_) {
-                std::cout << "before bg fix: " << std::endl;
-                std::cout << "tiled_mat: " << std::endl;
-                chipimgproc::info(std::cout, tiled_mat.get_cali_img());
-                std::cout << std::endl;
-                std::cout << "grid_raw_img: " << std::endl;
-                chipimgproc::info(std::cout, grid_raw_img.mat());
-                std::cout << std::endl;
+                *msg_ << "before bg fix: " << std::endl;
+                *msg_ << "tiled_mat: " << std::endl;
+                chipimgproc::info(*msg_, tiled_mat.get_cali_img());
+                *msg_ << std::endl;
+                *msg_ << "grid_raw_img: " << std::endl;
+                chipimgproc::info(*msg_, grid_raw_img.mat());
+                *msg_ << std::endl;
                 // start background calibration
                 auto bg_value = bgb::chunk_local_mean(
                     dirty_margin_res.stat_mats.mean,
@@ -433,15 +433,15 @@ struct SingleGeneral {
                     3, 3, 0.05,     // TODO: parameterize
                     marker_layout_, 
                     true, 
-                    std::cout
+                    *msg_
                 );
-                std::cout << "after integer fix: " << std::endl;
-                std::cout << "tiled_mat: " << std::endl;
-                chipimgproc::info(std::cout, tiled_mat.get_cali_img());
-                std::cout << std::endl;
-                std::cout << "grid_raw_img: " << std::endl;
-                chipimgproc::info(std::cout, grid_raw_img.mat());
-                std::cout << std::endl;
+                *msg_ << "after integer fix: " << std::endl;
+                *msg_ << "tiled_mat: " << std::endl;
+                chipimgproc::info(*msg_, tiled_mat.get_cali_img());
+                *msg_ << std::endl;
+                *msg_ << "grid_raw_img: " << std::endl;
+                chipimgproc::info(*msg_, grid_raw_img.mat());
+                *msg_ << std::endl;
                 tiled_mat.get_cali_img() = grid_raw_img.mat();
                 tiled_mat.get_tiles() = tiles;
                 auto margin_res = margin_(
@@ -463,7 +463,7 @@ struct SingleGeneral {
                     3, 3, 0.05,     // TODO: parameterize
                     marker_layout_, 
                     false, 
-                    std::cout
+                    *msg_
                 );
                 return nucleona::make_tuple(
                     std::move(dirty_margin_res), std::move(bg_value)

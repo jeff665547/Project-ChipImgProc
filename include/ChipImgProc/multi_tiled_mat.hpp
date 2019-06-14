@@ -145,10 +145,10 @@ struct MultiTiledMat
                 );
             }
         }
-        std::cout << "markers, before unique: " << std::endl;
-        for( auto& m : markers_ ) {
-            std::cout << m << std::endl;
-        }
+        // std::cout << "markers, before unique: " << std::endl;
+        // for( auto& m : markers_ ) {
+        //     std::cout << m << std::endl;
+        // }
         auto rect_less = [](const cv::Rect& r1, const cv::Rect& r2) {
             if( r1.x == r2.x ) {
                 if( r1.y == r2.y ) {
@@ -171,10 +171,10 @@ struct MultiTiledMat
         auto itr = std::unique( markers_.begin(), markers_.end(), rect_eq );
         markers_.erase(itr, markers_.end());
 
-        std::cout << "markers, after unique: " << std::endl;
-        for( auto& m : markers_ ) {
-            std::cout << m << std::endl;
-        }
+        // std::cout << "markers, after unique: " << std::endl;
+        // for( auto& m : markers_ ) {
+        //     std::cout << m << std::endl;
+        // }
 
         // initial fov index
         if( !fov_index.empty() ) {

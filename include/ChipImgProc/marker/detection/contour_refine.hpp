@@ -58,7 +58,7 @@ struct ContourRefine {
                 ct.y += mk_r.y;
                 cv::rectangle(v_src, ct, 32767, 3);
             }
-            std::cout << "contour num: " << cts.size() << std::endl;
+            // std::cout << "contour num: " << cts.size() << std::endl;
             // TODO: QC the contour, 
             // now assume the contour doesn't have physical break.
 

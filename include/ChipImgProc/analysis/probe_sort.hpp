@@ -13,10 +13,6 @@ constexpr struct ProbeSort {
         auto&& mean = wrapper::bind_acc(mat, MAT::min_cv_mean);
         auto v_points = make_points<cv::Point>(mat);
         std::vector<cv::Point> points(v_points.begin(), v_points.end());
-        
-        // std::cout << __FILE__ << ":" << __LINE__ 
-        //     << ", points.size(): " << points.size() << std::endl;
-
         std::sort(points.begin(), points.end(), [&mean](
             const cv::Point& p0,
             const cv::Point& p1

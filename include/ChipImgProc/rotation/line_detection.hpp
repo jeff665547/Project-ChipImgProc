@@ -197,12 +197,12 @@ class LineDetection
                 cv::normalize(src, tmp, 0.0, 255.0, cv::NORM_MINMAX, CV_8U);
                 src = tmp;
             }
-            chipimgproc::info(std::cout, src);
+            chipimgproc::info(msg, src);
 
             cv::Mat unused;
             auto thres = cv::threshold(src, unused, 0.0, 255.0, cv::THRESH_BINARY | cv::THRESH_OTSU);
             cv::threshold( src, src, thres * 0.8, 255.0, cv::THRESH_BINARY );
-            chipimgproc::info(std::cout, src);
+            chipimgproc::info(msg, src);
         }
         else
         {
@@ -219,9 +219,9 @@ class LineDetection
             v_edges(src);
         }
         auto hist = hough_transform( src );
-        chipimgproc::info(std::cout, src);
+        chipimgproc::info(msg, src);
         cv::Point loc = min_entropy( hist, msg );
-        chipimgproc::info(std::cout, src);
+        chipimgproc::info(msg, src);
         // double val;
         // cv::minMaxLoc(hist, nullptr, &val, nullptr, &loc);
         auto theta = hough_transform.unitvecs()[loc.y].theta - 90;

@@ -126,7 +126,7 @@ struct RegMat {
         for ( auto& mk : mk_regs ) {
             mk.x -= x_offset;
             mk.y -= y_offset;
-            std::cout << mk << std::endl;
+            msg << mk << std::endl;
         }
 
 
