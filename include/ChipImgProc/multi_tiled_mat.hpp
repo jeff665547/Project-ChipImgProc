@@ -10,6 +10,7 @@
 #include <ChipImgProc/wrapper/indexed_range.hpp>
 #include <mutex>
 #include <memory>
+#include <ChipImgProc/logger.hpp>
 namespace chipimgproc{
 
 template<class FLOAT = float>
@@ -316,7 +317,7 @@ struct MultiTiledMat
     }
 
     template<class FUNC = decltype(min_cv_mean)&>
-    cv::Mat dump(FUNC&& func = min_cv_mean) {
+    cv::Mat dump(FUNC&& func = min_cv_mean) const {
         cv::Mat_<FLOAT> res(this->index_.rows, this->index_.cols);
         res.forEach([this, v_func = FWD(func)](FLOAT& value, const int* pos){
             auto& r = pos[0];

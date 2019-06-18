@@ -1,6 +1,7 @@
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/multi_tiled_mat.hpp>
+#include <ChipImgProc/logger.hpp>
 namespace chipimgproc{ namespace stitch{ 
 
 struct GridlineBased {
@@ -14,7 +15,6 @@ struct GridlineBased {
         GLID j = 0;
         for( GLID i = shift; i < gl0.size() && j < gl1.size(); i ++ ) {
             res.at(i) = ( res.at(i) + gl1.at(j) + shift_px) / 2;
-            // res.at(i) = gl1.at(j);
             j ++;
         }
         for( ; j < gl1.size(); j ++ ) {
@@ -25,9 +25,11 @@ struct GridlineBased {
     template<class GLID>
     void merge(
         GridRawImg<GLID>& m, 
-        const GridRawImg<GLID>& raw_img, 
+        const GridRawImg<GLID>& __raw_img, 
         const cv::Point& st_ps
     ) const {
+        auto raw_img = __raw_img.clean_border();
+        log.trace("cell level stitch point: ({},{})", st_ps.x, st_ps.y);
         if(m.empty()) {
             m.mat()  = raw_img.mat();
             m.gl_x() = raw_img.gl_x();

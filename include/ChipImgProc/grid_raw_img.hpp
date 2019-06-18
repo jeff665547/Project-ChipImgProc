@@ -58,7 +58,22 @@ struct GridRawImg {
             gl_y_.begin() + r.y, 
             gl_y_.begin() + r.y + r.height + 1
         );
+        auto front = gl_x.front();
+        for(auto& l : gl_x) {
+            l -= front;
+        }
+        front = gl_y.front();
+        for(auto& l : gl_y) {
+            l -= front;
+        }
         return GridRawImg(img, gl_x, gl_y);
+    }
+    auto clean_border() const {
+        cv::Rect roi(
+            0, 0, 
+            gl_x_.size() - 1, gl_y_.size() - 1
+        );
+        return get_roi(roi);
     }
 
     GridRawImg clone() const {

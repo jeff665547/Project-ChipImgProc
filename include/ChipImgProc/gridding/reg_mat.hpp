@@ -4,6 +4,7 @@
 #include <Nucleona/stream/null_buffer.hpp>
 #include <ChipImgProc/marker/detection/mk_region.hpp>
 #include <ChipImgProc/marker/layout.hpp>
+#include <ChipImgProc/logger.hpp>
 namespace chipimgproc{ namespace gridding{
 
 struct RegMat {
@@ -112,22 +113,23 @@ struct RegMat {
         for(int j = 0; j < fov_w_cl + 1; j ++ ) {
             x_grid_anchor.push_back((std::uint32_t)std::round(left_top->x + (j * cl_w_px)));
         }
-        cv::Rect roi(
-            x_grid_anchor.front(), y_grid_anchor.front(),
-            x_grid_anchor.back() - x_grid_anchor.front(),
-            y_grid_anchor.back() - y_grid_anchor.front()
-        );
-        auto tmp = in_src(roi);
-        in_src.release();
-        in_src = tmp;
 
-        auto x_offset = shift_0(x_grid_anchor);
-        auto y_offset = shift_0(y_grid_anchor);
-        for ( auto& mk : mk_regs ) {
-            mk.x -= x_offset;
-            mk.y -= y_offset;
-            msg << mk << std::endl;
-        }
+        // cv::Rect roi(
+        //     x_grid_anchor.front(), y_grid_anchor.front(),
+        //     x_grid_anchor.back() - x_grid_anchor.front(),
+        //     y_grid_anchor.back() - y_grid_anchor.front()
+        // );
+        // auto tmp = in_src(roi);
+        // in_src.release();
+        // in_src = tmp;
+
+        // auto x_offset = shift_0(x_grid_anchor);
+        // auto y_offset = shift_0(y_grid_anchor);
+        // for ( auto& mk : mk_regs ) {
+        //     mk.x -= x_offset;
+        //     mk.y -= y_offset;
+        //     msg << mk << std::endl;
+        // }
 
 
         std::vector<cv::Rect> tiles;

@@ -43,3 +43,13 @@ hunter_add_package(range-v3)
 find_package(range-v3 CONFIG REQUIRED)
 find_package(Threads REQUIRED)
 include(${SCREW_DIR}/hunter_root.cmake)
+
+# spdlog
+if(ENABLE_LOG)
+    hunter_add_package(spdlog)
+    find_package(spdlog)
+endif()
+
+# fmt
+hunter_add_package(fmt)
+find_package(fmt)

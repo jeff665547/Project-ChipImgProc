@@ -11,11 +11,17 @@ Win_CI:
         - rmdir build /s /q
         - mkdir build
         - cd build
-        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DINSTALL_DEPS=ON
+        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DINSTALL_DEPS=ON -DENABLE_LOG=OFF
+        - cmake --build . --target install
+        - cd ..
+        - rmdir stage /s /q
+        - rmdir build /s /q
+        - cd build
+        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DINSTALL_DEPS=ON -DENABLE_LOG=ON
         - cmake --build . --target install
         - ctest --verbose
     only:
-        - master
+        - v0.5.x
     tags:
         - WIN
 
@@ -33,10 +39,16 @@ CentOS_CI:
         - rm -rf build
         - mkdir -p build
         - cd build
-        - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON
+        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DINSTALL_DEPS=ON -DENABLE_LOG=OFF
+        - cmake --build . --target install
+        - cd ..
+        - rm -rf stage
+        - rm -rf build
+        - cd build
+        - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DENABLE_LOG=ON
         - cmake --build . --target install
         - ctest --verbose
     only:
-        - master
+        - v0.5.x
     tags:
         - CENTOS
