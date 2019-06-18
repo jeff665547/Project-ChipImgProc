@@ -16,6 +16,7 @@ Win_CI:
         - cd ..
         - rmdir stage /s /q
         - rmdir build /s /q
+        - mkdir build
         - cd build
         - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DINSTALL_DEPS=ON -DENABLE_LOG=ON
         - cmake --build . --target install
@@ -44,6 +45,7 @@ CentOS_CI:
         - cd ..
         - rm -rf stage
         - rm -rf build
+        - mkdir -p build
         - cd build
         - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DENABLE_LOG=ON
         - cmake --build . --target install
