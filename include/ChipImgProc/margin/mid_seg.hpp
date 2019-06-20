@@ -17,7 +17,7 @@ struct MidSeg
         , const std::function<
             void(const cv::Mat&)
           >&                        v_result            = nullptr
-    )
+    ) const 
     {
         if( mid_rate > 1 ) {
             throw std::runtime_error("mid_rate must <= 1");

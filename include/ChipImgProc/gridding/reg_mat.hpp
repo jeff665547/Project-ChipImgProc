@@ -5,6 +5,7 @@
 #include <ChipImgProc/marker/detection/mk_region.hpp>
 #include <ChipImgProc/marker/layout.hpp>
 #include <ChipImgProc/logger.hpp>
+#include "utils.hpp"
 namespace chipimgproc{ namespace gridding{
 
 struct RegMat {
@@ -70,7 +71,7 @@ struct RegMat {
         return org;
     }
     Result operator()(
-          cv::Mat&                      in_src
+          const cv::Mat&                in_src
         , const MKLayout&               mk_layout
         , std::vector<MKRegion>&        mk_regs
         , std::ostream&                 msg         = nucleona::stream::null_out
@@ -103,8 +104,10 @@ struct RegMat {
         std::vector<std::uint32_t> y_grid_anchor; 
         auto fov_h_px = right_bottom->y + right_bottom->height - left_top->y;
         auto fov_w_px = right_bottom->x + right_bottom->width - left_top->x;
-        msg << VDUMP(fov_h_px) << std::endl;
-        msg << VDUMP(fov_w_px) << std::endl;
+
+        chipimgproc::log.trace("FOV height: {}px", fov_h_px);
+        chipimgproc::log.trace("FOV width : {}px", fov_w_px);
+
         float cl_h_px = fov_h_px / (float)fov_h_cl;
         float cl_w_px = fov_w_px / (float)fov_w_cl;
         for(int i = 0; i < fov_h_cl + 1; i ++ ) {
@@ -130,35 +133,19 @@ struct RegMat {
         //     mk.y -= y_offset;
         //     msg << mk << std::endl;
         // }
-
-
-        std::vector<cv::Rect> tiles;
-        for(std::size_t i = 1; i < y_grid_anchor.size(); i ++ ) {
-            for (std::size_t j = 1; j < x_grid_anchor.size(); j ++ ) {
-                auto w = x_grid_anchor.at(j) - x_grid_anchor.at(j-1);
-                auto h = y_grid_anchor.at(i) - y_grid_anchor.at(i-1);
-                tiles.push_back(
-                    cv::Rect(
-                        x_grid_anchor.at(j-1),
-                        y_grid_anchor.at(i-1),
-                        w, h
-                    )
-                );
-            }
-        }
         result.feature_rows = y_grid_anchor.size() - 1;
         result.feature_cols = x_grid_anchor.size() - 1;
-        result.tiles        = tiles;
+        result.tiles        = gridline_to_tiles(x_grid_anchor, y_grid_anchor);
         result.gl_x         = x_grid_anchor;
         result.gl_y         = y_grid_anchor;
 
-        msg << "feature_rows: " << result.feature_rows << std::endl;
-        msg << "feature_cols: " << result.feature_cols << std::endl;
+        chipimgproc::log.trace("FOV grid rows: {}", result.feature_rows);
+        chipimgproc::log.trace("FOV grid cols: {}", result.feature_cols);
 
         if(v_result) {
             cv::Mat_<std::uint16_t> debug_img = viewable(in_src);
             auto color = 65536/2;
-            for (auto tile: tiles)
+            for (auto tile: result.tiles)
             {
                 tile.width  += 1;
                 tile.height += 1;

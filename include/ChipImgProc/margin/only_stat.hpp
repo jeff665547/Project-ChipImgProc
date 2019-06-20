@@ -15,7 +15,7 @@ struct OnlyStat
         , const std::function<
             void(const cv::Mat&)
           >&                        v_result            = nullptr
-    )
+    ) const 
     {
         auto ts_rows = rows(tiled_src);
         auto ts_cols = cols(tiled_src);

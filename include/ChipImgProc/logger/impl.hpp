@@ -16,9 +16,15 @@ private:
         static auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("chipimgproc.log", true);
         return file_sink;
     }
+    auto create_logger() const {
+        auto log = std::make_shared<spdlog::logger>("CIMP", console_sink());
+        log->sinks().push_back(file_sink());
+        log->set_pattern("[%Y-%m-%d %H:%M:%S.%e][%n][%l][thread %t] %v");
+        return log;
+    }
     auto& core() const {
-        static spdlog::logger logger("CIMP", {console_sink(), file_sink()});
-        return logger;
+        static auto log(create_logger());
+        return *log;
     }
 public:
     template<class... Args>

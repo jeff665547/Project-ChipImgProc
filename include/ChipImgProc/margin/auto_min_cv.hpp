@@ -25,7 +25,7 @@ namespace chipimgproc { namespace margin{
 template<class FLOAT>
 struct AutoMinCV
 {
-    stat::Cell<FLOAT> count_cv ( const cv::Mat& mat )
+    stat::Cell<FLOAT> count_cv ( const cv::Mat& mat ) const 
     {
         return stat::Cell<FLOAT>::make(mat);
     }
@@ -34,7 +34,7 @@ struct AutoMinCV
         , const cv::Rect& t
         , std::int32_t windows_width
         , std::int32_t windows_height 
-    ) {
+    ) const {
         // TODO: optimize
         stat::Cell<FLOAT> min;
         cv::Rect min_cv_win(0, 0, windows_width, windows_height);
@@ -88,7 +88,7 @@ struct AutoMinCV
         , const std::function<
             void(const cv::Mat&)
           >&                        v_result            = nullptr
-    )
+    ) const 
     {
         stat::Mats<FLOAT> res(rows(tiled_src), cols(tiled_src));
         auto& tiles = tiled_src.get_tiles();

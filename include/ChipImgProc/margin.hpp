@@ -17,7 +17,7 @@ struct Margin {
     margin::Result<FLOAT> operator()(
         const std::string&          method, 
         const margin::Param<GLID>&  param
-    ) {
+    ) const {
         margin::Result<FLOAT> res;
         if(method == "auto_min_cv") {
             margin::AutoMinCV<FLOAT> auto_min_cv;

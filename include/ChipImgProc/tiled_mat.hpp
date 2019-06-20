@@ -13,12 +13,15 @@ namespace chipimgproc{
  *  @tparam  The integer type use to score the grid line position, 
  *           this depend on the image size.
  */
-template<
-    class GLID = std::uint16_t
->
+template<class GLID = std::uint16_t>
 struct TiledMat
 {
     using IndexType = cv::Mat_<std::int32_t>;
+    /**
+     *  @brief        Tiled matrix default.
+     */
+    TiledMat() = default;
+
     /**
      *  @brief        Tiled matrix constructor.
      *  @param rows   Grid level row number.
@@ -32,6 +35,14 @@ struct TiledMat
     , gl_y_()
     {
         tiles_.reserve(rows * cols);
+    }
+    /**
+     * @brief         Initial Tiled matrix index
+     *  @param rows   Grid level row number.
+     *  @param cols   Grid level column number.
+     */
+    void init(int rows, int cols) {
+        index_ = IndexType(rows, cols);
     }
     /**
      *  @brief Get the grid level tile region on image.
