@@ -97,7 +97,7 @@ auto trim_outlier( M&& mm, int peek_threshold = 40000)
         count = hist[i].second;
         if( count > limit ) count = 0;
         found = count > threshold;
-    } while(!found && i < hist.size());
+    } while(!found && i < (hist.size()-1));
     int hmin = i;
     i = hist.size();
     do {
@@ -105,13 +105,12 @@ auto trim_outlier( M&& mm, int peek_threshold = 40000)
         count = hist[i].second;
         if(count > limit) count = 0;
         found = count > threshold;
-    } while(!found && i < hist.size());
+    } while(!found && i > 0);
     int hmax = i;
     float lbound, ubound;
-    if(hmax >= hmin) {
-        lbound = hist.lbound + hmin * hist.bin_size;
-        ubound = hist.lbound + hmax * hist.bin_size;
-    }
+    if(hmax < hmin) hmax = hmin;
+    lbound = hist.lbound + hmin * hist.bin_size;
+    ubound = hist.lbound + hmax * hist.bin_size;
     for(auto&& v : mm) {
         if(v < lbound) v = lbound;
         if(v > ubound) v = ubound;
