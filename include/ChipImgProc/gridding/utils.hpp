@@ -3,8 +3,8 @@
 namespace chipimgproc::gridding {
 constexpr struct GridlineToTiles {
     std::vector<cv::Rect> operator()(
-        const std::vector<std::uint32_t>& x_grid_anchor,
-        const std::vector<std::uint32_t>& y_grid_anchor
+        const std::vector<double>& x_grid_anchor,
+        const std::vector<double>& y_grid_anchor
     ) const {
         std::vector<cv::Rect> tiles;
         for(std::size_t i = 1; i < y_grid_anchor.size(); i ++ ) {
@@ -13,9 +13,10 @@ constexpr struct GridlineToTiles {
                 auto h = y_grid_anchor.at(i) - y_grid_anchor.at(i-1);
                 tiles.push_back(
                     cv::Rect(
-                        x_grid_anchor.at(j-1),
-                        y_grid_anchor.at(i-1),
-                        w, h
+                        (int)std::round(x_grid_anchor.at(j-1)),
+                        (int)std::round(y_grid_anchor.at(i-1)),
+                        (int)std::round(w), 
+                        (int)std::round(h)
                     )
                 );
             }

@@ -100,39 +100,23 @@ struct RegMat {
                 right_bottom = &mk_r;
             }
         }
-        std::vector<std::uint32_t> x_grid_anchor;
-        std::vector<std::uint32_t> y_grid_anchor; 
+        std::vector<double> x_grid_anchor;
+        std::vector<double> y_grid_anchor; 
         auto fov_h_px = right_bottom->y + right_bottom->height - left_top->y;
         auto fov_w_px = right_bottom->x + right_bottom->width - left_top->x;
 
         chipimgproc::log.trace("FOV height: {}px", fov_h_px);
         chipimgproc::log.trace("FOV width : {}px", fov_w_px);
 
-        float cl_h_px = fov_h_px / (float)fov_h_cl;
-        float cl_w_px = fov_w_px / (float)fov_w_cl;
+        double cl_h_px = fov_h_px / (double)fov_h_cl;
+        double cl_w_px = fov_w_px / (double)fov_w_cl;
         for(int i = 0; i < fov_h_cl + 1; i ++ ) {
-            y_grid_anchor.push_back((std::uint32_t)std::round(left_top->y + (i * cl_h_px)));
+            y_grid_anchor.push_back(left_top->y + (i * cl_h_px));
         }
         for(int j = 0; j < fov_w_cl + 1; j ++ ) {
-            x_grid_anchor.push_back((std::uint32_t)std::round(left_top->x + (j * cl_w_px)));
+            x_grid_anchor.push_back(left_top->x + (j * cl_w_px));
         }
 
-        // cv::Rect roi(
-        //     x_grid_anchor.front(), y_grid_anchor.front(),
-        //     x_grid_anchor.back() - x_grid_anchor.front(),
-        //     y_grid_anchor.back() - y_grid_anchor.front()
-        // );
-        // auto tmp = in_src(roi);
-        // in_src.release();
-        // in_src = tmp;
-
-        // auto x_offset = shift_0(x_grid_anchor);
-        // auto y_offset = shift_0(y_grid_anchor);
-        // for ( auto& mk : mk_regs ) {
-        //     mk.x -= x_offset;
-        //     mk.y -= y_offset;
-        //     msg << mk << std::endl;
-        // }
         result.feature_rows = y_grid_anchor.size() - 1;
         result.feature_cols = x_grid_anchor.size() - 1;
         result.tiles        = gridline_to_tiles(x_grid_anchor, y_grid_anchor);

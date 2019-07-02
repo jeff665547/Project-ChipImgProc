@@ -7,8 +7,8 @@ namespace chipimgproc::gridding{
 
 struct Pseudo {
     Result operator()(
-        const std::vector<std::uint32_t>& gl_x,
-        const std::vector<std::uint32_t>& gl_y, 
+        const std::vector<double>&        gl_x,
+        const std::vector<double>&        gl_y, 
         const ViewerCallback&             v_result    = nullptr,
         cv::Mat*                          in_src      = nullptr
     ) const {

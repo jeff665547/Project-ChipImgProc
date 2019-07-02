@@ -9,7 +9,7 @@ set(
 )
 HunterGate(
     URL "ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/hunter.git"
-    SHA1 d40cac9154b827654c0e0013843bcf988f48e6a0
+    SHA1 5e77997222f7e2c6b3d43a3301f36ae3f8448fa8
     FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
 )
 project(ChipImgProc LANGUAGES C CXX)

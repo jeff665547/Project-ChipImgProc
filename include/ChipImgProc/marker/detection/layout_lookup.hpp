@@ -4,9 +4,10 @@
 namespace chipimgproc::marker::detection {
 
 constexpr struct LayoutLookup {
+    template<class GLRange>
     std::vector<MKRegion> operator()(
-        const std::vector<std::uint32_t>& gl_x,
-        const std::vector<std::uint32_t>& gl_y,
+        GLRange&& gl_x,
+        GLRange&& gl_y,
         const Layout& layout
     ) const {
         std::vector<MKRegion> res;
@@ -19,10 +20,10 @@ constexpr struct LayoutLookup {
                 MKRegion reg;
                 reg.x_i = c;
                 reg.y_i = r;
-                reg.x = gl_x.at(pos.x);
-                reg.y = gl_y.at(pos.y);
-                auto x_end = gl_x.at(pos.x + mk.cols);
-                auto y_end = gl_y.at(pos.y + mk.rows);
+                reg.x = gl_x[pos.x];
+                reg.y = gl_y[pos.y];
+                auto x_end = gl_x[pos.x + mk.cols];
+                auto y_end = gl_y[pos.y + mk.rows];
                 reg.width = x_end - reg.x;
                 reg.height = y_end - reg.y;
                 res.emplace_back(std::move(reg));
