@@ -5,6 +5,7 @@
 #include <ChipImgProc/marker/detection/pos_comp_by_score.hpp>
 #include <ChipImgProc/algo/fixed_capacity_set.hpp>
 #include <ChipImgProc/marker/detection/pos_comp_by_score.hpp>
+// #include <ChipImgProc/algo/scaled_match_template.hpp>
 namespace chipimgproc::marker::detection {
 constexpr struct RegMatNoRot {
     cv::Mat_<float> score_mat(
@@ -51,6 +52,10 @@ constexpr struct RegMatNoRot {
                 );
                 if( unit == MatUnit::PX) {
                     auto& mk_mask = mk_des.get_best_mk_mask(unit);
+                    // chipimgproc::algo::scaled_match_template.max(
+                    //     scan_target_mat, mk_pat, score, 
+                    //     CV_TM_CCORR_NORMED, 2, mk_mask
+                    // );
                     cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED, mk_mask);
                 } else if (unit == MatUnit::CELL) {
                     cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED);
