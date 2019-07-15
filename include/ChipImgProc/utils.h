@@ -20,7 +20,8 @@ void info(OS& os, const cv::Mat& image)
              << "- elemSize1  " << image.elemSize1()  << " bytes" << std::endl
              << "- depth      " << depth(image)       << std::endl;
 }
-
+std::string info_str(const cv::Mat& image);
+void info_log(const cv::Mat& image);
 constexpr double cmax(std::int32_t depth)
 {
     switch (depth)
