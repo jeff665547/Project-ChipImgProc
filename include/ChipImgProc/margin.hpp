@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <ChipImgProc/margin/percentile.hpp>
 #include <ChipImgProc/margin/auto_min_cv.hpp>
 #include <ChipImgProc/margin/mid_seg.hpp>
 #include <ChipImgProc/margin/only_stat.hpp>
@@ -31,6 +32,15 @@ struct Margin {
         } else if(method == "mid_seg") {
             margin::MidSeg<FLOAT> mid_seg;
             auto tmp = mid_seg(
+                *param.tiled_mat, 
+                param.seg_rate,
+                param.replace_tile,
+                param.v_result
+            );
+            res.stat_mats = tmp;
+        } else if(method == "percentile") {
+            margin::Percentile<FLOAT> func;
+            auto tmp = func(
                 *param.tiled_mat, 
                 param.seg_rate,
                 param.replace_tile,
