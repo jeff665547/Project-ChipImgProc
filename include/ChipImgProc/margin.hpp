@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <ChipImgProc/margin/max.hpp>
 #include <ChipImgProc/margin/percentile.hpp>
 #include <ChipImgProc/margin/auto_min_cv.hpp>
 #include <ChipImgProc/margin/mid_seg.hpp>
