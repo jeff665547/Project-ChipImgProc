@@ -20,7 +20,7 @@ struct Percentile {
     ) const {
         auto trim_rate = (1.0 - percentage) / 2;
         auto cell_data = src(t);
-        std::vector<std:uint16_t> buf(
+        std::vector<std::uint16_t> buf(
             cell_data.begin<std::uint16_t>(), 
             cell_data.end<std::uint16_t>() 
         );
@@ -57,10 +57,10 @@ struct Percentile {
                 auto pt_data = tile_percentile(
                     tiled_src.get_cali_img(), t, percentage
                 );
-                res.mean   (y, x) = pt_data.stat.mean;
-                res.stddev (y, x) = pt_data.stat.stddev;
-                res.cv     (y, x) = pt_data.stat.cv;
-                res.num    (y, x) = pt_data.stat.num;
+                res.mean   (y, x) = pt_data.mean;
+                res.stddev (y, x) = pt_data.stddev;
+                res.cv     (y, x) = pt_data.cv;
+                res.num    (y, x) = pt_data.num;
                 if( tile_replace )
                     tiled_src.tile_at(y, x) = t;
             }
