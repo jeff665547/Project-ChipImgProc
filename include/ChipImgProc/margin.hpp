@@ -47,6 +47,14 @@ struct Margin {
                 param.v_result
             );
             res.stat_mats = tmp;
+        } else if(method == "max") {
+            margin::Max<FLOAT> func;
+            auto tmp = func(
+                *param.tiled_mat, 
+                param.replace_tile,
+                param.v_result
+            );
+            res.stat_mats = tmp;
         } else if( method == "only_stat") {
             margin::OnlyStat<FLOAT> only_stat;
             auto tmp = only_stat(
