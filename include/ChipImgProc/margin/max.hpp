@@ -8,6 +8,7 @@
 #include <ChipImgProc/stat/cell.hpp>
 #include <ChipImgProc/stat/mats.hpp>
 #include <algorithm>
+#include "mid_seg.hpp"
 namespace chipimgproc::margin{
 
 template<class FLOAT>
@@ -42,6 +43,8 @@ struct Max {
             void(const cv::Mat&)
           >&                        v_result            = nullptr
     ) const {
+        MidSeg<FLOAT> mid_seg;
+        mid_seg(tiled_src, 0.8, true);
         stat::Mats<FLOAT> res(rows(tiled_src), cols(tiled_src));
         auto& tiles = tiled_src.get_tiles();
         for( int y = 0; y < rows(tiled_src); y ++ ) {
