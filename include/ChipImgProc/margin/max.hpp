@@ -25,7 +25,7 @@ struct Max {
         res.stddev = std::numeric_limits<FLOAT>::max();
         res.num = 1;
 
-        FLOAT max_value = 0;
+        std::uint16_t max_value = 0;
         for(int r = 0; r < cell_data.rows; r++) {
             for(int c = 0; c < cell_data.cols; c ++) {
                 auto value = cell_data(r, c);
@@ -53,10 +53,10 @@ struct Max {
                 auto pt_data = tile_max(
                     tiled_src.get_cali_img(), t
                 );
-                res.mean   (y, x) = pt_data.stat.mean;
-                res.stddev (y, x) = pt_data.stat.stddev;
-                res.cv     (y, x) = pt_data.stat.cv;
-                res.num    (y, x) = pt_data.stat.num;
+                res.mean   (y, x) = pt_data.mean;
+                res.stddev (y, x) = pt_data.stddev;
+                res.cv     (y, x) = pt_data.cv;
+                res.num    (y, x) = pt_data.num;
                 if( tile_replace )
                     tiled_src.tile_at(y, x) = t;
             }
