@@ -16,10 +16,13 @@ struct IterationCali {
     , rot_est_          (rot_est)
     , rot_cali_         (rot_cali)
     {}
-
-    auto operator()(
+    template<
+        class EstArgs = std::tuple<>, 
+        class CaliArgs = std::tuple<>
+    > auto operator()(
         const cv::Mat& src, 
-        std::ostream& logger = nucleona::stream::null_out
+        const EstArgs& est_args = {},
+        const CaliArgs& cali_args = {}
     ) const {
         const int start_record_theta_time = 2;
 
@@ -27,11 +30,17 @@ struct IterationCali {
         Float theta_off, theta;
         int iter_times = 0;
         std::vector<Float> candi_theta;
+        auto rot_est = [this, &tmp](auto&&... args) {
+            return rot_est_(tmp, FWD(args)...);
+        };
+        auto rot_cali = [this, &tmp, &theta](auto&&... args) {
+            return rot_cali_(tmp, theta, FWD(args)...);
+        };
         do {
-            theta_off = rot_est_(tmp);
+            theta_off = std::apply(rot_est, est_args);
             theta += theta_off;
             tmp = src.clone();
-            rot_cali_(tmp, theta);
+            std::apply(rot_cali, cali_args);
             if(iter_times > start_record_theta_time) {
                 candi_theta.push_back(theta);
             }
@@ -39,14 +48,12 @@ struct IterationCali {
             if(iter_times >= max_time_) break;
         } while(std::abs(theta_off) > theta_threshold_);
         if( std::abs(theta_off) > theta_threshold_ ) {
-            logger << "theta not converge\n";
+            // logger << "theta not converge\n";
             Float sum = 0;
             for(auto&& t : candi_theta) {
                 sum += t;
             }
             theta = sum / candi_theta.size();
-            // tmp = src.clone();
-            // rot_cali_(tmp, theta);
         }
         return theta;
     }

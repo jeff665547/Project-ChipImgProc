@@ -1,6 +1,6 @@
 #pragma once
 #include <opencv2/opencv.hpp>
-namespace chipimgproc::marker::detection {
+namespace chipimgproc::utils {
 
 struct PosCompByScore {
     PosCompByScore(const cv::Mat_<float>& score)

@@ -2,9 +2,8 @@
 #include <ChipImgProc/marker/detection/mk_region.hpp>
 #include <ChipImgProc/marker/layout.hpp>
 #include <Nucleona/stream/null_buffer.hpp>
-#include <ChipImgProc/marker/detection/pos_comp_by_score.hpp>
+#include <ChipImgProc/utils/pos_comp_by_score.hpp>
 #include <ChipImgProc/algo/fixed_capacity_set.hpp>
-#include <ChipImgProc/marker/detection/pos_comp_by_score.hpp>
 // #include <ChipImgProc/algo/scaled_match_template.hpp>
 namespace chipimgproc::marker::detection {
 constexpr struct RegMatNoRot {
@@ -73,7 +72,7 @@ constexpr struct RegMatNoRot {
     ) const {
         auto& score_sum = score_matrix;
         auto max_points = make_fixed_capacity_set<cv::Point>(
-            20, PosCompByScore(score_sum)
+            20, chipimgproc::utils::PosCompByScore(score_sum)
         );
         cv::Point max_loc;
         float max_score = 0;

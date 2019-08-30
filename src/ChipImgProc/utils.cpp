@@ -6,7 +6,16 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <cpp_base64/base64.h>
+#include <ChipImgProc/logger.hpp>
 namespace chipimgproc { 
+std::string info_str(const cv::Mat& image) {
+    std::stringstream ss;
+    info(ss, image);
+    return ss.str();
+}
+void info_log(const cv::Mat& image) {
+    log.debug(info_str(image));
+}
 int cols(const cv::Mat& m) {
     return m.cols;
 }
@@ -103,9 +112,11 @@ cv::Mat_<std::uint16_t> viewable(
     switch(m.depth()) {
         case CV_16U:
             tmp = m.clone();
+            trim_outlier(tmp, peek_threshold);
             break;
         case CV_8U:
             m.convertTo(tmp, CV_16U, 256);
+            trim_outlier(tmp, peek_threshold);
             break;
         case CV_32F:
             // std::cout << "viewable: detect float image, assume range is [0, 1]" << std::endl;
@@ -114,7 +125,6 @@ cv::Mat_<std::uint16_t> viewable(
         default:
             throw std::runtime_error("not support depth: " + std::string(depth(m)));
     }
-    trim_outlier(tmp, peek_threshold);
     cv::Mat_<std::uint16_t> res = tmp.clone();
     cv::normalize( tmp, res, 0, 65535, cv::NORM_MINMAX );
     return res;
@@ -162,6 +172,14 @@ std::string jpg_base64( const cv::Mat& pixels) {
     // std::cout << "base64 size: " << pixels_encode.size() << std::endl;
     // std::cout << "content: " << pixels_encode << std::endl;
     return pixels_encode;
+}
+cv::Mat_<float> match_template(cv::Mat img, cv::Mat tpl) {
+    cv::Mat_<float> sm(
+        img.rows - tpl.rows + 1,
+        img.cols - tpl.cols + 1
+    );
+    cv::matchTemplate(img, tpl, sm, cv::TM_CCORR_NORMED);
+    return sm;
 }
 
 

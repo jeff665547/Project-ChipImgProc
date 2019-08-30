@@ -179,4 +179,5 @@ cv::Rect bound_rect( const std::vector<cv::Point>& points );
 
 std::string jpg_base64( const cv::Mat& pixels);
 
+cv::Mat_<float> match_template(cv::Mat img, cv::Mat tpl);
 }
