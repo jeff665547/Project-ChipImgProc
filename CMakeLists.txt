@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.11.0)
 include(cmake/HunterGate.cmake)
 set(
     HUNTER_CACHE_SERVERS
-    "https://github.com/elucideye/hunter-cache;https://github.com/ingenue/hunter-cache"
+    "https://github.com/CHChang810716/hunter-binary-cache"
     CACHE
     STRING
     "Hunter cache servers"
 )
 HunterGate(
     URL "ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/hunter.git"
-    SHA1 5e77997222f7e2c6b3d43a3301f36ae3f8448fa8
+    SHA1 5ad88238a72487e3d93b9959b43554dc506d71ac
     FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
 )
 project(ChipImgProc LANGUAGES C CXX)
@@ -25,5 +25,6 @@ include(cmake/compiler.cmake)
 include(cmake/src.cmake)
 include(cmake/unit_test.cmake)
 include(cmake/ide.cmake)
+include(cmake/doc.cmake)
 include(cmake/install.cmake)
 include(cmake/cpack.cmake)
