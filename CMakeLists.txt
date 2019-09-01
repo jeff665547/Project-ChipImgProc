@@ -8,7 +8,7 @@ set(
     "Hunter cache servers"
 )
 HunterGate(
-    URL "ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/hunter.git"
+    URL "http://gitlab.centrilliontech.com.tw:10080/centrillion/hunter.git"
     SHA1 5e77997222f7e2c6b3d43a3301f36ae3f8448fa8
     FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
 )
