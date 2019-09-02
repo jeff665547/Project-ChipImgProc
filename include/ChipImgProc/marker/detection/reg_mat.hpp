@@ -18,7 +18,7 @@ namespace chipimgproc{ namespace marker{ namespace detection{
  *  @brief  Detect markers in image and assume the marker layout is regular matrix distribution.
  * 
  */
-struct RegMat {
+class RegMat {
     template<class T>
     auto generate_raw_marker_regions(
         const cv::Mat_<T>&      src, 
@@ -145,6 +145,7 @@ struct RegMat {
         return marker_regions;
 
     }
+public:
     /**
      * @brief Call operator of RegMat type, given marker layout and return marker regions.
      * 
@@ -160,9 +161,12 @@ struct RegMat {
      * @param out           The debug log message output, can be any STL ostream, by default is null stream
      * @param v_bin         The debug pre-process image output callback, the callback form is void(const cv::Mat&) type. 
      *                      Current implementation is 8bit normalization image.
-     * @param v_search      
-     * @param v_marker 
+     * @param v_search      The debug image output callback, the callback form is void(const cv::Mat&) type. 
+     *                      Current implementation is show the marker searching space.
+     * @param v_marker      The debug image output callback, the callback form is void(const cv::Mat&) type.
+     *                      Current implementation is show the marker segmentation location
      * @return std::vector<MKRegion> 
+     *                      A vector of marker regions
      */
     template<class T>
     std::vector<MKRegion> operator()(
