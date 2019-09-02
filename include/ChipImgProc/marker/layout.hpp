@@ -1,3 +1,8 @@
+/**
+ * @file    layout.hpp
+ * @author  Chia-Hua Chang (johnidet@centrilliontech.com.tw)
+ * @brief   The marker layout type
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/const.h>
@@ -5,17 +10,19 @@
 #include <ChipImgProc/marker/txt_to_img.hpp>
 #include <range/v3/all.hpp>
 namespace chipimgproc{ namespace marker{
+/**
+ * @brief Marker description, contains a series of candidate marker/mask patterns
+ *        and logical position in cell/pixel level
+ * 
+ */
 struct Des {
 friend struct Layout;
-    // const cv::Point& get_pos_cl() const {
-    //     return pos_cl_;
-    // }
-    // const cv::Point& get_pos_px() const {
-    //     return pos_px_;
-    // }
-    // const auto& get_candi_mks_mask_px() const {
-    //     return candi_mks_px_mask;
-    // }
+    /**
+     * @brief   Get position, in px or cell level
+     * 
+     * @param   unit PX/CELL
+     * @return  const cv::Point& logical marker position 
+     */
     const cv::Point& get_pos(const MatUnit& unit) const {
         switch(unit) {
             case MatUnit::CELL:
@@ -28,10 +35,22 @@ friend struct Layout;
                 );
         }
     }
+    /**
+     * @brief   Get position, in px or cell level
+     * 
+     * @param   unit PX/CELL
+     * @return  const cv::Point& logical marker position 
+     */
     cv::Point& get_pos(const MatUnit& unit) {
         const auto& this_ref = *this;        
         return const_cast<cv::Point&>(this_ref.get_pos(unit));
     }
+    /**
+     * @brief Get all candidate markers in this description
+     * 
+     * @param unit PX/CELL 
+     * @return const auto& deduced, usually std::vector<cv::Mat_<std::uint8_t>>
+     */
     const auto& get_candi_mks( const MatUnit& unit) const {
         switch(unit) {
             case MatUnit::CELL:
@@ -44,6 +63,12 @@ friend struct Layout;
                 );
         }
     }
+    /**
+     * @brief Get all candidate markers in this description
+     * 
+     * @param unit PX/CELL 
+     * @return const auto& deduced, usually std::vector<cv::Mat_<std::uint8_t>>
+     */
     const auto& get_candi_mks_mask( const MatUnit& unit) const {
         switch(unit) {
             case MatUnit::CELL:
@@ -56,15 +81,43 @@ friend struct Layout;
                 );
         }
     }
+    /**
+     * @brief Get the best match marker in current candidate marker list,
+     *        The best match marker usually set by marker detection.
+     * 
+     * @param unit PX/CELL level marker pattern
+     * @return const auto& The marker pattern, type deduced usually cv::Mat_<std::unit8_t>
+     */
     const auto& get_best_mk(const MatUnit& unit) const {
         return get_candi_mks(unit).at(best_mk_idx);
     }
+    /**
+     * @brief Get the standard marker pattern, may different from best marker,
+     *        because the input image quality may not always as good as expect.
+     * 
+     * @param unit PX/CELL level marker pattern
+     * @return const auto& The marker pattern, type deduced usually cv::Mat_<std::unit8_t>
+     */
     const auto& get_std_mk(const MatUnit& unit) const {
         return get_candi_mks(unit).at(0);
     }
+    /**
+     * @brief Get the best match marker related mask in current candidate marker list,
+     *        The best match marker usually set by marker detection.
+     * 
+     * @param unit PX/CELL level marker pattern
+     * @return const auto& The marker pattern, type deduced usually cv::Mat_<std::unit8_t>
+     */
     const auto& get_best_mk_mask(const MatUnit& unit) const {
         return get_candi_mks_mask(unit).at(best_mk_idx);
     }
+    /**
+     * @brief Get the standard marker related mask, may different from best marker,
+     *        because the input image quality may not always as good as expect.
+     * 
+     * @param unit PX/CELL level marker pattern
+     * @return const auto& The marker pattern, type deduced usually cv::Mat_<std::unit8_t>
+     */
     const auto& get_std_mk_mask(const MatUnit& unit) const {
         return get_candi_mks_mask(unit).at(0);
     }

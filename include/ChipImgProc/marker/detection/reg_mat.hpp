@@ -1,7 +1,7 @@
 /**
- *  @file   ChipImgProc/marker/detection/reg_mat.hpp
- *  @author Chia-Hua Chang <johnidfet@centrilliontech.com.tw>
- *  @brief  Detect markers in image and assume the marker layout is regular matrix distribution.
+ *  @file       ChipImgProc/marker/detection/reg_mat.hpp
+ *  @author     Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ *  @brief      Detect markers in image and assume the marker layout is regular matrix distribution.
  */
 #pragma once
 #include <ChipImgProc/utils.h>
@@ -15,7 +15,9 @@
 #include <ChipImgProc/utils/pos_comp_by_score.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
 /**
- *  @brief  Detect markers in image and assume the marker layout is regular matrix distribution.
+ *  @brief      Detect markers in image and assume the marker layout is regular matrix distribution.
+ *  @details    Here is the example:
+ *      @snippet ChipImgProc/marker/detection/reg_mat_test.cpp usage
  * 
  */
 class RegMat {
@@ -147,14 +149,15 @@ class RegMat {
     }
 public:
     /**
-     * @brief Call operator of RegMat type, given marker layout and return marker regions.
+     * @brief Call operator of RegMat type, 
+     *        given marker layout and image, return marker regions.
      * 
      * @tparam T            (Deduced) Input matrix value type, for centrillion Summit image, 
      *                      the white channel usually use std::uint8_t. 
      *                      and probe channel use std::uint16_t.
      * @param src           Input image.
-     * @param mk_layout     Marker layout of current process image, 
-     *                      for different chip spec should have differenct chip marker layout. 
+     * @param mk_layout     The marker layout of current process image, 
+     *                      for different chip spec should have different chip marker layout. 
      * @param unit          Image unit level, can be MatUnit::PX (pixel level) or MatUnit::CELL (cell level).
      * @param cand_mk_i     Use the i-th candidate marker in marker layout to match the image. 
      *                      By default is 0, usually means the standard marker pattern.
