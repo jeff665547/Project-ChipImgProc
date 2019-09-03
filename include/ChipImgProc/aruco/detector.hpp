@@ -52,7 +52,11 @@ class Detector {
     , ids_                ()
     {}
     /**
-     * @brief  Reset the detector parameters
+     * @brief  Reset the detector parameters.
+     * @details The detector parameters include ArUco dictionary, image process algorithm parameter, chip marker specification. 
+     *   For the chip marker related parameter, consider the image:
+     *   @image html aruco-single-mk-spec.png width=600px
+     *   @image latex aruco-single-mk-spec.png
      * @param  dict            Dictionary for ArUco coding binaries.
      * @param  pyramid_level   A number of downsampling levels for speeding up marker localization.
      *                         The value is an integer > 0. Experientially, setting the value of levels to 2 or 3 is good enough.
