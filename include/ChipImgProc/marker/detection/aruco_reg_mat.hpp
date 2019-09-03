@@ -89,35 +89,8 @@ class ArucoRegMat
     }
 public:
     /**
-     * @brief Set the ArUco marker dictionary
-     * @details The marker dictionary is the JSON format like:
-     *      @code
-     *      {
-     *        "DICT_6X6_250": {
-     *            "coding_bits": 6
-     *          , "maxcor_bits": 5
-     *          , "bitmap_list": {
-     *                "0": [
-     *                    0, 0, 0, 1, 1, 1
-     *                  , 1, 0, 0, 0, 1, 1
-     *                  , 1, 1, 0, 1, 1, 1
-     *                  , 0, 1, 1, 0, 0 , 0
-     *                  , 0, 0, 1, 0, 1, 0
-     *                  , 1, 0, 0, 1, 1, 0
-     *                ]
-     *              , "1": [
-     *                    0, 0, 0, 0, 1, 1
-     *                  , 1, 0, 1, 1, 1, 1
-     *                  , 1, 0, 1, 1, 1, 0
-     *                  , 1, 0, 0, 0, 1, 1
-     *                  , 1, 0, 0, 0, 1, 0
-     *                  , 0, 1, 0, 0, 0, 1
-     *                ]
-     *              ...
-     *        }
-     *      }
-     *      @endcode
-     * @param db    The JSON format ArUco database.
+     * @brief Set the ArUco marker dictionary.
+     * @param db    The JSON format ArUco database. The database
      * @param key   The ArUco marker set id use to set the dictionary, for example: DICT_6X6_250.
      */
     void set_dict(const nlohmann::json& db, const std::string& key) {
