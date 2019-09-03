@@ -1,3 +1,21 @@
+# Build ChipImgProc from source code
+
+## CMake on Windows MinGW
+
+### Requirement
+* Your project must be a CMake project
+* GCC >= 7.3
+* CMake >= 3.10
+
+### Steps
+
+```bat
+ChipImgProc\> mkdir build
+ChipImgProc\> cd build
+build\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+build\> cmake --build . --target install
+```
+
 # Import ChipImgProc to your project
 
 ## Import with CMake Hunter (recommanded)
