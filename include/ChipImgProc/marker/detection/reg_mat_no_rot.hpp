@@ -184,5 +184,10 @@ constexpr struct RegMatNoRot {
         }
         return mk_regs;
     }
-} reg_mat_no_rot;
+} 
+/**
+ * @brief Global functor with RegMatNoRot type.
+ * 
+ */
+reg_mat_no_rot;
 }

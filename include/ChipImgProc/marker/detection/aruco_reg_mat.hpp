@@ -1,3 +1,8 @@
+/**
+ * @file aruco_reg_mat.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::marker::detection::ArucoRegMat
+ */
 #pragma once
 #include <vector>
 #include <Nucleona/stream/null_buffer.hpp>
@@ -8,58 +13,13 @@
 #include <ChipImgProc/aruco.hpp>
 #include "reg_mat.hpp"
 namespace chipimgproc::marker::detection {
-
-struct ArucoRegMat 
+/**
+ * @brief The regular matrix layout ArUco marker detection.
+ * 
+ */
+class ArucoRegMat 
 {
-    void set_dict(const nlohmann::json& db, const std::string& key) {
-        auto& dict_json = db[key];
-        mk_index_map_.resize(dict_json["bitmap_list"].size());
-        auto dict = aruco::Dictionary::from_json(dict_json);
-        set_dict_(std::move(dict));
-    }
-    void set_dict(const std::string& path, const std::string& key) {
-        std::ifstream fin(path);
-        nlohmann::json db;
-        fin >> db;
-        set_dict(db, key);
-    }
-    void set_detector_ext(
-        const std::int32_t&               pyramid_level
-      , const std::int32_t&               border_bits               // bits
-      , const std::int32_t&               fringe_bits               // bits
-      , const double&                     a_bit_width               // pixels
-      , const double&                     margin_size               // pixels 
-      , const std::string&                frame_template_path
-      , const std::string&                frame_mask_path
-      , const std::int32_t&               nms_count
-      , const double&                     nms_radius                // pixels
-      , const std::int32_t&               cell_size                 // pixels
-      , const std::vector<std::int32_t>&  ids                       // ids   
-      , const std::vector<cv::Point>&     mk_index_map              // id to point
-      , std::ostream&                     logger            = nucleona::stream::null_out
-    ) {
-        if(!dictionary_set_)
-            throw std::runtime_error("dictionary not yet set");
-        auto frame_template = cv::imread(frame_template_path, cv::IMREAD_GRAYSCALE);
-        auto frame_mask     = cv::imread(frame_mask_path, cv::IMREAD_GRAYSCALE);
-        detector_.reset(
-            dictionary_, pyramid_level, 
-            border_bits, fringe_bits,
-            a_bit_width,
-            margin_size, 
-            frame_template, frame_mask,
-            nms_count, nms_radius,
-            cell_size,
-            ids,
-            logger
-        );
-        mk_index_map_ = mk_index_map;
-
-        for(auto&& id : ids) {
-            mk_pos_to_id_[mk_index_map_[id]] = id;
-        }
-    }
-    NOINLINE auto generate_raw_marker_regions(
+    auto generate_raw_marker_regions(
         const cv::Mat&          src, 
         double                  mk_invl_x,
         double                  mk_invl_y,
@@ -127,6 +87,142 @@ struct ArucoRegMat
         }
         
     }
+public:
+    /**
+     * @brief Set the ArUco marker dictionary
+     * @details The marker dictionary is the JSON format like:
+     *      @code
+     *      {
+     *        "DICT_6X6_250": {
+     *            "coding_bits": 6
+     *          , "maxcor_bits": 5
+     *          , "bitmap_list": {
+     *                "0": [
+     *                    0, 0, 0, 1, 1, 1
+     *                  , 1, 0, 0, 0, 1, 1
+     *                  , 1, 1, 0, 1, 1, 1
+     *                  , 0, 1, 1, 0, 0 , 0
+     *                  , 0, 0, 1, 0, 1, 0
+     *                  , 1, 0, 0, 1, 1, 0
+     *                ]
+     *              , "1": [
+     *                    0, 0, 0, 0, 1, 1
+     *                  , 1, 0, 1, 1, 1, 1
+     *                  , 1, 0, 1, 1, 1, 0
+     *                  , 1, 0, 0, 0, 1, 1
+     *                  , 1, 0, 0, 0, 1, 0
+     *                  , 0, 1, 0, 0, 0, 1
+     *                ]
+     *              ...
+     *        }
+     *      }
+     *      @endcode
+     * @param db    The JSON format ArUco database.
+     * @param key   The ArUco marker set id use to set the dictionary, for example: DICT_6X6_250.
+     */
+    void set_dict(const nlohmann::json& db, const std::string& key) {
+        auto& dict_json = db[key];
+        mk_index_map_.resize(dict_json["bitmap_list"].size());
+        auto dict = aruco::Dictionary::from_json(dict_json);
+        set_dict_(std::move(dict));
+    }
+    /**
+     * @brief Equivlent to set_dict(const nlohmann::json& db, const std::string& key)
+     *        but use JSON file path as the ArUco database source
+     * 
+     * @param path ArUco database JSON file path.
+     * @param key   The ArUco marker set id use to set the dictionary, for example: DICT_6X6_250.
+     */
+    void set_dict(const std::string& path, const std::string& key) {
+        std::ifstream fin(path);
+        nlohmann::json db;
+        fin >> db;
+        set_dict(db, key);
+    }
+    /**
+     * @brief Set the internal ArUco detector parameters.
+     * 
+     * @param pyramid_level         A number of downsampling levels for speeding up marker localization.
+     *                              The value is an integer > 0. Experientially, setting the value of levels to 2 or 3 is good enough.
+     * @param border_bits           A number of bits for border edge generation.
+     *                              Please refer to the symbol b in the schematic diagram.
+     * @param fringe_bits           A number of bits for fringe edge generation.
+     *                              Please refer to the symbol f in schematic diagram.
+     * @param a_bit_width           The width of a bit pattern in pixel scales. This value needs to be estimated precisely. 
+     *                              Please refer to the symbol p in schematic diagram.
+     * @param margin_size           The width of the margin for matching frame template.
+     *                              This value must be greater than 0 and less than a size of border width.
+     *                              Experientially, setting the parameter to border_bits x 0.6 is a practical.
+     *                              The value unit is pixel.
+     *                              Please refer to the symbol m in schematic diagram.
+     * @param frame_template_path   The template image file path for marker localization.
+     * @param frame_mask_path       The mask image file path for matching frame template.
+     *                              It is used to exclude the patterns of coding region in matching process.
+     * @param nms_count             An upper bound to the number of markers in an observed image.
+     * @param nms_radius            A lower bound to the distance between ArUco markers in pixel scales.
+     * @param cell_size             The size of the interior region for a bit detection.
+     *                              Please refer to the symbol s in schematic diagram.
+     * @param ids                   A list of candidate marker IDs possibly detected in an image.
+     * @param mk_index_map          A mapper from ArUco marker ID to marker location ID.
+     * 
+     * @param logger                A logger for outputting the recognition process details.
+     */
+    void set_detector_ext(
+        const std::int32_t&               pyramid_level
+      , const std::int32_t&               border_bits               // bits
+      , const std::int32_t&               fringe_bits               // bits
+      , const double&                     a_bit_width               // pixels
+      , const double&                     margin_size               // pixels 
+      , const std::string&                frame_template_path
+      , const std::string&                frame_mask_path
+      , const std::int32_t&               nms_count
+      , const double&                     nms_radius                // pixels
+      , const std::int32_t&               cell_size                 // pixels
+      , const std::vector<std::int32_t>&  ids                       // ids   
+      , const std::vector<cv::Point>&     mk_index_map              // id to point
+      , std::ostream&                     logger            = nucleona::stream::null_out
+    ) {
+        if(!dictionary_set_)
+            throw std::runtime_error("dictionary not yet set");
+        auto frame_template = cv::imread(frame_template_path, cv::IMREAD_GRAYSCALE);
+        auto frame_mask     = cv::imread(frame_mask_path, cv::IMREAD_GRAYSCALE);
+        detector_.reset(
+            dictionary_, pyramid_level, 
+            border_bits, fringe_bits,
+            a_bit_width,
+            margin_size, 
+            frame_template, frame_mask,
+            nms_count, nms_radius,
+            cell_size,
+            ids,
+            logger
+        );
+        mk_index_map_ = mk_index_map;
+
+        for(auto&& id : ids) {
+            mk_pos_to_id_[mk_index_map_[id]] = id;
+        }
+    }
+    /**
+     * @brief Call operator, detect ArUco marker as regular matrix.
+     * 
+     * @tparam T                Input image value type.
+     * @tparam Func             Function/Functor parameter pos_map's type, should be deduced.
+     * 
+     * @param src               The input image.
+     * @param mk_invl_x         Marker interval along X direction, in pixel.
+     * @param mk_invl_y         Marker interval along Y direction, in pixel.
+     * @param mk_width          Marker width, in pixel. 
+     * @param mk_height         Marker height, in pixel.
+     * @param fov_mk_num_x      Marker numbers along the X direction.
+     * @param fov_mk_num_y      Marker numbers along the Y direction.
+     * @param pyramid_level     A number of downsampling levels for speeding up marker localization.
+     *                          The value is an integer > 0. Experientially, setting the value of levels to 2 or 3 is good enough.
+     * @param pos_map           The mapper function from FOV marker position to chip marker position.
+     *                          The function symbol is cv::Point(int, int).
+     * @return std::vector<MKRegion> 
+     *                          The detected marker regions.
+     */
     template<class T, class Func>
     std::vector<MKRegion> operator()(
         const cv::Mat_<T>&          src, 
@@ -152,11 +248,9 @@ struct ArucoRegMat
         for(auto&& mk_r : raw_mk_rs) {
             auto tgt = src(mk_r);
             resize(tgt, pyramid_level);
-            cv::imwrite("debug_tgt.tiff", tgt);
             auto&& mk_chip_pos = pos_map(mk_r.x_i, mk_r.y_i);
             auto& aruco_mk_id = mk_pos_to_id_.at(mk_chip_pos);
             auto mk_img = detector_.aruco_img(aruco_mk_id);
-            cv::imwrite("debug_mk_img.tiff", mk_img);
             auto score = match_template(tgt, mk_img);
             auto max_points = make_fixed_capacity_set<cv::Point>(
                 20, chipimgproc::utils::PosCompByScore(score)
@@ -191,22 +285,19 @@ struct ArucoRegMat
         }
         return raw_mk_rs;
     }
-    std::vector<MKRegion> operator()(
-        const cv::Mat&              src, 
-        const Layout&               mk_layout, 
-        const MatUnit&              unit,
-        std::ostream&               out        = nucleona::stream::null_out,
-        const ViewerCallback&       v_bin      = nullptr,
-        const ViewerCallback&       v_search   = nullptr,
-        const ViewerCallback&       v_marker   = nullptr
-    ) const {
-        auto& mk_des = mk_layout.get_single_pat_marker_des();
-        auto& marker = mk_des.get_std_mk(unit);
-        return operator()(
-            src, marker.cols, marker.rows, out,
-            v_bin, v_search, v_marker
-        );
-    }
+    /**
+     * @brief Call operator, detect ArUco marker as regular matrix.
+     * 
+     * @param src               The input image.
+     * @param marker_width      Marker width in pixel scale.
+     * @param marker_height     Marker height in pixel scale.
+     * @param out               A logger for outputting the recognition process details.
+     * @param v_bin             Deprecated. Debug image output.
+     * @param v_search          Deprecated. Debug image output. 
+     * @param v_marker          Deprecated. Debug image output. 
+     * @return std::vector<MKRegion> 
+     *                          The detected marker regions.
+     */
     std::vector<MKRegion> operator()(
         const cv::Mat&              src, 
         int                         marker_width,
@@ -234,6 +325,35 @@ struct ArucoRegMat
             res.push_back(mk_r);
         }
         return res;
+    }
+    /**
+     * @brief Call operator, detect ArUco marker as regular matrix.
+     * 
+     * @param src               The input image.
+     * @param mk_layout         The marker layout of image.
+     * @param unit              Image matrix unit.
+     * @param out               A logger for outputting the recognition process details.
+     * @param v_bin             Deprecated. Debug image output.
+     * @param v_search          Deprecated. Debug image output. 
+     * @param v_marker          Deprecated. Debug image output. 
+     * @return std::vector<MKRegion> 
+     *                          The detected marker regions.
+     */
+    std::vector<MKRegion> operator()(
+        const cv::Mat&              src, 
+        const Layout&               mk_layout, 
+        const MatUnit&              unit,
+        std::ostream&               out        = nucleona::stream::null_out,
+        const ViewerCallback&       v_bin      = nullptr,
+        const ViewerCallback&       v_search   = nullptr,
+        const ViewerCallback&       v_marker   = nullptr
+    ) const {
+        auto& mk_des = mk_layout.get_single_pat_marker_des();
+        auto& marker = mk_des.get_std_mk(unit);
+        return operator()(
+            src, marker.cols, marker.rows, out,
+            v_bin, v_search, v_marker
+        );
     }
 private:
     void set_dict_(aruco::Dictionary&& dict) {

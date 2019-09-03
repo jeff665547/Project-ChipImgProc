@@ -1,7 +1,7 @@
 /**
  *  @file    ChipImgProc/aruco/detector.hpp
  *  @author  Chia-Hua Chang, Alex Lee
- *  @brief   Detect ArUco markers in an image.
+ *  @brief   @copybrief chipimgproc::aruco::Detector
  *  @details The ArUco marker detection algorithm
  * 
  */
