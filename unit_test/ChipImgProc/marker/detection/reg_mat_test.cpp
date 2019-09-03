@@ -1,3 +1,4 @@
+/// [usage]
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
@@ -29,6 +30,7 @@ TEST(reg_mat_layout, operator_call_test) {
             cv::imwrite("debug_marker.tiff", mat);
         });
 }
+/// [usage]
 
 
 TEST(reg_mat_layout, hard_case) {

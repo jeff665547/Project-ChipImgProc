@@ -1,3 +1,4 @@
+/// [usage]
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <Nucleona/app/cli/gtest.hpp>
@@ -6,13 +7,6 @@
 #include <ChipImgProc/aruco.hpp>
 TEST(aruco_test,basic_test) 
 {
-/// [usage]
-
-    // Please include the following headers to your C++ code
-    // * nlohmann/json.hpp
-    // * ChipImgProc/utils.h
-    // * ChipImgProc/aruco.hpp
-
     /*
      * prepare test data
      */
@@ -25,7 +19,7 @@ TEST(aruco_test,basic_test)
     auto img0 = cv::imread(img0_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
     auto img1 = cv::imread(img1_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 
-    // declare the ArUco markers that would be found in an image. Marker IDs can be inordered.
+    // declare the ArUco markers that would be found in an image. Marker IDs can be ignordered.
     std::vector<std::int32_t> aruco_ids_in_image {
         47, 48, 49, 05, 50, 51, 52,
         40, 41, 42, 43, 44, 45, 46,
@@ -48,14 +42,14 @@ TEST(aruco_test,basic_test)
     nlohmann::json aruco_db;
     db_fin >> aruco_db;
     auto dict = chipimgproc::aruco::Dictionary::from_json(
-        aruco_db["DICT_6X6_250"]
+        aruco_db["DICT_6X6_250"] // dictionary name
     );
     
     // path to marker frame template and mask
     auto frame_template_path = nucleona::test::data_dir() / "aruco_frame_template.tiff";
     auto frame_mask_path = nucleona::test::data_dir() / "aruco_frame_mask.tiff";
 
-    // load marker frame template and mask
+    // load marker frame template and mask as gray scale image
     auto frame_template = cv::imread(frame_template_path.string(), cv::IMREAD_GRAYSCALE);
     auto frame_mask     = cv::imread(frame_mask_path.string(), cv::IMREAD_GRAYSCALE);
     
@@ -92,5 +86,5 @@ TEST(aruco_test,basic_test)
     for(auto& [id, pt] : pts1 )
         std::cout << id << '\t' << pt << std::endl;
     
-/// [usage]
 }
+/// [usage]
