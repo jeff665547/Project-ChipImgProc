@@ -16,19 +16,21 @@ namespace chipimgproc{ namespace marker{ namespace detection{
  */
 struct MKRegion : public cv::Rect {
     /**
-     * @brief The marker position index along X direction, 
-     *        for 3*3 markers on image, the x_i will be [0, 1, 2]
+     * @brief The marker location index along X-axis.
+     *        For example, given a 3-by-3 grid of markers within the image,
+     *        the value of x_i will be 0, 1 or 2.
      */
     int x_i;
+
     /**
-     * @brief The marker position index along Y direction, 
-     *        for 3*3 markers on image, the y_i will be [0, 1, 2]
+     * @brief The marker location index along Y-axis.
+     *        For example, given a 3-by-3 grid of markers within the image,
+     *        the value of y_i will be 0, 1 or 2.
      */
     int y_i;
+
     /**
-     * @brief The marker matching score.
-     *        This value will be set after marker detection.
-     * 
+     * @brief The quality score of the marker recognition.
      */
     double score;
 
@@ -41,9 +43,9 @@ struct MKRegion : public cv::Rect {
     using Group = std::map<int, std::vector<T>>;
 
     /**
-     * @brief Print the marker region information to given stream.
+     * @brief Export the content of marker region to the given ostream object.
      * 
-     * @param out out stream object.
+     * @param out output stream object.
      */
     void info(std::ostream& out) {
         out << "(" << this->x << "," << this->y << ")"
@@ -52,8 +54,9 @@ struct MKRegion : public cv::Rect {
             << std::endl
         ;
     }
+
     /**
-     * @brief Group marker region with the same x_i.
+     * @brief Group the marker regions by the value of x_i.
      * 
      * @tparam FUNC     Function type. Deduced, can be 
      * @param regs      The marker regions.
@@ -68,8 +71,9 @@ struct MKRegion : public cv::Rect {
         }
         return group;
     }
+
     /**
-     * @brief Group marker region with the same y_i.
+     * @brief Group the marker regions by the value of y_i.
      * 
      * @tparam FUNC     Function type. Deduced, can be 
      * @param regs      The marker regions.
