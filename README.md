@@ -24,8 +24,10 @@ build\> cmake --build . --target install
 
 ### Requirment
 * Your project must be a CMake project
-* GCC >= 7.3
+* GCC = 7.3, Architecture = x86_64, posix, seh, 0
 * CMake >= 3.10
+
+
 
 ### General hunter configuration
 
