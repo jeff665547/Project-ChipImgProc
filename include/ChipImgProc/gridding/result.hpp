@@ -13,20 +13,30 @@ namespace chipimgproc{ namespace gridding{
  */
 struct Result {
     /**
-     * @brief Grid table row and column numbers.
+     * @brief Grid table row numbers.
      * 
      */
-    std::uint16_t               feature_rows, feature_cols  ;
+    std::uint16_t               feature_rows;
+    /**
+     * @brief Grid table column numbers.
+     * 
+     */
+    std::uint16_t               feature_cols;
     /**
      * @brief Grid table tiles.
      * 
      */
-    std::vector<cv::Rect>       tiles                       ;
+    std::vector<cv::Rect>       tiles;
     /**
-     * @brief Grid line positions on both x and y direction.
+     * @brief Grid line positions on x direction.
      * 
      */
-    std::vector<double>         gl_x, gl_y                  ;
+    std::vector<double>         gl_x;
+    /**
+     * @brief Grid line positions on y direction.
+     * 
+     */
+    std::vector<double>         gl_y; 
 };
 
 }}

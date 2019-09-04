@@ -1,5 +1,5 @@
 /**
- * @file reg_mat.hpp
+ * @file ChipImgProc/gridding/reg_mat.hpp
  * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
  * @brief @copybrief chipimgproc::gridding::RegMat
  * 
