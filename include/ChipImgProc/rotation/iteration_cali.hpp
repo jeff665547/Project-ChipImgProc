@@ -10,9 +10,8 @@
 namespace chipimgproc::rotation {
 
 /**
- * @brief Iterative search the rotation angle. To use this algorithm, 
- *        we suggest call the factory function: 
- *        chipimgproc::rotation::make_iteration_cali()
+ * @brief Iterative search the rotation angle. To use this algorithm, we suggest to use the factory function:
+ *        @ref make-iteration-cali "make_iteration_cali"
  * 
  * @details This algorithm takes 4 parameters: 
  * rotation estimate function, rotation calibrate function, 
@@ -41,6 +40,17 @@ namespace chipimgproc::rotation {
  */
 template<class Float, class RotEst, class RotCali>
 struct IterationCali {
+    /**
+     * @brief Constructor of IterationCali
+     * 
+     * @details To create IterationCali object, we suggest to use the factory function:
+     *          @ref make-iteration-cali "make_iteration_cali"
+     * 
+     * @param max_time 
+     * @param theta_threshold 
+     * @param rot_est 
+     * @param rot_cali 
+     */
     IterationCali(
         int             max_time, 
         Float           theta_threshold,
@@ -111,6 +121,7 @@ private:
     RotCali     rot_cali_           ;
 };
 /**
+ * @anchor make-iteration-cali
  * @brief The maker function of chipimgproc::rotation::IterationCali type.
  * 
  * @details @copydetails chipimgproc::rotation::IterationCali
@@ -130,8 +141,7 @@ private:
  *                          By default is 6
  * @param theta_threshold   The rotation angle threshold. 
  * @return auto  Deduced, The chipimgproc::rotation::IterationCali functor type.
- */
-template<class RotEst, class RotCali, class Float = float>
+ */template<class RotEst, class RotCali, class Float = float>
 auto make_iteration_cali(
     const RotEst&   rot_est, 
     const RotCali&  rot_cali,
