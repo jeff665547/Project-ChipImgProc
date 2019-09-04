@@ -4,7 +4,9 @@
 
 ### Requirement
 * Your project must be a CMake project
+* Download and install gcc from https://sourceforge.net/projects/mingw-w64/
 * GCC = 7.3, Architecture = x86_64, posix, seh, 0
+* Download and install CMake from https://cmake.org/download/
 * CMake >= 3.10
 
 ### Steps
