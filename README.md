@@ -10,6 +10,8 @@
 ### Steps
 
 ```bat
+ChipImgProc\> git submodule init
+ChipImgProc\> git submodule update
 ChipImgProc\> mkdir build
 ChipImgProc\> cd build
 build\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
