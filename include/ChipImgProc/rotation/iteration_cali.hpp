@@ -31,12 +31,6 @@ namespace chipimgproc::rotation {
  * 
  * TODO: example code
  * 
- * @tparam Float    The float point type use to run the algorithm.
- * @tparam RotEst   The rotation angle estimation function.
- *                  The function symbol is Float(const cv::Mat&, ...).
- * @tparam RotCali  The rotation angle calibration function.
- *                  The function symbol is Float(const cv::Mat&, Float, ...).
- * 
  */
 template<class Float, class RotEst, class RotCali>
 struct IterationCali {
@@ -46,10 +40,10 @@ struct IterationCali {
      * @details To create IterationCali object, we suggest to use the factory function:
      *          @ref make-iteration-cali "make_iteration_cali"
      * 
-     * @param max_time 
-     * @param theta_threshold 
-     * @param rot_est 
-     * @param rot_cali 
+     * @param max_time              Iteration stop condition, max time iteration.
+     * @param theta_threshold       Iteration stop condition, angle threshold.
+     * @param rot_est               Rotation estimate function.
+     * @param rot_cali              Rotation calibration function.
      */
     IterationCali(
         int             max_time, 
@@ -141,7 +135,8 @@ private:
  *                          By default is 6
  * @param theta_threshold   The rotation angle threshold. 
  * @return auto  Deduced, The chipimgproc::rotation::IterationCali functor type.
- */template<class RotEst, class RotCali, class Float = float>
+ */
+template<class RotEst, class RotCali, class Float = float>
 auto make_iteration_cali(
     const RotEst&   rot_est, 
     const RotCali&  rot_cali,

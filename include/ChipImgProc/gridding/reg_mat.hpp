@@ -1,3 +1,9 @@
+/**
+ * @file reg_mat.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::gridding::RegMat
+ * 
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/gridding/result.hpp>
@@ -7,11 +13,14 @@
 #include <ChipImgProc/logger.hpp>
 #include "utils.hpp"
 namespace chipimgproc{ namespace gridding{
-
-struct RegMat {
+/**
+ * @brief Grid the input image with given marker layout(chipimgproc::marker::Layout) 
+ *        and marker regions(chipimgproc::marker::detection::MKRegion)
+ * 
+ */
+class RegMat {
     using MKRegion = marker::detection::MKRegion;
     using MKLayout = marker::Layout;
-    // using FUNC = std::function<int(cv::Point)>;
     template<class FUNC>
     auto grid_anchors_group( 
         MKRegion::Group<cv::Point>& grouped_ps, 
@@ -70,6 +79,19 @@ struct RegMat {
         }
         return org;
     }
+public:
+    /**
+     * @brief Call operator, @copybrief chipimgproc::gridding::RegMat
+     * 
+     * @param in_src        Input image data
+     * @param mk_layout     Image marker layout, provide logical marker position.
+     * @param mk_regs       Image marker regions, 
+     *                      provide real marker position detected from marker detection algorithm.
+     * @param msg           Deprecated, debug output message.
+     * @param v_result      Debug grid line image output.
+     * @return Result       A data structure contains:  
+     *                      grid table row and column number, each tiles and grid line position.
+     */
     Result operator()(
           const cv::Mat&                in_src
         , const MKLayout&               mk_layout

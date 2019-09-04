@@ -42,6 +42,7 @@ TEST(reg_mat_layout, operator_call_test) {
         cv:imwrite("debug_gridding.tiff", m);
     });
 }
+
 TEST(reg_mat_layout, hard_case) {
     chipimgproc::marker::detection::RegMat reg_mat;
     chipimgproc::rotation::MarkerVec<float> marker_fit;

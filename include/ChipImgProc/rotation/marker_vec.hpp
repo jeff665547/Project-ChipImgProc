@@ -18,6 +18,8 @@ namespace chipimgproc { namespace rotation {
 /**
  * @brief Group the known marker position into line points group and use 
  *        chipimgproc::rotation::GridPointInfer to inference the rotation angle.
+ * @details Here is the example usage:
+ *   @snippet ChipImgProc/rotation/marker_vec_test.cpp usage
  * 
  * @tparam FLOAT Computing and result float point type.
  */
