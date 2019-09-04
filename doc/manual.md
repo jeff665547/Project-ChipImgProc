@@ -1,11 +1,14 @@
-Manual {#mainpage}
+Getting start {#mainpage}
 ===
+# Build from source
 
-# Import
+TODO:
+
+# Import ChipImgProc to client project(TODO: update this)
 
 ## Import with CMake Hunter (recommanded)
 
-### Requirment
+### Requirements
 * Your project must be a CMake project
 * GCC >= 7.3
 * CMake >= 3.10
@@ -68,3 +71,25 @@ target_link_libraries(
 # Now you can access all ChipImgProc and dependent features in "foo" target, include Nucleona, Boost, OpenCV etc.
 ```
 see http://gitlab.centrilliontech.com.tw:10080/centrillion/submodule-ci/blob/ChipImgProc/CMakeLists.txt for a runable project
+
+# Introduction
+
+To extract the probe intensities from the image. 
+There are several issues of the image we need to resolve:
+
+1. The images are slanted
+2. Noise
+3. Grid recognition and segmentation
+4. A chip sample is captured into multiple images, which need to be stitched.
+5. The region of interest detection, remove the regions we don't need.
+etc.
+
+To solve these issues, we develop a pipeline with following steps:
+
+* @subpage improc_image_rotation
+* @subpage improc_gridding
+* @subpage improc_segmentation
+* @subpage improc_min_cv_auto_margin
+* @subpage improc_r_o_i_detection
+* @subpage improc_background_fix_sub_and_division01
+* @subpage improc_stitiching
