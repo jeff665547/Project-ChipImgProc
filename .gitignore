@@ -64,3 +64,4 @@ stage/
 workdir/
 doc/output
 version.h
+.bak/
