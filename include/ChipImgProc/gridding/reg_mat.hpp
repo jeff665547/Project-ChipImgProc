@@ -15,7 +15,12 @@
 namespace chipimgproc{ namespace gridding{
 /**
  * @brief Grid the input image with given marker layout(chipimgproc::marker::Layout) 
- *        and marker regions(chipimgproc::marker::detection::MKRegion)
+ *   and marker regions(chipimgproc::marker::detection::MKRegion).
+ * @details @copybrief chipimgproc::gridding::RegMat
+ *   This gridding algorithm require markers to be regular matrix 
+ *   and the position must standardized, which means it usually called with 
+ *   chipimgproc::marker::detection::reg_mat_infer. Here is the example:
+ *   @snippet ChipImgProc/gridding/reg_mat_test.cpp usage
  * 
  */
 class RegMat {

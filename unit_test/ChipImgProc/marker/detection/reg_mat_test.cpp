@@ -3,7 +3,6 @@
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/layout.hpp>
-#include <ChipImgProc/marker/loader.hpp>
 #include "../../make_layout.hpp"
 
 TEST(reg_mat_layout, operator_call_test) {
