@@ -11,39 +11,43 @@
 namespace chipimgproc{ namespace marker{ namespace detection{
 
 /**
- * @brief The marker region on any level of image.
- * 
+ * @brief This class inherits from the class cv:Rect,
+ *        which records the width and height of the shape, and the xy coordinate of top-left corner,
+ *        with additional marker location index and matching quality score.
+ *        This class can be applied to any integer scaling level of image such as
+ *        integral-pixel-level, cell-level and marker-level scales,
+ *        except micron-level scale.
  */
 struct MKRegion : public cv::Rect {
     /**
-     * @brief The marker location index along X-axis.
+     * @brief the marker location index along X-axis.
      *        For example, given a 3-by-3 grid of markers within the image,
      *        the value of x_i will be 0, 1 or 2.
      */
     int x_i;
 
     /**
-     * @brief The marker location index along Y-axis.
+     * @brief the marker location index along Y-axis.
      *        For example, given a 3-by-3 grid of markers within the image,
      *        the value of y_i will be 0, 1 or 2.
      */
     int y_i;
 
     /**
-     * @brief The quality score of the marker recognition.
+     * @brief the quality score of the marker recognition.
      */
     double score;
 
     /**
-     * @brief Group the object by the marker position index.
+     * @brief an std::map for grouping objects in std::vector by the marker loctation index.
      * 
-     * @tparam T The grouped object type
+     * @tparam T the grouped object type
      */
     template<class T>
     using Group = std::map<int, std::vector<T>>;
 
     /**
-     * @brief Export the content of marker region to the given ostream object.
+     * @brief Export the content to the given ostream object.
      * 
      * @param out output stream object.
      */
@@ -58,10 +62,10 @@ struct MKRegion : public cv::Rect {
     /**
      * @brief Group the marker regions by the value of x_i.
      * 
-     * @tparam FUNC     Function type. Deduced, can be 
-     * @param regs      A set of marker regions.
-     * @param func      A transfomation to grouped marker regions.
-     * @return auto     Deduced, depend on FUNC result type. The pattern is Group<T>.
+     * @tparam FUNC     deduced, it can be any value returning function type
+     * @param regs      a set of marker regions
+     * @param func      a transfomation to grouped marker regions.
+     * @return auto     deduced, the return type Group<T> depends on result type of FUNC.
      */
     template<class FUNC>
     static auto x_group(const std::vector<MKRegion>& regs, FUNC&& func) {
@@ -75,10 +79,10 @@ struct MKRegion : public cv::Rect {
     /**
      * @brief Group the marker regions by the value of y_i.
      * 
-     * @tparam FUNC     Function type. Deduced, can be 
-     * @param regs      A set of marker regions.
-     * @param func      A transfomation to grouped marker regions.
-     * @return auto     Deduced, depend on FUNC result type. The pattern is Group<T>.
+     * @tparam FUNC     deduced, it can be any value returning function type
+     * @param regs      a set of marker regions.
+     * @param func      a transfomation to grouped marker regions.
+     * @return auto     deduced, the return type Group<T> depends on result type of FUNC.
      */
     template<class FUNC>
     static auto y_group(const std::vector<MKRegion>& regs, FUNC&& func) {
@@ -91,8 +95,8 @@ struct MKRegion : public cv::Rect {
     /**
      * @brief Group marker region into marker location with the same x_i.
      * 
-     * @param regs Input marker regions
-     * @return auto Deduced, usually std::vector<Group<cv::Point>>
+     * @param regs      the input marker regions
+     * @return auto     deduced, the return type is std::vector<Group<cv::Point>>
      */
     static auto x_group_points( const std::vector<MKRegion>& regs ) {
         return x_group(regs, [](const MKRegion& mk_reg){
@@ -102,8 +106,8 @@ struct MKRegion : public cv::Rect {
     /**
      * @brief Group marker region into marker location with the same y_i.
      * 
-     * @param regs Input marker regions
-     * @return auto Deduced, usually std::vector<Group<cv::Point>>
+     * @param regs      the input marker regions
+     * @return auto     deduced, the return type is std::vector<Group<cv::Point>>
      */
     static auto y_group_points( const std::vector<MKRegion>& regs ) {
         return y_group(regs, [](const MKRegion& mk_reg){
