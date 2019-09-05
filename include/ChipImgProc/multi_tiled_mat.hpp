@@ -88,6 +88,11 @@ struct MultiTiledMat
 , public detail::IndexedRange<FLOAT, GLID>  // provide range based for iterator
 {
     /**
+     * @brief The float point type use in current type.
+     * 
+     */
+    using FloatType = FLOAT;
+    /**
      * @brief The (row, col) coordinate to one dimension integer transform matrix type.
      * 
      */
@@ -335,21 +340,24 @@ private:
     static constexpr MinCVMean min_cv_mean_{};
 public:
     /**
-     * @brief The element access strategy
+     * @brief The element access strategy. Get the mean value for each cell.
+     *  For overlapping region, select the cell which has minimum CV.
+     *  The functor return is a float point value 
      * 
-     * @return const MinCVMean& 
+     * @return const MinCVMean& Cell select functor.
      */
     const MinCVMean& min_cv_mean() const {
         return min_cv_mean_;
     }
-    MinCVPixels min_cv_pixels() {
-        return MinCVPixels(*this);
-    }
+    /**
+     * @brief The element access strategy. Get the pixels(cv::Mat type) for each cell.
+     *  For overlapping region, select the cell which has minimum CV.
+     *  The functor return is a float point value 
+     * 
+     * @return MinCVPixels Cell select functor.
+     */
     MinCVPixels min_cv_pixels() const {
         return MinCVPixels(*this);
-    }
-    MinCVAllData min_cv_all_data() {
-        return MinCVAllData(*this);
     }
     MinCVAllData min_cv_all_data() const {
         return MinCVAllData(*this);
