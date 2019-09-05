@@ -31,7 +31,7 @@ struct Gridding
     {
         // 1D projection
         cv::Mat_<FLOAT> data;
-        cv::reduce(src, data, dim, CV_REDUCE_AVG, data.depth());
+        cv::reduce(src, data, dim, cv::REDUCE_AVG, data.depth());
         if (dim == 1)
             cv::transpose(data, data);
     

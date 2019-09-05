@@ -98,7 +98,7 @@ struct RegMatMarkerLayout {
                     sub_tgt.rows - mk.rows + 1,
                     sub_tgt.cols - mk.cols + 1
                 );
-                cv::matchTemplate(sub_tgt, mk, sub_score, CV_TM_CCORR_NORMED);
+                cv::matchTemplate(sub_tgt, mk, sub_score, cv::TM_CCORR_NORMED);
                 if(v_score) {
                     cv::Mat tmp;
                     // cv::Mat tmp = sub_score + 1;
