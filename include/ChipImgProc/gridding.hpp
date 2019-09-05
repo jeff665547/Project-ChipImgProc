@@ -174,3 +174,6 @@ struct Gridding
     }
 };
 }
+#include "gridding/pseudo.hpp"
+#include "gridding/result.hpp"
+#include "gridding/reg_mat.hpp"

@@ -1,3 +1,9 @@
+/**
+ * @file multi_tiled_mat.hpp
+ * @author Chia-Hua Chang(johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::MultiTiledMat
+ * 
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <Nucleona/range.hpp>
@@ -12,7 +18,16 @@
 #include <memory>
 #include <ChipImgProc/logger.hpp>
 namespace chipimgproc{
-
+/**
+ * @brief Grid cell, include location, width, height, 
+ *        statistic data, and FOV image id.
+ * @details The FOV image ID is a sequencial number 
+ *   to identify the current cell belong to which FOV, 
+ *   and this ID usually numbering by the FOV row major order.
+ * 
+ * @tparam FLOAT The float point type used in this data structure, 
+ *   and is use to trade off the performance and numerical accuracy.
+ */
 template<class FLOAT = float>
 struct IdxRect 
 : public cv::Rect
@@ -53,22 +68,73 @@ struct TilesWrapper {
 
 
 }
-// using GLID = std::uint16_t;
+/**
+ * @brief Container of multiple tiled fov images. 
+ *   Provide chip level coordinates access to cell data, 
+ *   And lazy evaluate the cell statistic values.
+ * 
+ * @tparam FLOAT The float point type used in this data structure, 
+ *   and is use to trade off the performance and numerical accuracy.
+ * @tparam GLID The grid line type, 
+ *   and is use to limit the memory usage of the grid line storages.
+ */
 template<
     class FLOAT = float,
     class GLID  = std::uint16_t
 >
 struct MultiTiledMat 
-: protected detail::TilesWrapper<FLOAT>
-, protected detail::IndexWrapper<GLID>
-, public detail::IndexedRange<FLOAT, GLID>
+: protected detail::TilesWrapper<FLOAT>     // tile storage, workaround for member initialize order 
+, protected detail::IndexWrapper<GLID>      // index storage, workaround for member initialize order 
+, public detail::IndexedRange<FLOAT, GLID>  // provide range based for iterator
 {
+    /**
+     * @brief The (row, col) coordinate to one dimension integer transform matrix type.
+     * 
+     */
     using IndexType  = typename detail::IndexWrapper<GLID>::IndexType;
+    /**
+     * @brief The IndexType matrix containning value type
+     * 
+     */
     using IndexValue = typename IndexType::value_type;
+    /**
+     * @brief A vector of FOV cell data type, the cell data type is actually chipimgproc::IdxRect, 
+     *   so the type CellInfos is similar to std::vector<chipimgproc::IdxRect>.
+     * @details The CellInfos is a vector containning one or multiple FOVs' cell data 
+     *   which has same coordinates on the chip. If the cell position is in a none overlapping region of a FOV,
+     *   then the CellInfos vector should contains only one cell data, but if the cell position is in a overlapping region,
+     *   then the CellInfos vector should contains multiple cells data.
+     */
     using CellInfos  = detail::CellInfos_<FLOAT>;
+    /**
+     * @brief The chip level cell container. The actual type of Tiles is like std::vector<std::vector<IdxRect>>
+     * @details Given a (row, col) position, we can access not only one cell data.
+     *   Here we notice that the cell data is the concept on FOV image, 
+     *   but there are several overlapping regions between FOVs.
+     *   In such case, a (row, col) position may contains multiple cells from different FOVs.
+     *   The concept of Tile is to represent the single cell on the "chip" level, 
+     *   and the Tiles is the container of Tile and will be access by the IndexType object.
+     * 
+     */
     using Tiles      = typename detail::TilesWrapper<FLOAT>::Tiles;
+    /**
+     * @brief A shortcut to represent "this" type
+     * 
+     */
     using This       = MultiTiledMat<FLOAT, GLID>;
-
+    /**
+     * @brief create MultiTiledMat
+     *  
+     * @param imgs          FOV gridding result, 
+     *                      In general we use TiledMat::make_from_grid_res 
+     *                      to create TiledMat from gridding::Result.
+     * @param stats         Cell level statistic data, usually generate from margin process. 
+     *                      Note that, the order should match the parameter imgs.
+     * @param cell_st_pts   Cell level logical stitch points.
+     *                      Note that, the order should match the parameter imgs.
+     * @param fov_index     The FOV position IDs following the imgs order. 
+     *                      Note that, the FOV position ID format is (x,y) not (r,c).
+     */
     MultiTiledMat(
         const std::vector<TiledMat<GLID>>&        imgs,
         const std::vector<stat::Mats<FLOAT>>&     stats,
@@ -194,7 +260,8 @@ struct MultiTiledMat
         }
         cell_st_pts_ = cell_st_pts;
     }
-    static constexpr struct MinCVMean {
+private:
+    struct MinCVMean {
         FLOAT operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
             FLOAT res = -1.0;
@@ -211,8 +278,7 @@ struct MultiTiledMat
             }
             return res;
         }
-    } min_cv_mean{};
-
+    };
     struct MinCVPixels {
         MinCVPixels(const MultiTiledMat& m)
         : mm_(m)
@@ -266,6 +332,16 @@ struct MultiTiledMat
         const MultiTiledMat& mm_;
 
     };
+    static constexpr MinCVMean min_cv_mean_{};
+public:
+    /**
+     * @brief The element access strategy
+     * 
+     * @return const MinCVMean& 
+     */
+    const MinCVMean& min_cv_mean() const {
+        return min_cv_mean_;
+    }
     MinCVPixels min_cv_pixels() {
         return MinCVPixels(*this);
     }
@@ -284,40 +360,40 @@ struct MultiTiledMat
     auto cols() const {
         return this->index_.cols;
     }
-    template<class CELL_INFOS_FUNC = decltype(min_cv_mean)&>
+    template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
         std::uint32_t row, std::uint32_t col, 
-        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean_
     ) const {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
-    template<class CELL_INFOS_FUNC = decltype(min_cv_mean)&>
+    template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
         std::uint32_t row, std::uint32_t col, 
-        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean_
     ) {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
-    template<class CELL_INFOS_FUNC = decltype(min_cv_mean)&>
+    template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) operator()(
         std::uint32_t row, std::uint32_t col, 
-        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean_
     ) const {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
-    template<class CELL_INFOS_FUNC = decltype(min_cv_mean)&>
+    template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) operator()(
         std::uint32_t row, std::uint32_t col, 
-        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean_
     ) {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
-    template<class FUNC = decltype(min_cv_mean)&>
-    cv::Mat dump(FUNC&& func = min_cv_mean) const {
+    template<class FUNC = decltype(min_cv_mean_)&>
+    cv::Mat dump(FUNC&& func = min_cv_mean_) const {
         cv::Mat_<FLOAT> res(this->index_.rows, this->index_.cols);
         res.forEach([this, v_func = FWD(func)](FLOAT& value, const int* pos){
             auto& r = pos[0];
@@ -384,13 +460,13 @@ struct MultiTiledMat
 private:
     template<
         class THIS__, 
-        class CELL_INFOS_FUNC = decltype(min_cv_mean)
+        class CELL_INFOS_FUNC = decltype(min_cv_mean_)
     >
     static decltype(auto) at_impl(
         THIS__&             this_, 
         std::uint32_t       row, 
         std::uint32_t       col, 
-        CELL_INFOS_FUNC&&   cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&&   cell_infos_func = min_cv_mean_
     ) {
         auto&& cell_infos = this_.tiles_.at(
             this_.index_(row, col)

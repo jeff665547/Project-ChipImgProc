@@ -13,6 +13,9 @@ target_include_directories(${__screw_target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+if(MINGW)
+    target_compile_options(${__screw_target} PUBLIC -Wa,-mbig-obj)
+endif()
 target_compile_definitions(${__screw_target} PRIVATE NUCLEONA_RANGE_USE_V3)
 screw_add_launch_task(${__screw_target})
 add_test(

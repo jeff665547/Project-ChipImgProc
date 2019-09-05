@@ -1,3 +1,9 @@
+/**
+ * @file marker_vec.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::rotation::MarkerVec
+ * 
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/marker/layout.hpp>
@@ -9,7 +15,14 @@
 #include <vector>
 #include <ChipImgProc/rotation/grid_point_infer.hpp>
 namespace chipimgproc { namespace rotation {
-
+/**
+ * @brief Group the known marker position into line points group and use 
+ *        chipimgproc::rotation::GridPointInfer to inference the rotation angle.
+ * @details Here is the example usage:
+ *   @snippet ChipImgProc/rotation/marker_vec_test.cpp usage
+ * 
+ * @tparam FLOAT Computing and result float point type.
+ */
 template<class FLOAT>
 struct MarkerVec : public GridPointInfer<FLOAT> {
     using Base = GridPointInfer<FLOAT>;
@@ -27,6 +40,14 @@ private:
     }
     
 public:
+    /**
+     * @brief Input a set of marker regions, The MarkerVec will group the marker points,
+     *        and use chipimgproc::rotation::GridPointInfer to inference the rotation angle.
+     * 
+     * @param mk_regions    The set of marker regions
+     * @param logger        Debug log message output.
+     * @return auto         Deduced, same as template parameter FLOAT. The final rotation angle. 
+     */
     auto operator()(
         const std::vector<
             marker::detection::MKRegion

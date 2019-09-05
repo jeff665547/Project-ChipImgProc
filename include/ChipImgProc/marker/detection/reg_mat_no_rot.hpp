@@ -1,12 +1,36 @@
+/**
+ * @file reg_mat_no_rot.hpp
+ * @author Chia-Hua Chang (johnidet@centrilliontech.com.tw)
+ * @brief  Detect markers in image and assume the marker layout is regular matrix distribution and ignore rotation.
+ * 
+ */
+
 #pragma once
 #include <ChipImgProc/marker/detection/mk_region.hpp>
 #include <ChipImgProc/marker/layout.hpp>
 #include <Nucleona/stream/null_buffer.hpp>
 #include <ChipImgProc/utils/pos_comp_by_score.hpp>
 #include <ChipImgProc/algo/fixed_capacity_set.hpp>
-// #include <ChipImgProc/algo/scaled_match_template.hpp>
 namespace chipimgproc::marker::detection {
+
+/**
+ * @brief type of immutable global variable reg_mat_no_rot.
+ * 
+ */
 constexpr struct RegMatNoRot {
+    /**
+     * @brief Given image and marker layout, output score matrix
+     * 
+     * @param src_u8         Image normalize to unsigned 8 bits matrix
+     * @param mk_layout      The marker layout of current process image, 
+     *                       for different chip spec should have different chip marker layout. 
+     * @param unit           Image unit level, can be MatUnit::PX (pixel level) or MatUnit::CELL (cell level).
+     * @param ignore_mk_regs Ignored marker, the marker position id in this list 
+     *                       will not take to compute the score matrix.
+     * @param out            Log message output(deprecated).
+     * @return cv::Mat_<float> 
+     *                       Score matrix use to inference the marker regions.
+     */
     cv::Mat_<float> score_mat(
         cv::Mat                             src_u8,
         Layout&                             mk_layout,
@@ -64,6 +88,17 @@ constexpr struct RegMatNoRot {
         }
         return score_sum;
     }
+    /**
+     * @brief Inference the marker regions
+     * 
+     * @param score_matrix  The score matrix.
+     * @param mk_layout     The marker layout of current process image, 
+     *                      for different chip spec should have different chip marker layout. 
+     * @param unit          Image unit level, can be MatUnit::PX (pixel level) or MatUnit::CELL (cell level).
+     * @param out           Log message output(deprecated).
+     * @return std::vector<MKRegion> 
+     *                      A vector of marker regions
+     */
     std::vector<MKRegion> infer_marker_regions(
         const cv::Mat_<float>&  score_matrix,
         Layout&                 mk_layout,
@@ -109,6 +144,22 @@ constexpr struct RegMatNoRot {
 
         return mk_regs;
     }
+    /**
+     * @brief Call operator of RegMatNoRot, 
+     *        given marker layout and image, return the marker regions.
+     * 
+     * @param src              Image input, must be uint16 value type matrix. 
+     * @param mk_layout        The marker layout of current process image, 
+     *                         for different chip spec should have different chip marker layout. 
+     * @param unit             Image unit level, can be MatUnit::PX (pixel level) or MatUnit::CELL (cell level).
+     * @param ignore_mk_regs   Ignored marker, the marker position id in this list 
+     *                         will not take to compute the score matrix.
+     * @param out              Log message output(deprecated).
+     * @param v_marker         The debug image output callback, the callback form is void(const cv::Mat&) type.
+     *                         Current implementation is show the marker segmentation location
+     * @return std::vector<MKRegion> 
+     *                         A vector of marker regions
+     */
     std::vector<MKRegion> operator()(
         const cv::Mat_<std::uint16_t>&      src,
         Layout&                             mk_layout,
@@ -133,5 +184,10 @@ constexpr struct RegMatNoRot {
         }
         return mk_regs;
     }
-} reg_mat_no_rot;
+} 
+/**
+ * @brief Global functor with RegMatNoRot type.
+ * 
+ */
+reg_mat_no_rot;
 }
