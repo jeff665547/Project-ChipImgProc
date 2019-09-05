@@ -70,8 +70,9 @@ struct TilesWrapper {
 }
 /**
  * @brief Container of multiple tiled fov images. 
- *   Provide chip level coordinates access to cell data, 
- *   And lazy evaluate the cell statistic values.
+ *   Provide chip level abstraction coordinates access to cell data, 
+ *   And lazy evaluate to the cell detail properties, 
+ *   include region position, pixels and statistic data.
  * 
  * @tparam FLOAT The float point type used in this data structure, 
  *   and is use to trade off the performance and numerical accuracy.
@@ -350,24 +351,92 @@ public:
         return min_cv_mean_;
     }
     /**
-     * @brief The element access strategy. Get the pixels(cv::Mat type) for each cell.
+     * @brief The element access strategy. Get the pixels for each cell.
      *  For overlapping region, select the cell which has minimum CV.
-     *  The functor return is a float point value 
+     *  The functor return is cv::Mat type 
      * 
      * @return MinCVPixels Cell select functor.
      */
     MinCVPixels min_cv_pixels() const {
         return MinCVPixels(*this);
     }
+    /**
+     * @brief The element access strategy. 
+     *  Get the aggregated data including pixel, cell region and statistic data for each cell.
+     *  For overlapping region, select the cell which has minimum CV.
+     *  The functor return is a POD structure:
+     *  @code
+     *  struct hidden-name {
+     *      cv::Mat         pixels;
+     *      IdxRect<FLOAT>  cell_info;
+     *  };
+     *  @endcode
+     *  Since the type name is hidden, so the object should use "auto" to receive the return object.
+     * 
+     * @return MinCVAllData Cell select functor.
+     */
     MinCVAllData min_cv_all_data() const {
         return MinCVAllData(*this);
     }
+    /**
+     * @brief Get the multiple tiled matrix's grid row number.
+     * 
+     * @return auto Deduced, usually int 
+     */
     auto rows() const {
         return this->index_.rows;
     }
+    /**
+     * @brief Get the multiple tiled matrix's grid column number.
+     * 
+     * @return auto Deduced, usually int 
+     */
     auto cols() const {
         return this->index_.cols;
     }
+    /**
+     * @anchor multi-tiled-mat-at
+     * @brief Access to the cell of multiple tiled matrix and doing user defined process to the cell infos.
+     * @details This accessor allow user pass a callback function 
+     *   to do some basic process to the cell and overlapping data.
+     *   For example, in the overlapping region, 
+     *   given a cell position we actually get multiple cells from different FOVs.
+     *   In this case, we can select the cell which has the minimum CV to represent
+     *   the current position data (for heatmap or further analysis) and return the mean of the cell.
+     *   To do such work, here is the example code.
+     *   @code
+     *   multi_tiled_mat.at(300, 500, [](const auto& cell_infos) {
+     *      auto min_cv = std::numeric_limits<FLOAT>::max();
+     *      FLOAT res = -1.0;
+     *      if( cell_infos.size() <= 0 ) 
+     *          throw std::runtime_error("BUG: no cell info found");
+     *      for(auto& ci : cell_infos) {
+     *          if(min_cv > ci.cv ) {
+     *              min_cv = ci.cv;
+     *              res = ci.mean;
+     *          }
+     *      }
+     *      if( res < 0 )  {
+     *          res = cell_infos.at(0).mean;
+     *      }
+     *      return res;
+     *   })
+     *   @endcode
+     *   Also, this is the default behavior of the at accessor function.
+     *   Other than the default behavior, we provide MultiTiledMat::min_cv_pixels,
+     *   MultiTiledMat::min_cv_all_data which are frequently used in downstream analysis.
+     *          
+     * 
+     * @tparam CELL_INFOS_FUNC The accessor type, 
+     *                         the function symbol is @a any(const CellInfos&)
+     * 
+     * @param row             The row position of target cell.
+     * @param col             The column position of target cell.
+     * @param cell_infos_func Optional, The cell accessor functor, 
+     *                        which accept cell infos (with overlap cells) and return user defined data.
+     *                        By default the behavior is take the minimum CV cell and return the cell mean.
+     * @return decltype(auto) Deduced, same as cell_infos_func return type.
+     */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
         std::uint32_t row, std::uint32_t col, 
@@ -375,7 +444,10 @@ public:
     ) const {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
-
+    /**
+     * @brief The mutable version of @ref multi-tiled-mat-at "multiple tiled matrix at accessor"
+     * @details The mutable version of @ref multi-tiled-mat-at "multiple tiled matrix at accessor"
+     */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
         std::uint32_t row, std::uint32_t col, 
@@ -383,7 +455,10 @@ public:
     ) {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
-
+    /**
+     * @brief same as MultiTiledMat::at
+     * @details same as MultiTiledMat::at
+     */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) operator()(
         std::uint32_t row, std::uint32_t col, 
@@ -392,6 +467,10 @@ public:
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
+    /**
+     * @brief same as MultiTiledMat::at
+     * @details same as MultiTiledMat::at
+     */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) operator()(
         std::uint32_t row, std::uint32_t col, 
@@ -400,6 +479,20 @@ public:
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
+    /**
+     * @brief Dump the multiple tiled matrix into a normal cv::Mat
+     * @details The multiple tiled matrix will use the given function
+     *   to process the cell info data and save all cell process result into a matrix.
+     *   The default behavior is MultiTiledMat::min_cv_mean, 
+     *   which means the return matrix is actually the heatmap.
+     * 
+     * @tparam FUNC Same as the MultiTiledMat::at accessor, 
+     *   but only allow the return type is float point.
+     * 
+     * @param func Same as the MultiTiledMat::at accessor, 
+     *   but only allow the return type is float point.
+     * @return cv::Mat 
+     */
     template<class FUNC = decltype(min_cv_mean_)&>
     cv::Mat dump(FUNC&& func = min_cv_mean_) const {
         cv::Mat_<FLOAT> res(this->index_.rows, this->index_.cols);
@@ -411,12 +504,31 @@ public:
         });
         return res;
     }
+    /**
+     * @brief Get the cell level marker regions of the chip.
+     * 
+     * @return const std::vector<cv::Rect>& Marker regions.
+     */
     const std::vector<cv::Rect>& markers() const {
         return markers_;
     }
+    /**
+     * @brief mutable version of MultiTiledMat::markers()
+     * 
+     */
     std::vector<cv::Rect>& markers() {
         return markers_;
     }
+    /**
+     * @brief Given a cell point, determine if the point is in a marker.
+     *   If true, the method return the hit marker region.
+     * 
+     * @param p       The given cell point.
+     * @param[out] r  The rectangle data that 
+     *                will be filled if the given p hit any marker. 
+     * @return true   Given p is contained by any marker.
+     * @return false  Given p is not contained by any marker.
+     */
     bool cell_is_marker(const cv::Point& p, cv::Rect& r ) {
         for(auto& m : markers_ ) {
             if( m.contains(p) ) {
