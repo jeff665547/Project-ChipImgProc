@@ -79,9 +79,9 @@ constexpr struct RegMatNoRot {
                     //     scan_target_mat, mk_pat, score, 
                     //     CV_TM_CCORR_NORMED, 2, mk_mask
                     // );
-                    cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED, mk_mask);
+                    cv::matchTemplate(scan_target_mat, mk_pat, score, cv::TM_CCORR_NORMED, mk_mask);
                 } else if (unit == MatUnit::CELL) {
-                    cv::matchTemplate(scan_target_mat, mk_pat, score, CV_TM_CCORR_NORMED);
+                    cv::matchTemplate(scan_target_mat, mk_pat, score, cv::TM_CCORR_NORMED);
                 }
                 score_sum += score;
             }

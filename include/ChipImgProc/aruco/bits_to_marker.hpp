@@ -54,7 +54,7 @@ constexpr struct BitsToMarker {
                 cell = cell & img_bound;
                 auto bit = code & mask;
                 auto cell_cont = bit == 0 ? 0 : 255;
-                cv::rectangle(img, cell, cell_cont, CV_FILLED);
+                cv::rectangle(img, cell, cell_cont, cv::FILLED);
                 code = code >> 1;
             }
         }
