@@ -16,12 +16,17 @@
 #include <ChipImgProc/rotation/grid_point_infer.hpp>
 namespace chipimgproc { namespace rotation {
 /**
- * @brief Group the known marker position into line points group and use 
- *        chipimgproc::rotation::GridPointInfer to inference the rotation angle.
- * @details Here is the example usage:
+ * @brief This is the rotation angle estimator based on the grid of marker locations.
+ *        Given a set of marker locations represented as chipimgproc::detection::MKRegion object,
+ *        this algorithm firstly groups the marker locations into a set of nearly horizontal lines and vertical lines.
+ *        Next, it calculates the mean of the inclination angles of nearly horizontal and vertical lines 
+ *        against the standard basis vector (0,1) and (1,0) respectively by using
+ *        the inherited template class chipimgproc::rotation::GridPointInfer.
+ * 
+ * @details The following shows an usage example:
  *   @snippet ChipImgProc/rotation/marker_vec_test.cpp usage
  * 
- * @tparam FLOAT Computing and result float point type.
+ * @tparam FLOAT the type of floating point type for rotation angle estimation
  */
 template<class FLOAT>
 struct MarkerVec : public GridPointInfer<FLOAT> {
@@ -41,12 +46,12 @@ private:
     
 public:
     /**
-     * @brief Input a set of marker regions, The MarkerVec will group the marker points,
-     *        and use chipimgproc::rotation::GridPointInfer to inference the rotation angle.
+     * @brief Given a set of marker regions, estimate the corresponding rotation angle
      * 
-     * @param mk_regions    The set of marker regions
-     * @param logger        Debug log message output.
-     * @return auto         Deduced, same as template parameter FLOAT. The final rotation angle. 
+     * @param mk_regions    a set of marker regions. Please refer to MKRegion for details
+     * @param logger        an output stream object for debug logging messages
+     * @return auto         the rotation angle of the grid of marker regions.
+     *                      The return type will be the template parameter FLOAT.
      */
     auto operator()(
         const std::vector<
