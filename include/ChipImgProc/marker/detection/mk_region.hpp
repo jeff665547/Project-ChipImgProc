@@ -59,8 +59,8 @@ struct MKRegion : public cv::Rect {
      * @brief Group the marker regions by the value of x_i.
      * 
      * @tparam FUNC     Function type. Deduced, can be 
-     * @param regs      The marker regions.
-     * @param func      The marker region to user specifed object tranform.
+     * @param regs      A set of marker regions.
+     * @param func      A transfomation to grouped marker regions.
      * @return auto     Deduced, depend on FUNC result type. The pattern is Group<T>.
      */
     template<class FUNC>
@@ -76,8 +76,8 @@ struct MKRegion : public cv::Rect {
      * @brief Group the marker regions by the value of y_i.
      * 
      * @tparam FUNC     Function type. Deduced, can be 
-     * @param regs      The marker regions.
-     * @param func      The marker region to user specifed object tranform.
+     * @param regs      A set of marker regions.
+     * @param func      A transfomation to grouped marker regions.
      * @return auto     Deduced, depend on FUNC result type. The pattern is Group<T>.
      */
     template<class FUNC>
