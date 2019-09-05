@@ -122,7 +122,19 @@ struct MultiTiledMat
      * 
      */
     using This       = MultiTiledMat<FLOAT, GLID>;
-
+    /**
+     * @brief create MultiTiledMat
+     *  
+     * @param imgs          FOV gridding result, 
+     *                      In general we use TiledMat::make_from_grid_res 
+     *                      to create TiledMat from gridding::Result.
+     * @param stats         Cell level statistic data, usually generate from margin process. 
+     *                      Note that, the order should match the parameter imgs.
+     * @param cell_st_pts   Cell level logical stitch points.
+     *                      Note that, the order should match the parameter imgs.
+     * @param fov_index     The FOV position IDs following the imgs order. 
+     *                      Note that, the FOV position ID format is (x,y) not (r,c).
+     */
     MultiTiledMat(
         const std::vector<TiledMat<GLID>>&        imgs,
         const std::vector<stat::Mats<FLOAT>>&     stats,
@@ -248,7 +260,8 @@ struct MultiTiledMat
         }
         cell_st_pts_ = cell_st_pts;
     }
-    static constexpr struct MinCVMean {
+private:
+    struct MinCVMean {
         FLOAT operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
             FLOAT res = -1.0;
@@ -265,8 +278,7 @@ struct MultiTiledMat
             }
             return res;
         }
-    } min_cv_mean{};
-
+    };
     struct MinCVPixels {
         MinCVPixels(const MultiTiledMat& m)
         : mm_(m)
@@ -320,6 +332,16 @@ struct MultiTiledMat
         const MultiTiledMat& mm_;
 
     };
+    static constexpr MinCVMean min_cv_mean_{};
+public:
+    /**
+     * @brief The element access strategy
+     * 
+     * @return const MinCVMean& 
+     */
+    const MinCVMean& min_cv_mean() const {
+        return min_cv_mean_;
+    }
     MinCVPixels min_cv_pixels() {
         return MinCVPixels(*this);
     }
@@ -338,40 +360,40 @@ struct MultiTiledMat
     auto cols() const {
         return this->index_.cols;
     }
-    template<class CELL_INFOS_FUNC = decltype(min_cv_mean)&>
+    template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
         std::uint32_t row, std::uint32_t col, 
-        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean_
     ) const {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
-    template<class CELL_INFOS_FUNC = decltype(min_cv_mean)&>
+    template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
         std::uint32_t row, std::uint32_t col, 
-        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean_
     ) {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
-    template<class CELL_INFOS_FUNC = decltype(min_cv_mean)&>
+    template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) operator()(
         std::uint32_t row, std::uint32_t col, 
-        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean_
     ) const {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
-    template<class CELL_INFOS_FUNC = decltype(min_cv_mean)&>
+    template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) operator()(
         std::uint32_t row, std::uint32_t col, 
-        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&& cell_infos_func = min_cv_mean_
     ) {
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
 
-    template<class FUNC = decltype(min_cv_mean)&>
-    cv::Mat dump(FUNC&& func = min_cv_mean) const {
+    template<class FUNC = decltype(min_cv_mean_)&>
+    cv::Mat dump(FUNC&& func = min_cv_mean_) const {
         cv::Mat_<FLOAT> res(this->index_.rows, this->index_.cols);
         res.forEach([this, v_func = FWD(func)](FLOAT& value, const int* pos){
             auto& r = pos[0];
@@ -438,13 +460,13 @@ struct MultiTiledMat
 private:
     template<
         class THIS__, 
-        class CELL_INFOS_FUNC = decltype(min_cv_mean)
+        class CELL_INFOS_FUNC = decltype(min_cv_mean_)
     >
     static decltype(auto) at_impl(
         THIS__&             this_, 
         std::uint32_t       row, 
         std::uint32_t       col, 
-        CELL_INFOS_FUNC&&   cell_infos_func = min_cv_mean
+        CELL_INFOS_FUNC&&   cell_infos_func = min_cv_mean_
     ) {
         auto&& cell_infos = this_.tiles_.at(
             this_.index_(row, col)
