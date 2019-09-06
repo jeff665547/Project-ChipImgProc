@@ -7,7 +7,7 @@
 #include <boost/program_options.hpp>
 
 /*
- *  This example code will help you to build the image rotation app. 
+ *  This example code will help you to build the both image rotation and image gridding app. 
  *
  *  Input:
  *          TIFF file of the raw image from SUMMIT
@@ -15,7 +15,7 @@
  *          TSV file of marker pattern
  *          
  *  output:
- *          The degree of the image rotated image and theta
+ *          Rotated image with gridded-line
  * 
  *  Example:
  *          ./Example-aruco_detection
