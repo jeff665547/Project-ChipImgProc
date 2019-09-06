@@ -5,7 +5,7 @@
 ### Requirement
 
 * Your project must be a CMake project
-* GCC >= 7.3 (7.3 is recommanded and well tested)
+* GCC >= 7.3 (7.3 is recommended and well tested)
 * CMake >= 3.13
 * MSVC <= v141 build tool
 
@@ -34,14 +34,14 @@ build\> cmake --build . --target install
 
 ![Gitlab download icon link](images/gitlab-download-icon-link.png)
 
-We assume the users visit the download icon link or the release tags just want to use the library but run the unit test, which means the users download project in such may should use an the alternative configure command:
+We assume the users visit the download icon link or the release tags just want to use the library but run the unit test, which means the users download project in such way should use an the alternative configure command:
 
 ```bat
 build\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release" -DCOPY_ALL_TP=ON -DBUILD_TESTS=OFF
 ```
 
 In this case, Build script will not need test data and of course, no test code will be built.
-Only library source will be compile into binary.
+Only library source will be compiled into binary.
 
 ## Manually link ChipImgProc
 
@@ -126,25 +126,26 @@ Link libraries:
   * comdlg32
   * advapi32
 
-### Truble shooting
+### Trouble shooting
 
 * Missing link library
 
-  The library link is highly depend on user code, it may need reorder or more external link beyond the following list.
+  The library link is highly depend on user code, your code may require alternative link order or use more library beyond the following list.
   We put all dependencies in the \<*ChipImgProc install prefix*>/lib and \<*ChipImgProc install prefix*>/third_party.
   You should be able to find any missing library and add to your link command.
 
-Manully include and link OpenCV & Boost are really painful, so we suggest to use CMake & Hunter to do such link works.
+Manually include and link OpenCV & Boost are really painful, so we suggest to use CMake & Hunter to do such link works.
 
-## Import ChipImgProc by hunter
+## Import ChipImgProc by Hunter
 
-To use the hunter package manager, all upstream will be built.
-User no need to build ChipImgProc manually.
+To use the Hunter package manager, all upstream will be built, 
+user no need to build ChipImgProc manually.
 
-### Requirment
+### Requirement
+
 
 * Your project must be a CMake project
-* GCC >= 7.3 (7.3 is recommanded and well tested)
+* GCC >= 7.3 (7.3 is recommended and well tested)
 * CMake >= 3.13
 * MSVC <= v141 build tool
 
