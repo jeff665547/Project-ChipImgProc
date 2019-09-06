@@ -1,12 +1,31 @@
+/**
+ * @file bits_to_marker.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::aruco::BitsToMarker
+ * 
+ */
 #pragma once
 #include <cstdint>
 #include <ChipImgProc/utils.h>
 #include <Nucleona/language.hpp>
 #include <bitset>
 namespace chipimgproc::aruco {
-
+/**
+ * @brief Convert ArUco bits map to marker image
+ * 
+ */
 constexpr struct BitsToMarker {
-    auto operator()(
+    /**
+     * @brief Call operator, given ArUco code and one side bits number and generate marker image.
+     * 
+     * @param code              ArUco code encoded in integer.
+     *                          The lowest bit is image left top bit.
+     * @param side_bits_length  Bits number of marker side.
+     * @param bit_width         Bit width in pixel.
+     * @param pyramid_level     Result scale down 2^pyramid_level times. 
+     * @return cv::Mat          The ArUco marker pattern. Coding bit is 255, otherwise 0.
+     */
+    cv::Mat operator()(
         std::uint64_t   code,
         std::int32_t    side_bits_length,
         double          bit_width,
@@ -35,7 +54,7 @@ constexpr struct BitsToMarker {
                 cell = cell & img_bound;
                 auto bit = code & mask;
                 auto cell_cont = bit == 0 ? 0 : 255;
-                cv::rectangle(img, cell, cell_cont, CV_FILLED);
+                cv::rectangle(img, cell, cell_cont, cv::FILLED);
                 code = code >> 1;
             }
         }

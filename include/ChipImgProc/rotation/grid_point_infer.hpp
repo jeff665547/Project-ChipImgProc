@@ -1,3 +1,9 @@
+/**
+ * @file grid_point_infer.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::rotation::GridPointInfer
+ * 
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <map>
@@ -5,9 +11,19 @@
 #include <Nucleona/stream/null_buffer.hpp>
 namespace chipimgproc{ namespace rotation{
 
+/**
+ * @brief Use grid points group by line and directions inference the rotation angle.
+ * 
+ * @tparam FLOAT Computing float point type. 
+ */
 template<class FLOAT = float>
 struct GridPointInfer {
 
+    /**
+     * @brief The group points type, is std::map type.
+     * The key is line id, and value is points vector
+     * 
+     */
     using DirPointsGroup = std::map<int, std::vector<cv::Point>>;
 
 private:
@@ -66,6 +82,15 @@ private:
     }
 
 public:
+    /**
+     * @brief Call operator, Compute the horizontal and vertical points vector to angle value line by line.
+     * And Compute the mean of each lines, the result is the rotation angle.
+     * 
+     * @param x_group The line group points along the X direction.
+     * @param y_group The line group points along the Y direction.
+     * @param logger  Debug log message ouput.
+     * @return auto   Deduced, same as template parameter T. The final rotation angle.
+     */
     auto operator()( 
         DirPointsGroup& x_group, 
         DirPointsGroup& y_group,

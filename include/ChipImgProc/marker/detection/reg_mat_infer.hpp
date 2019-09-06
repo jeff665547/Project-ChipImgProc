@@ -1,10 +1,20 @@
+/**
+ * @file reg_mat_infer.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::marker::detection::RegMatInfer
+ * 
+ */
 #pragma once
 #include <vector>
 #include <ChipImgProc/marker/detection/mk_region.hpp>
 #include <Nucleona/stream/null_buffer.hpp>
 namespace chipimgproc::marker::detection {
 
-constexpr struct RegMatInfer {
+/**
+ * @brief Inference the missing marker and standardize the marker position
+ * 
+ */
+constexpr class RegMatInfer {
     void anchor_infer(std::size_t expect, std::vector<double>& ancs, std::ostream& out) const {
         if(ancs.size() > 1 && ancs.size() < expect) {
             std::size_t sum = 0;
@@ -27,6 +37,21 @@ constexpr struct RegMatInfer {
         if(expect > 0 && ancs.size() != expect)
             out << "marker region inference failed, the detected markers are too few\n";
     }
+public:
+    /**
+     * @brief Given existing marker regions and matrix row and column,
+     *        inference the missing marker and re-position the markers to fit the regular matrix.
+     * 
+     * @tparam T By default, std::uint16_t. Deduced, The input image(for debug) value type.
+     * @param mk_regs   Marker regions with missing or slightly not fit the regular matrix
+     * @param rows      The expected marker layout matrix rows 
+     * @param cols      The expected marker layout matrix columns 
+     * @param src       The marker detected image source, unnecessary for inference, only for debug output.
+     * @param out       Deprecated. Log message output.
+     * @param v_marker  The debug image output callback, the callback form is void(const cv::Mat&) type.
+     *                  Current implementation is show the marker segmentation location
+     * @return auto     Deduced, usually std::vector<MKRegion>. New marker regions. 
+     */
     template<class T = std::uint16_t>
     auto operator() ( 
         std::vector<MKRegion>&  mk_regs,
@@ -101,6 +126,11 @@ constexpr struct RegMatInfer {
         }
         return new_mk_regs;
     } 
-} reg_mat_infer;
+}
+/**
+ * @brief The global funtor with RegMatInfer type
+ * 
+ */
+reg_mat_infer;
 
 }

@@ -1,3 +1,8 @@
+/**
+ * @file    layout.hpp
+ * @author  Chia-Hua Chang (johnidet@centrilliontech.com.tw)
+ * @brief   @copybrief chipimgproc::marker::Layout
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/const.h>
@@ -5,17 +10,19 @@
 #include <ChipImgProc/marker/txt_to_img.hpp>
 #include <range/v3/all.hpp>
 namespace chipimgproc{ namespace marker{
+/**
+ * @brief Marker description, contains a series of candidate marker/mask patterns
+ *        and logical position in cell/pixel level
+ * 
+ */
 struct Des {
 friend struct Layout;
-    // const cv::Point& get_pos_cl() const {
-    //     return pos_cl_;
-    // }
-    // const cv::Point& get_pos_px() const {
-    //     return pos_px_;
-    // }
-    // const auto& get_candi_mks_mask_px() const {
-    //     return candi_mks_px_mask;
-    // }
+    /**
+     * @brief   Get position, in px or cell level
+     * 
+     * @param   unit PX/CELL
+     * @return  const cv::Point& logical marker position 
+     */
     const cv::Point& get_pos(const MatUnit& unit) const {
         switch(unit) {
             case MatUnit::CELL:
@@ -28,10 +35,22 @@ friend struct Layout;
                 );
         }
     }
+    /**
+     * @brief   Get position, in px or cell level
+     * 
+     * @param   unit PX/CELL
+     * @return  const cv::Point& logical marker position 
+     */
     cv::Point& get_pos(const MatUnit& unit) {
         const auto& this_ref = *this;        
         return const_cast<cv::Point&>(this_ref.get_pos(unit));
     }
+    /**
+     * @brief Get all candidate markers in this description
+     * 
+     * @param unit PX/CELL 
+     * @return const auto& deduced, usually std::vector<cv::Mat_<std::uint8_t>>
+     */
     const auto& get_candi_mks( const MatUnit& unit) const {
         switch(unit) {
             case MatUnit::CELL:
@@ -44,6 +63,12 @@ friend struct Layout;
                 );
         }
     }
+    /**
+     * @brief Get all candidate markers in this description
+     * 
+     * @param unit PX/CELL 
+     * @return const auto& deduced, usually std::vector<cv::Mat_<std::uint8_t>>
+     */
     const auto& get_candi_mks_mask( const MatUnit& unit) const {
         switch(unit) {
             case MatUnit::CELL:
@@ -56,44 +81,123 @@ friend struct Layout;
                 );
         }
     }
+    /**
+     * @brief Get the best match marker in current candidate marker list,
+     *        The best match marker usually set by marker detection.
+     * 
+     * @param unit PX/CELL level marker pattern
+     * @return const auto& The marker pattern, type deduced usually cv::Mat_<std::unit8_t>
+     */
     const auto& get_best_mk(const MatUnit& unit) const {
         return get_candi_mks(unit).at(best_mk_idx);
     }
+    /**
+     * @brief Get the standard marker pattern, may different from best marker,
+     *        because the input image quality may not always as good as expect.
+     * 
+     * @param unit PX/CELL level marker pattern
+     * @return const auto& The marker pattern, type deduced usually cv::Mat_<std::unit8_t>
+     */
     const auto& get_std_mk(const MatUnit& unit) const {
         return get_candi_mks(unit).at(0);
     }
+    /**
+     * @brief Get the best match marker related mask in current candidate marker list,
+     *        The best match marker usually set by marker detection.
+     * 
+     * @param unit PX/CELL level marker pattern
+     * @return const auto& The marker pattern, type deduced usually cv::Mat_<std::unit8_t>
+     */
     const auto& get_best_mk_mask(const MatUnit& unit) const {
         return get_candi_mks_mask(unit).at(best_mk_idx);
     }
+    /**
+     * @brief Get the standard marker related mask, may different from best marker,
+     *        because the input image quality may not always as good as expect.
+     * 
+     * @param unit PX/CELL level marker pattern
+     * @return const auto& The marker pattern, type deduced usually cv::Mat_<std::unit8_t>
+     */
     const auto& get_std_mk_mask(const MatUnit& unit) const {
         return get_candi_mks_mask(unit).at(0);
     }
+    /**
+     * @brief cell level candidate markers
+     */
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_cl;
+    /**
+     * @brief pixel level candidate markers
+     */
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_px;
+    /**
+     * @brief cell level candidate marker masks
+     */
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_cl_mask; 
+    /**
+     * @brief pixel level candidate marker masks
+     */
     std::vector<cv::Mat_<std::uint8_t>> candi_mks_px_mask;
+    /**
+     * @brief best marker index in candidate list
+     */
     std::size_t best_mk_idx {0};
 private:
     cv::Point pos_cl_;
     cv::Point pos_px_;
 };
+/**
+ * @brief Marker layout, use to present logical level marker position and pattern.
+ *        Currently only support single style pattern and regular matrix distribution.
+ *        The multiple style pattern ie. ArUco markers is not yet done.
+ * @details The layout generation example
+ *      @snippet ChipImgProc/make_layout.hpp usage
+ */
 struct Layout {
+friend struct MakeSinglePatternRegMatLayout;
+    /**
+     * @brief Marker pattern style number, currently only support single
+     */
     enum PatternNum { // How many kind of marker patterns
         single, multi
     };
+    /**
+     * @brief Marker position distribution, currently on support reg_mat
+     */
     enum DistForm { 
         reg_mat, random
     };
+    /**
+     * @brief Get the marker description by position.
+     *        For a FOV with 3*3 markers layout, the position is (0,0), (0,1)...(2,2)
+     * 
+     * @param r The row position of marker
+     * @param c The column position of marker
+     * @return const Des& immutable description object
+     */
     const Des& get_marker_des(int r, int c) const {
         if( dist_form != reg_mat) {
             throw std::runtime_error("get_marker_des(r,c) only support reg_mat form");
         }
         return mks.at(mk_map(r, c));
     }
+    /**
+     * @brief Get the marker description by position.
+     *        For a FOV with 3*3 markers layout, the position is (0,0), (0,1)...(2,2)
+     * 
+     * @param r The row position of marker
+     * @param c The column position of marker
+     * @return Des& mutable description object
+     */
     Des& get_marker_des(int r, int c) {
         const auto& this_ref = *this;        
         return const_cast<Des&>(this_ref.get_marker_des(r, c));
     }
+    /**
+     * @brief Get a marker description from layout. 
+     *        The marker layout must be single pattern style.
+     * 
+     * @return const auto& Deduced, usually a Des type.
+     */
     const auto& get_single_pat_marker_des() const {
         if(pat_num != single) {
             throw std::runtime_error(
@@ -103,14 +207,37 @@ struct Layout {
         auto& mk = mks.at(0);
         return mk;
     }
+    /**
+     * @brief Get the candidate marker number.
+     *        The marker must be single pattern style.
+     * 
+     * @return auto Deduced, usually std::size_t.
+     */
     auto get_single_pat_candi_num() const {
         return get_single_pat_marker_des().candi_mks_cl.size();
     }
+    /**
+     * @brief Manually set the best marker index.
+     *        Every marker description's best marker index wil be set to i.
+     * 
+     * @param i The best marker index.
+     */
     void set_single_pat_best_mk(std::size_t i) {
         for(auto&& mk : mks) {
             mk.best_mk_idx = i;
         }
     }
+    /**
+     * @brief Set the marker layout to regular matrix distribution.
+     * 
+     * @param rows      Marker layout contained row number of markers.
+     * @param cols      Marker layout contained col number of markers.
+     * @param min_p     The first marker position related to origin, usually the marker have minimum position.
+     * @param invl_x_cl The marker interval along X direction (horizontal) in cell level.
+     * @param invl_y_cl The marker interval along Y direction (vertical) in cell level.
+     * @param invl_x_px The marker interval along X direction (horizontal) in pixel level.
+     * @param invl_y_px The marker interval along Y direction (vertical) in pixel level.
+     */
     void set_reg_mat_dist(
         int rows, int cols, 
         const cv::Point& min_p, 
@@ -138,6 +265,14 @@ struct Layout {
         mk_invl_x_px = invl_x_px;
         mk_invl_y_px = invl_y_px;
     }
+    /**
+     * @brief Set the marker layout to single marker pattern.
+     * 
+     * @param candi_pats_cl         Candidate marker pattern in cell level.
+     * @param candi_pats_px         Candidate marker pattern in pixel level.
+     * @param candi_pats_cl_mask    Candidate marker mask in cell level.
+     * @param candi_pats_px_mask    Candidate marker mask in pixel level.
+     */
     void set_single_mk_pat( 
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_cl,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
@@ -152,6 +287,157 @@ struct Layout {
             mk.candi_mks_px_mask = candi_pats_px_mask;
         }
     } 
+    /**
+     * @brief Get marker width in cell level.
+     * 
+     * @return auto Deduced, usually int.
+     */
+    auto get_marker_width_cl() const {
+        return mks.at(0).candi_mks_cl.at(0).cols;
+    }
+    /**
+     * @brief Get the marker height in cell level.
+     * 
+     * @return auto Deduced, usually int
+     */
+    auto get_marker_height_cl() const {
+        return mks.at(0).candi_mks_cl.at(0).rows;
+    }
+    /**
+     * @brief Get the marker width in pixel level.
+     * 
+     * @return auto Deduced, usually int
+     */
+    auto get_marker_width_px() const {
+        return mks.at(0).candi_mks_px.at(0).cols;
+    }
+    /**
+     * @brief Get the marker height in pixel level.
+     * 
+     * @return auto Deduced, usually int
+     */
+    auto get_marker_height_px() const {
+        return mks.at(0).candi_mks_px.at(0).rows;
+    }
+    /**
+     * @brief Get the marker height in given level
+     * 
+     * @param unit CELL/PX
+     * @return auto Deduced, usually int
+     */
+    auto get_marker_height(const MatUnit& unit) const {
+        switch(unit) {
+            case MatUnit::PX:
+                return get_marker_height_px();
+            case MatUnit::CELL:
+                return get_marker_height_cl();
+            default: 
+                throw std::runtime_error(
+                    "Layout::get_marker_width, unsupported type"
+                );
+        }
+    }
+    /**
+     * @brief Get the marker width in given level
+     * 
+     * @param unit CELL/PX
+     * @return auto Deduced, usually int
+     */
+    auto get_marker_width(const MatUnit& unit) const {
+        switch(unit) {
+            case MatUnit::PX:
+                return get_marker_width_px();
+            case MatUnit::CELL:
+                return get_marker_width_cl();
+            default: 
+                throw std::runtime_error(
+                    "Layout::get_marker_width, unsupported type"
+                );
+        }
+    }
+    /**
+     * @brief Get the marker interval in given unit level
+     * 
+     * @param unit PX/CELL
+     * @return auto Deduced, usually std::tuple<std::uint32_t, std::uint32_t>.
+     *              Element 0 is X direction interval, 1 is Y direction interval.
+     */
+    auto get_marker_invl(const MatUnit& unit) const {
+        switch(unit) {
+            case MatUnit::PX:
+                return nucleona::make_tuple(
+                    nucleona::copy(mk_invl_x_px),
+                    nucleona::copy(mk_invl_y_px)
+                );
+            case MatUnit::CELL:
+                return nucleona::make_tuple(
+                    nucleona::copy(mk_invl_x_cl),
+                    nucleona::copy(mk_invl_y_cl)
+                );
+            default:
+                throw std::runtime_error(
+                    "get_mk_invl, unsupported unit: " + unit.to_string()
+                );
+        }
+    }
+    /**
+     * @brief Get the marker regions(rectangle) in given unit level
+     * 
+     * @param unit CELL/PX
+     * @return auto Deduced, usually std::vector<cv::Rect>
+     */
+    auto get_marker_rects(const MatUnit& unit) const {
+        std::vector<cv::Rect> res;
+        for( auto&& mk : mks ) {
+            auto&& mk_mat = mk.get_candi_mks(unit).at(0);
+            auto&& mk_pos = mk.get_pos(unit);
+            res.push_back(
+                cv::Rect(
+                    mk_pos.x, mk_pos.y,
+                    mk_mat.cols, mk_mat.rows
+                )
+            );
+        }
+        return res;
+    }
+    /**
+     * @brief Pattern number type, multi or single.
+     */
+    PatternNum              pat_num        { multi  } ;
+
+    /**
+     * @brief Marker position distribution type, random or reg_mat.
+     */
+    DistForm                dist_form      { random } ;
+
+    /**
+     * @brief Regular matrix marker index map.
+     */
+    cv::Mat_<std::int16_t>  mk_map                    ; // used in reg_mat
+
+    /**
+     * @brief Marker descriptions
+     */
+    std::vector<Des>        mks                       ; // used in all type
+
+    /**
+     * @brief marker interval in cell level along the the X direction
+     */
+    std::uint32_t           mk_invl_x_cl              ; // used in reg_mat
+    /**
+     * @brief marker interval in pixel level along the the Y direction
+     */
+    std::uint32_t           mk_invl_y_cl              ; // used in reg_mat
+    /**
+     * @brief marker interval in pixel level along the the X direction
+     */
+    std::uint32_t           mk_invl_x_px              ; // used in reg_mat
+    /**
+     * @brief marker interval in pixel level along the the Y direction
+     */
+    std::uint32_t           mk_invl_y_px              ; // used in reg_mat
+    
+private:
     void reset_mk_pat(
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px_mask,
@@ -211,91 +497,12 @@ struct Layout {
         mk.pos_cl_ = p_cl;
         mks.push_back(mk);
     }
-    auto get_marker_width_cl() const {
-        return mks.at(0).candi_mks_cl.at(0).cols;
-    }
-    auto get_marker_height_cl() const {
-        return mks.at(0).candi_mks_cl.at(0).rows;
-    }
-    auto get_marker_width_px() const {
-        return mks.at(0).candi_mks_px.at(0).cols;
-    }
-    auto get_marker_height_px() const {
-        return mks.at(0).candi_mks_px.at(0).rows;
-    }
-    auto get_marker_height(const MatUnit& unit) const {
-        switch(unit) {
-            case MatUnit::PX:
-                return get_marker_height_px();
-            case MatUnit::CELL:
-                return get_marker_height_cl();
-            default: 
-                throw std::runtime_error(
-                    "Layout::get_marker_width, unsupport type"
-                );
-        }
-    }
-    auto get_marker_width(const MatUnit& unit) const {
-        switch(unit) {
-            case MatUnit::PX:
-                return get_marker_width_px();
-            case MatUnit::CELL:
-                return get_marker_width_cl();
-            default: 
-                throw std::runtime_error(
-                    "Layout::get_marker_width, unsupport type"
-                );
-        }
-    }
-    auto get_marker_invl(const MatUnit& unit) {
-        switch(unit) {
-            case MatUnit::PX:
-                return nucleona::make_tuple(
-                    nucleona::copy(mk_invl_x_px),
-                    nucleona::copy(mk_invl_y_px)
-                );
-            case MatUnit::CELL:
-                return nucleona::make_tuple(
-                    nucleona::copy(mk_invl_x_cl),
-                    nucleona::copy(mk_invl_y_cl)
-                );
-            default:
-                throw std::runtime_error(
-                    "get_mk_invl, unsupported unit: " + unit.to_string()
-                );
-        }
-    }
-    auto get_marker_invl(const MatUnit& unit) const {
-        return const_cast<Layout&>(*this).get_marker_invl(unit);
-    }
-
-    auto get_marker_rects(const MatUnit& unit) const {
-        std::vector<cv::Rect> res;
-        for( auto&& mk : mks ) {
-            auto&& mk_mat = mk.get_candi_mks(unit).at(0);
-            auto&& mk_pos = mk.get_pos(unit);
-            res.push_back(
-                cv::Rect(
-                    mk_pos.x, mk_pos.y,
-                    mk_mat.cols, mk_mat.rows
-                )
-            );
-        }
-        return res;
-    }
-
-    PatternNum              pat_num        { multi  } ;
-    DistForm                dist_form      { random } ;
-    cv::Mat_<std::int16_t>  mk_map                    ; // used in reg_mat
-    std::vector<Des>        mks                       ; // used in all type
-    std::uint32_t           mk_invl_x_cl              ; // used in reg_mat
-    std::uint32_t           mk_invl_y_cl              ; // used in reg_mat
-    std::uint32_t           mk_invl_x_px              ; // used in reg_mat
-    std::uint32_t           mk_invl_y_px              ; // used in reg_mat
-    
-
 };
-constexpr struct MakeSinglePatternRegMatLayout
+/**
+ * @brief Maker type of single pattern, regular matrix marker layout
+ * 
+ */
+constexpr class MakeSinglePatternRegMatLayout
 {
     auto to_px_domain(
         const std::vector<cv::Mat_<std::uint8_t>>& mks_cl,
@@ -329,27 +536,22 @@ constexpr struct MakeSinglePatternRegMatLayout
         );
 
     }
-    auto operator()(
-        const std::vector<cv::Mat_<std::uint8_t>>& mks_cl,
-        const std::vector<cv::Mat_<std::uint8_t>>& masks_cl,
-        float cell_r_um,
-        float cell_c_um,
-        float border_um,
-        std::uint32_t invl_x_cl, 
-        std::uint32_t invl_y_cl,
-        float um2px_r,
-        marker::Layout& mk_layout
-    ) const {
-        auto [candi_mk_pats_px, candi_mk_pats_px_mask, invl_x_px, invl_y_px] = 
-            to_px_domain(mks_cl, masks_cl, cell_r_um, cell_c_um, border_um, 
-                invl_x_cl, invl_y_cl, um2px_r
-            );
-        mk_layout.reset_mk_pat(
-            candi_mk_pats_px,
-            candi_mk_pats_px_mask,
-            invl_x_px, invl_y_px
-        );
-    }
+public:
+    /**
+     * @brief Make maker from all needed information.
+     * 
+     * @param mks_cl        New marker pattern in cell level.
+     * @param masks_cl      New marker mask in cell level.
+     * @param cell_r_um     Cell height in micron.
+     * @param cell_c_um     Cell width in micron.
+     * @param border_um     Border size between cell in micron.
+     * @param rows          Marker layout contained row number of markers.
+     * @param cols          Marker layout contained col number of markers.
+     * @param invl_x_cl     Marker interval along X direction in cell level. 
+     * @param invl_y_cl     Marker interval along Y direction in cell level. 
+     * @param um2px_r       Micron to pixel rate.
+     * @return auto 
+     */
     auto operator()(
         const cv::Mat_<std::uint8_t>& mks_cl,
         const cv::Mat_<std::uint8_t>& masks_cl,
@@ -380,6 +582,52 @@ constexpr struct MakeSinglePatternRegMatLayout
         );
         return mk_layout;
     }
+    /**
+     * @brief Set marker layout by given new marker and um to pixel rate.
+     * 
+     * @param mks_cl        New marker pattern in cell level.
+     * @param masks_cl      New marker mask in cell level.
+     * @param cell_r_um     Cell height in micron.
+     * @param cell_c_um     Cell width in micron.
+     * @param border_um     Border size between cell in micron.
+     * @param invl_x_cl     Marker interval along X direction in cell level. 
+     * @param invl_y_cl     Marker interval along Y direction in cell level. 
+     * @param um2px_r       Micron to pixel rate.
+     * @param mk_layout     Existing marker layout.
+     * @return auto         Deduced, void.
+     */
+    auto operator()(
+        const std::vector<cv::Mat_<std::uint8_t>>& mks_cl,
+        const std::vector<cv::Mat_<std::uint8_t>>& masks_cl,
+        float cell_r_um,
+        float cell_c_um,
+        float border_um,
+        std::uint32_t invl_x_cl, 
+        std::uint32_t invl_y_cl,
+        float um2px_r,
+        marker::Layout& mk_layout
+    ) const {
+        auto [candi_mk_pats_px, candi_mk_pats_px_mask, invl_x_px, invl_y_px] = 
+            to_px_domain(mks_cl, masks_cl, cell_r_um, cell_c_um, border_um, 
+                invl_x_cl, invl_y_cl, um2px_r
+            );
+        mk_layout.reset_mk_pat(
+            candi_mk_pats_px,
+            candi_mk_pats_px_mask,
+            invl_x_px, invl_y_px
+        );
+    }
+    /**
+     * @brief Reset marker layout by given new micron to pixel rate 
+     *        and other micron parameter.
+     * 
+     * @param mk_layout     Existing marker layout. 
+     * @param cell_r_um     Cell height in micron.
+     * @param cell_c_um     Cell width in micron.
+     * @param border_um     Border size between cell in micron.
+     * @param um2px_r       Micron to pixel rate.
+     * @return auto         Deduced, void. 
+     */
     auto operator()(
         marker::Layout& mk_layout, 
         float cell_r_um,
@@ -402,7 +650,12 @@ constexpr struct MakeSinglePatternRegMatLayout
     }
 private:
     chipimgproc::marker::TxtToImg txt_to_img_;
-} make_single_pattern_reg_mat_layout;
+} 
+/**
+ * @brief Global functor with MakeSinglePatternRegMatLayout type.
+ * 
+ */
+make_single_pattern_reg_mat_layout;
 
 
 

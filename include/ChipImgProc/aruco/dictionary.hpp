@@ -31,32 +31,7 @@ class Dictionary : public std::vector<std::uint64_t> {
     /**
      *  @brief  Generate dictionary from json.
      *  @param  j_dict  ArUco dictionary specified in json format. 
-     *                  For example:
-     *  @code
-     *  {
-     *    "coding_bits": 6
-     *  , "maxcor_bits": 5
-     *  , "bitmap_list": {
-     *        "0": [
-     *            0, 0, 0, 1, 1, 1
-     *          , 1, 0, 0, 0, 1, 1
-     *          , 1, 1, 0, 1, 1, 1
-     *          , 0, 1, 1, 0, 0, 0
-     *          , 0, 0, 1, 0, 1, 0
-     *          , 1, 0, 0, 1, 1, 0
-     *        ]
-     *      , "1": [
-     *            0, 0, 0, 0, 1, 1
-     *          , 1, 0, 1, 1, 1, 1
-     *          , 1, 0, 1, 1, 1, 0
-     *          , 1, 0, 0, 0, 1, 1
-     *          , 1, 0, 0, 0, 1, 0
-     *          , 0, 1, 0, 0, 0, 1
-     *        ]
-     *      , ...
-     *    }
-     *  }
-     *  @endcode
+     *                  For detail, see aruco.hpp
      *  @return  A Dictionary object
      */
     static Dictionary from_json( const nlohmann::json& j_dict ) {

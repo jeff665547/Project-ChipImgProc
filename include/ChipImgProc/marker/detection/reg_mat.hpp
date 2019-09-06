@@ -1,3 +1,8 @@
+/**
+ *  @file       ChipImgProc/marker/detection/reg_mat.hpp
+ *  @author     Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ *  @brief      Detect markers in image and assume the marker layout is regular matrix distribution.
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/marker/layout.hpp>
@@ -9,8 +14,13 @@
 #include <ChipImgProc/algo/fixed_capacity_set.hpp>
 #include <ChipImgProc/utils/pos_comp_by_score.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
-
-struct RegMat {
+/**
+ *  @brief      Detect markers in image and assume the marker layout is regular matrix distribution.
+ *  @details    Here is the example:
+ *      @snippet ChipImgProc/marker/detection/reg_mat_test.cpp usage
+ * 
+ */
+class RegMat {
     template<class T>
     auto generate_raw_marker_regions(
         const cv::Mat_<T>&      src, 
@@ -113,7 +123,7 @@ struct RegMat {
                 sub_tgt.rows - mk.rows + 1,
                 sub_tgt.cols - mk.cols + 1
             );
-            cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED, mask);
+            cv::matchTemplate(sub_tgt, mk, sub_candi_score, cv::TM_CCORR_NORMED, mask);
             // auto tmp = norm_u8(sub_candi_score, 0, 0);
             sub_score = sub_candi_score;
             auto mk_cols = mk_des.get_std_mk(unit).cols;
@@ -137,6 +147,30 @@ struct RegMat {
         return marker_regions;
 
     }
+public:
+    /**
+     * @brief Call operator of RegMat type, 
+     *        given marker layout and image, return marker regions.
+     * 
+     * @tparam T            (Deduced) Input matrix value type, for centrillion Summit image, 
+     *                      the white channel usually use std::uint8_t. 
+     *                      and probe channel use std::uint16_t.
+     * @param src           Input image.
+     * @param mk_layout     The marker layout of current process image, 
+     *                      for different chip spec should have different chip marker layout. 
+     * @param unit          Image unit level, can be MatUnit::PX (pixel level) or MatUnit::CELL (cell level).
+     * @param cand_mk_i     Use the i-th candidate marker in marker layout to match the image. 
+     *                      By default is 0, usually means the standard marker pattern.
+     * @param out           The debug log message output, can be any STL ostream, by default is null stream
+     * @param v_bin         The debug pre-process image output callback, the callback form is void(const cv::Mat&) type. 
+     *                      Current implementation is 8bit normalization image.
+     * @param v_search      The debug image output callback, the callback form is void(const cv::Mat&) type. 
+     *                      Current implementation is show the marker searching space.
+     * @param v_marker      The debug image output callback, the callback form is void(const cv::Mat&) type.
+     *                      Current implementation is show the marker segmentation location
+     * @return std::vector<MKRegion> 
+     *                      A vector of marker regions
+     */
     template<class T>
     std::vector<MKRegion> operator()(
         const cv::Mat_<T>&      src, 
