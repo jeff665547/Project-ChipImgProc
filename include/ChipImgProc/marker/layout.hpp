@@ -1,6 +1,6 @@
 /**
  * @file    layout.hpp
- * @author  Chia-Hua Chang (johnidet@centrilliontech.com.tw)
+ * @author  Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
  * @brief   @copybrief chipimgproc::marker::Layout
  */
 #pragma once
