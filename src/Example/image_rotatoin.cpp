@@ -13,7 +13,7 @@
  *          TSV file of marker pattern
  *          
  *  output:
- *          The degree of the image rotated theta
+ *          The degree of the image rotated image and theta
  * 
  *  Example:
  *          ./Example-aruco_detection
@@ -29,14 +29,14 @@ int main( int argc, char** argv )
      *  +=========================+
      */
 
-    std::string raw_image_path;         //  The path of raw chip image
+    std::string image_path;         //  The path of raw chip image
     std::string marker_pattern_path;    //  The path of marker pattern
 
     boost::program_options::variables_map op;
     boost::program_options::options_description options( "Options" );
 
     options.add_options()( "help,h" , "Print this help messages" )
-        ( "image,i" , boost::program_options::value< std::string >( &raw_image_path      )->required(),"Image path of raw chip image" )
+        ( "image,i" , boost::program_options::value< std::string >( &image_path      )->required(),"Image path of raw chip image" )
         ( "marker,m", boost::program_options::value< std::string >( &marker_pattern_path )->required(),"Tsv file path of marker pattern" )
         ;
     try {
@@ -59,7 +59,7 @@ int main( int argc, char** argv )
      */
 
     //  Load raw chip image from path via OpenCV
-    cv::Mat_<std::uint16_t> raw_image = cv::imread( raw_image_path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH );
+    cv::Mat_<std::uint16_t> image = cv::imread( image_path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH );
 
     /*
      *  By default, OpenCV read the image with 8 bits RGB color from cv::imread
@@ -202,15 +202,27 @@ int main( int argc, char** argv )
      *  +=====================================+
      */
 
-    // Declare the marker detector and image rotator
+    //  Declare the marker detector and image detector
     chipimgproc::marker::detection::RegMat marker_detector;
-    chipimgproc::rotation::MarkerVec<float> image_rotator;
+    chipimgproc::rotation::MarkerVec<float> theta_detector;
+
+    //  Declare the image rotator
+    chipimgproc::rotation::Calibrate image_rotator;
     
     //  Detecting marker
-    auto mk_regs = marker_detector( raw_image, marker_layout, chipimgproc::MatUnit::PX, 0, std::cout );
+    auto marker_regioins = marker_detector(
+        image,
+        marker_layout,
+        chipimgproc::MatUnit::PX,   //  Marker detecte with pixel unit (PX) or cell unit (CELL) 
+        0,                          //  Default mode to use perfect marker pattern
+        std::cout
+        );
     
-    //  Rotating image
-    auto theta = image_rotator( mk_regs, std::cout );
+    //  Detecting image rotation theta (degree)
+    auto theta = theta_detector( marker_regioins, std::cout );
+
+    //  Rotating the image via detected theta (degree)
+    image_rotator( image, theta );
 
     /*
      *  +========================+
