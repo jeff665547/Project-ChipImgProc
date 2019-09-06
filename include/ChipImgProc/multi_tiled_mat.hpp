@@ -448,8 +448,8 @@ public:
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
     /**
-     * @brief The mutable version of @ref multi-tiled-mat-at "multiple tiled matrix at accessor"
-     * @details The mutable version of @ref multi-tiled-mat-at "multiple tiled matrix at accessor"
+     * @brief Mutable version of @ref multi-tiled-mat-at "multiple tiled matrix at accessor"
+     * @details Mutable version of @ref multi-tiled-mat-at "multiple tiled matrix at accessor"
      */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
@@ -507,6 +507,7 @@ public:
         });
         return res;
     }
+
     /**
      * @brief Get the cell level marker regions of the chip.
      * 
@@ -515,13 +516,15 @@ public:
     const std::vector<cv::Rect>& markers() const {
         return markers_;
     }
+
     /**
-     * @brief mutable version of MultiTiledMat::markers()
+     * @brief Mutable version of MultiTiledMat::markers()
      * 
      */
     std::vector<cv::Rect>& markers() {
         return markers_;
     }
+
     /**
      * @brief Given a cell point, determine if the point is in a marker.
      *   If true, the method return the hit marker region.
@@ -541,52 +544,99 @@ public:
         }
         return false;
     }
+
     /**
      * @brief Get rotation calibrated raw FOV images
-     * @defails The image is warpped by chipimgproc::GridRawImg type, 
+     * @details The image is warpped by chipimgproc::GridRawImg type, 
      *   which include cv::Mat and x, y grid lines. See class documentation for details.
      * @return std::vector<GridRawImg>& The rotation calibrated raw FOV images
      */
-    std::vector<GridRawImg>& mats() {
+    const std::vector<GridRawImg<GLID>>& mats() const {
         return cali_imgs_;
     }
+
     /**
-     * @brief Immutable version of MultiTiledMat::mats()
+     * @brief Mutable version of MultiTiledMat::mats() const .
      */
-    const std::vector<GridRawImg>& mats() const {
+    std::vector<GridRawImg<GLID>>& mats() {
         return cali_imgs_;
     }
-    auto& get_fov_img(int x, int y) {
+
+    /**
+     * @brief Get rotation calibrated raw FOV image by FOV ID.
+     * 
+     * @param x The FOV position x.
+     * @param y The FOV position y.
+     * @return GridRawImg<GLID>& The rotation calibrated raw FOV image.
+     */
+    const GridRawImg<GLID>& get_fov_img(int x, int y) const {
         return cali_imgs_.at(fov_index_(y, x));
     }
-    auto& get_fov_img(int x, int y) const {
+
+    /**
+     * @brief Mutable version of MultiTiledMat::get_fov_img(int, int) const .
+     */
+    GridRawImg<GLID>& get_fov_img(int x, int y) {
         return cali_imgs_.at(fov_index_(y, x));
     }
-    auto get_fov_rows() {
-        return fov_index_.rows;
-    }
+
+
+    // auto get_fov_rows() {
+    //     return fov_index_.rows;
+    // }
+    /**
+     * @brief Get the FOV numbers in row.
+     * 
+     * @return auto Deduced, usually int. FOV numbers in row.
+     */
     auto get_fov_rows() const {
         return fov_index_.rows;
     }
-    auto get_fov_cols() {
-        return fov_index_.cols;
-    }
+
+    // auto get_fov_cols() {
+    //     return fov_index_.cols;
+    // }
+    /**
+     * @brief Get the FOV numbers in column.
+     * 
+     * @return auto Deduced, usually int. FOV numbers in column.
+     */
     auto get_fov_cols() const {
         return fov_index_.cols;
     }
 
-    const auto& cell_level_stitch_points() const {
+    /**
+     * @brief Get cell level stitching points. i.e. the constructor parameter.
+     * 
+     * @return const std::vector<cv::Point>& Cell level stitching points.
+     */
+    const std::vector<cv::Point>& cell_level_stitch_points() const {
+        return cell_st_pts_;
+    }
+    
+    /**
+     * @brief Mutable version of MultiTiledMat::cell_level_stitch_points() const
+     * 
+     */
+    std::vector<cv::Point>& cell_level_stitch_points() {
         return cell_st_pts_;
     }
 
-    auto& cell_level_stitch_points() {
-        return cell_st_pts_;
-    }
-    const auto& cell_level_stitch_point(int x, int y) const {
+    /**
+     * @brief Get cell level stitching point by FOV position.
+     * 
+     * @param x The FOV position x.
+     * @param y The FOV position y.
+     * @return const cv::Point& Cell level stitching point.
+     */
+    const cv::Point& cell_level_stitch_point(int x, int y) const {
         return cell_st_pts_.at(fov_index_(y, x));
     }
 
-    const auto& cell_level_stitch_point(int x, int y) {
+    /**
+     * @brief Mutable version of MultiTiledMat::cell_level_stitch_point(int, int) const
+     */
+    const cv::Point& cell_level_stitch_point(int x, int y) {
         return cell_st_pts_.at(fov_index_(y, x));
     }
 private:
