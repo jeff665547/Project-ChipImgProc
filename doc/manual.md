@@ -223,21 +223,3 @@ target_link_libraries(foo PUBLIC ChipImgProc::ChipImgProc)
 ```
 
 ## Feature Introduction
-
-To extract the probe intensities from the image. 
-There are several issues of the image we need to resolve:
-
-1. The images are slanted
-2. Noise
-3. Grid recognition and segmentation
-4. A chip sample is captured into multiple images, which need to be stitched.
-5. The region of interest detection, remove the regions we don't need.
-etc.
-
-To solve these issues, we develop a pipeline with following steps:
-
-* @subpage improc_image_rotation
-* @subpage improc_gridding
-* @subpage improc_min_cv_auto_margin
-* @subpage improc_background_fix_sub_and_division01
-* @subpage improc_stitiching
