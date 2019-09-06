@@ -5,7 +5,7 @@
 ### Requirement
 
 * Your project must be a CMake project
-* GCC >= 7.3 (7.3 is recommanded and well tested)
+* GCC >= 7.3 (7.3 is recommended and well tested)
 * CMake >= 3.13
 * MSVC <= v141 build tool
 
@@ -123,25 +123,25 @@ Link libraries:
   * comdlg32
   * advapi32
 
-### Truble shooting
+### Trouble shooting
 
 * Missing link library
 
-  The library link is highly depend on user code, you may use more library or require alternative  external link beyond the following list.
-  We put all dependencies in the \<*ChipImgProc install prefix*>/lib and \<*ChipImgProc install prefix*>/third_party.
-  You should be able to find any missing library and add to your link command.
+    The library link is highly depend on user code, you may use more library or require alternative  external link beyond the following list.
+    We put all dependencies in the \<*ChipImgProc install prefix*>/lib and \<*ChipImgProc install prefix*>/third_party.
+    You should be able to find any missing library and add to your link command.
 
-Manully include and link OpenCV & Boost are really painful, so we suggest to use CMake & Hunter to do such link works.
+Manually include and link OpenCV & Boost are really painful, so we suggest to use CMake & Hunter to do such link works.
 
 ## Import ChipImgProc by Hunter
 
 To use the Hunter package manager, all upstream will be built.
 User no need to build ChipImgProc manually before start develop client project.
 
-### Requirment
+### Requirement
 
 * Your project must be a CMake project
-* GCC >= 7.3 (7.3 is recommanded and well tested)
+* GCC >= 7.3 (7.3 is recommended and well tested)
 * CMake >= 3.13
 * MSVC <= v141 build tool
 
