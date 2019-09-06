@@ -31,7 +31,7 @@ int main( int argc, char** argv )
      *  +=========================+
      */
 
-    std::string image_path;         //  The path of raw chip image
+    std::string image_path;             //  The path of raw chip image
     std::string marker_pattern_path;    //  The path of marker pattern
 
     boost::program_options::variables_map op;
@@ -70,7 +70,7 @@ int main( int argc, char** argv )
      * 
      *      "cv::IMREAD_ANYCOLOR" for RGB color
      *      "cv::IMREAD_ANYDEPTH" for depth with our raw image (16 bits)
-    */
+     */
 
     /*
      *  +==============================+
@@ -79,7 +79,7 @@ int main( int argc, char** argv )
      */
 
 
-    // Load marker
+    //  Load marker
     std::ifstream marker_file_in( marker_pattern_path );
     auto [ marker, mask ] = chipimgproc::marker::Loader::from_txt( marker_file_in, std::cout );
 
