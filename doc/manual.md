@@ -52,9 +52,9 @@ C++ Flags (assuming use g++ compiler):
 
 Include directory:
 
-* ChipImgProc\stage\include
-* ChipImgProc\stage\third_party\include
-* ChipImgProc\stage\third_party\include\opencv
+* ChipImgProc\\stage\\include
+* ChipImgProc\\stage\\third_party\\include
+* ChipImgProc\\stage\\third_party\\include\\opencv
 
 C++ Define flags (nessesary):
 
@@ -63,9 +63,9 @@ C++ Define flags (nessesary):
 
 Link directory:
 
-* ChipImgProc\stage\lib
-* ChipImgProc\stage\third_party\lib
-* ChipImgProc\stage\third_party\x64\mingw\staticlib
+* ChipImgProc\\stage\\lib
+* ChipImgProc\\stage\\third_party\\lib
+* ChipImgProc\\stage\\third_party\\x64\\mingw\\staticlib
 
 Link libraries:
 
