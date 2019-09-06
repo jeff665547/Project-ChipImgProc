@@ -30,21 +30,106 @@ build\> cmake --build . --target install
 :: All upstream library will put in ChipImgProc\stage\third_party
 ```
 
+### About Gitlab download icon link
+
+![Gitlab download icon link](images/gitlab-download-icon-link.png)
+
+We assume the users visit the download icon link or the release tags just want to use the library but run the unit test, which means the users download project in such may should use an the alternative configure command:
+
+```bat
+build\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release" -DCOPY_ALL_TP=ON -DBUILD_TESTS=OFF
+```
+
+In this case, Build script will not need test data and of course, no test code will be built.
+Only library source will be compile into binary.
+
 ## Manually link ChipImgProc
+
+C++ Flags (assuming use g++ compiler)
+
+* -std=c++17
 
 Include directory:
 
 * ChipImgProc\stage\include
 * ChipImgProc\stage\third_party\include
+* ChipImgProc\stage\third_party\include\opencv
 
 Link directory:
 
 * ChipImgProc\stage\lib
 * ChipImgProc\stage\third_party\lib
+* ChipImgProc\stage\third_party\x64\mingw\staticlib
 
 Link libraries:
 
-TODO:
+* ChipImgProc
+  * libChipImgProc-logger
+  * libChipImgProc-utils
+  * libcpp_base64-base64
+* Nucleona
+  * libNucleona
+  * libNucleona-sys-executable_dir
+  * libNucleona-stream-null_buffer
+  * libNucleona-parallel-thread_pool
+  * libNucleona-util
+* OpenCV
+  * libopencv_ml340
+  * libopencv_objdetect340
+  * libopencv_shape340
+  * libopencv_stitching340
+  * libopencv_superres340
+  * libopencv_videostab340
+  * libopencv_calib3d340
+  * libopencv_features2d340
+  * libopencv_flann340
+  * libopencv_highgui340
+  * libopencv_photo340
+  * libopencv_video340
+  * libopencv_videoio340
+  * libopencv_imgcodecs340
+  * libopencv_imgproc340
+  * libopencv_core340
+* OpenCV upstream dependent
+  * liblibjasper
+  * libjpeg
+  * liblibwebp
+  * libpng
+  * liblibtiff
+* Boost
+  * libboost_filesystem-mt-X64
+  * more boost library goes here...
+* Win32 and other utility library
+  * libzlib
+  * comctl32
+  * gdi32
+  * setupapi
+  * ws2_32
+  * m
+  * avifil32
+  * avicap32
+  * winmm
+  * msvfw32
+  * kernel32
+  * user32
+  * gdi32
+  * winspool
+  * shell32
+  * ole32
+  * oleaut32
+  * uuid
+  * comdlg32
+  * advapi32
+
+### Truble shooting
+
+* Missing link library
+
+  The library link is highly depend on user code, it may need reorder or more external link beyond the following list.
+  We put all dependencies in the \<*ChipImgProc install prefix*>/lib and \<*ChipImgProc install prefix*>/third_party.
+  You should be able to find any missing library and add to your link command.
+
+Manully include and link OpenCV & Boost are really painful, so we suggest to use CMake & Hunter to do such link works.
 
 ## Import ChipImgProc by hunter
 
@@ -96,6 +181,29 @@ User no need to build ChipImgProc manually.
         find_package(ChipImgProc CONFIG REQUIRED)
 
 ### A full example
+
+cmake/packages.cmake
+
+```cmake
+if( MINGW )
+    set(OpenCV_ENABLE_PRECOMPILED_HEADERS OFF)
+else()
+    set(OpenCV_ENABLE_PRECOMPILED_HEADERS ON)
+endif()
+hunter_config(
+    OpenCV
+    VERSION "3.4.0-p0"
+    CMAKE_ARGS
+        BUILD_SHARED_LIBS=OFF
+        ENABLE_PRECOMPILED_HEADERS=${OpenCV_ENABLE_PRECOMPILED_HEADERS}
+)
+hunter_config(
+    OpenCV-Extra
+    VERSION "3.4.0"
+)
+```
+
+CMakeLists.txt
 
 ```cmake
 cmake_minimum_required(VERSION 3.13.0)
