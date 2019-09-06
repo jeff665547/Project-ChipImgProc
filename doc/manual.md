@@ -32,7 +32,8 @@ build\> cmake --build . --target install
 
 ### About Gitlab download icon link
 
-![Gitlab download icon link](images/gitlab-download-icon-link.png)
+@image html gitlab-download-icon-link.png width=300px
+@image latex gitlab-download-icon-link.png
 
 We assume the users visit the download icon link or the release tags just want to use the library but run the unit test, which means the users download project in such way should use an the alternative configure command:
 
@@ -227,4 +228,6 @@ add_executable(foo foo.cpp)
 target_link_libraries(foo PUBLIC ChipImgProc::ChipImgProc)
 ```
 
-## Feature Introduction
+## A basic example to process chip FOV images into heatmap
+
+@snippet ChipImgProc/multi_tiled_mat_test.cpp usage

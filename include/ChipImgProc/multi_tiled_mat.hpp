@@ -74,6 +74,9 @@ struct TilesWrapper {
  *   And lazy evaluate to the cell detail properties, 
  *   include region position, pixels and statistic data.
  * 
+ * @details Here is an example:
+ *   @snippet ChipImgProc/multi_tiled_mat_test.cpp usage
+ * 
  * @tparam FLOAT The float point type used in this data structure, 
  *   and is use to trade off the performance and numerical accuracy.
  * @tparam GLID The grid line type, 
