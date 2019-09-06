@@ -2,6 +2,8 @@
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/rotation/marker_vec.hpp>
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
+#include <ChipImgProc/marker/detection/reg_mat_infer.hpp>
+#include <ChipImgProc/gridding/reg_mat.hpp>
 #include <boost/program_options.hpp>
 
 /*
@@ -206,8 +208,9 @@ int main( int argc, char** argv )
     chipimgproc::marker::detection::RegMat marker_detector;
     chipimgproc::rotation::MarkerVec<float> theta_detector;
 
-    //  Declare the image rotator
+    //  Declare the image rotator and image gridder
     chipimgproc::rotation::Calibrate image_rotator;
+    chipimgproc::gridding::RegMat image_gridder;
     
     //  Detecting marker
     auto marker_regioins = marker_detector(
@@ -224,14 +227,30 @@ int main( int argc, char** argv )
     //  Rotating the image via detected theta (degree)
     image_rotator( image, theta );
 
-    /*
-     *  +========================+
-     *  | Output rotation result |
-     *  +========================+
-     */
-
     // Outputing
     std::cout << theta << std::endl;
+
+    //  Re-detecting the marker
+    marker_regioins = marker_detector( image, marker_layout, chipimgproc::MatUnit::PX, 0, std::cout );
+
+    //  Auto-inference to fill the vacancy marker positions
+    marker_regioins = chipimgproc::marker::detection::reg_mat_infer(
+        marker_regioins,
+        3,                  //  Number of markers ine one Row
+        3,                  //  Number of markers ine one Column
+        image
+        );
+
+    /*
+     *  +================+
+     *  | Image gridding |
+     *  +================+
+     */
+
+    //  Image ridding and output the result via lambda expression
+    auto grid_line = image_gridder( image, marker_layout, marker_regioins, std::cout, [](const auto& m){
+        cv:imwrite( "grid_line.tiff", m );
+    });
 
     return 0;
 }
