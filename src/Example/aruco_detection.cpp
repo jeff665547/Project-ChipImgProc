@@ -1,4 +1,3 @@
-#include <fstream>
 #include <nlohmann/json.hpp>
 #include <ChipImgProc/aruco.hpp>
 #include <boost/program_options.hpp>
@@ -35,7 +34,7 @@ int main( int argc, char** argv )
 {
     /*
      *  +=========================+
-     *  | Declare Program Options |
+     *  | Declare program options |
      *  +=========================+
      */
 
