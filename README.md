@@ -47,7 +47,7 @@ Only library source will be compiled into binary.
 
 ## Manually link ChipImgProc
 
-C++ Flags (assuming use g++ compiler)
+C++ flags (assuming use g++ compiler):
 
 * -std=c++17
 
@@ -56,6 +56,11 @@ Include directory:
 * ChipImgProc\stage\include
 * ChipImgProc\stage\third_party\include
 * ChipImgProc\stage\third_party\include\opencv
+
+C++ Define flags (nessesary):
+
+* -DNUCLEONA_RANGE_USE_V3
+* -DOPENCV_TRAITS_ENABLE_DEPRECATED
 
 Link directory:
 
