@@ -541,10 +541,19 @@ public:
         }
         return false;
     }
-    auto& mats() {
+    /**
+     * @brief Get rotation calibrated raw FOV images
+     * @defails The image is warpped by chipimgproc::GridRawImg type, 
+     *   which include cv::Mat and x, y grid lines. See class documentation for details.
+     * @return std::vector<GridRawImg>& The rotation calibrated raw FOV images
+     */
+    std::vector<GridRawImg>& mats() {
         return cali_imgs_;
     }
-    const auto& mats() const {
+    /**
+     * @brief Immutable version of MultiTiledMat::mats()
+     */
+    const std::vector<GridRawImg>& mats() const {
         return cali_imgs_;
     }
     auto& get_fov_img(int x, int y) {
