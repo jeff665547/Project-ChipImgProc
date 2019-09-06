@@ -186,7 +186,7 @@ struct MultiTiledMat
                 auto& r = pos[0];
                 auto& c = pos[1];
                 auto& src_tile = img.tile_at(r, c);
-                IdxRect dst_tile;
+                IdxRect<FLOAT> dst_tile;
                 dst_tile.x          = src_tile.x           ;
                 dst_tile.y          = src_tile.y           ;
                 dst_tile.width      = src_tile.width       ;
