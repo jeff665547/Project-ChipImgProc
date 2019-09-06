@@ -398,7 +398,6 @@ public:
         return this->index_.cols;
     }
     /**
-     * @anchor multi-tiled-mat-at
      * @brief Access to the cell of multiple tiled matrix and doing user defined process to the cell infos.
      * @details This accessor allow user pass a callback function 
      *   to do some basic process to the cell and overlapping data.
@@ -448,8 +447,9 @@ public:
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
     /**
-     * @brief Mutable version of @ref multi-tiled-mat-at "multiple tiled matrix at accessor"
-     * @details Mutable version of @ref multi-tiled-mat-at "multiple tiled matrix at accessor"
+     * @brief Mutable version of MultiTiledMat::at(std::uint32_t, std::uint32_t, CELL_INFOS_FUNC&&) const
+     * @details Be careful to use this version, once you use reference type to receive the return object.
+     *   Any modify to the reference may have side effects.
      */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
@@ -459,8 +459,8 @@ public:
         return at_impl(*this, row, col, FWD(cell_infos_func));
     }
     /**
-     * @brief same as MultiTiledMat::at
-     * @details same as MultiTiledMat::at
+     * @brief @copybrief MultiTiledMat::at(std::uint32_t, std::uint32_t, CELL_INFOS_FUNC&&) const
+     * @details @copydetails MultiTiledMat::at(std::uint32_t, std::uint32_t, CELL_INFOS_FUNC&&) const
      */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) operator()(
@@ -471,8 +471,8 @@ public:
     }
 
     /**
-     * @brief same as MultiTiledMat::at
-     * @details same as MultiTiledMat::at
+     * @brief @copybrief MultiTiledMat::at(std::uint32_t, std::uint32_t, CELL_INFOS_FUNC&&)
+     * @details @copydetails MultiTiledMat::at(std::uint32_t, std::uint32_t, CELL_INFOS_FUNC&&)
      */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) operator()(
@@ -519,6 +519,8 @@ public:
 
     /**
      * @brief Mutable version of MultiTiledMat::markers()
+     * @details Be careful to use this version, once you use reference type to receive the return object.
+     *   Any modify to the reference may have side effects.
      * 
      */
     std::vector<cv::Rect>& markers() {
@@ -557,6 +559,8 @@ public:
 
     /**
      * @brief Mutable version of MultiTiledMat::mats() const .
+     * @details Be careful to use this version, once you use reference type to receive the return object.
+     *   Any modify to the reference may have side effects.
      */
     std::vector<GridRawImg<GLID>>& mats() {
         return cali_imgs_;
@@ -575,6 +579,8 @@ public:
 
     /**
      * @brief Mutable version of MultiTiledMat::get_fov_img(int, int) const .
+     * @details Be careful to use this version, once you use reference type to receive the return object.
+     *   Any modify to the reference may have side effects.
      */
     GridRawImg<GLID>& get_fov_img(int x, int y) {
         return cali_imgs_.at(fov_index_(y, x));
@@ -616,6 +622,8 @@ public:
     
     /**
      * @brief Mutable version of MultiTiledMat::cell_level_stitch_points() const
+     * @details Be careful to use this version, once you use reference type to receive the return object.
+     *   Any modify to the reference may have side effects.
      * 
      */
     std::vector<cv::Point>& cell_level_stitch_points() {
@@ -635,6 +643,8 @@ public:
 
     /**
      * @brief Mutable version of MultiTiledMat::cell_level_stitch_point(int, int) const
+     * @details Be careful to use this version, once you use reference type to receive the return object.
+     *   Any modify to the reference may have side effects.
      */
     const cv::Point& cell_level_stitch_point(int x, int y) {
         return cell_st_pts_.at(fov_index_(y, x));
