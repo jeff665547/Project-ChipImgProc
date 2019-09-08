@@ -269,6 +269,10 @@ struct MultiTiledMat
         }
         cell_st_pts_ = cell_st_pts;
     }
+    /**
+     * @brief @copybrief chipimgproc::MultiTiledMat::min_cv_mean() const
+     * 
+     */
     struct MinCVMean {
         FLOAT operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
@@ -287,6 +291,10 @@ struct MultiTiledMat
             return res;
         }
     };
+    /**
+     * @brief @copybrief chipimgproc::MultiTiledMat::min_cv_pixels() const
+     * 
+     */
     struct MinCVPixels {
         MinCVPixels(const MultiTiledMat& m)
         : mm_(m)
@@ -310,6 +318,10 @@ struct MultiTiledMat
         }
         const MultiTiledMat& mm_;
     };
+    /**
+     * @brief @copybrief chipimgproc::MultiTiledMat::min_cv_all_data() const
+     * 
+     */
     struct MinCVAllData {
         struct Result {
             cv::Mat         pixels;
@@ -340,6 +352,7 @@ struct MultiTiledMat
         const MultiTiledMat& mm_;
 
     };
+private:
     static constexpr MinCVMean min_cv_mean_{};
 public:
     /**
@@ -447,7 +460,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::at(std::uint32_t, std::uint32_t, CELL_INFOS_FUNC&&) const
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Andy modification to the reference may have side effects.
+     *   Any modify to the reference may have side effects.
      */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
@@ -518,7 +531,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::markers()
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Andy modification to the reference may have side effects.
+     *   Any modify to the reference may have side effects.
      * 
      */
     std::vector<cv::Rect>& markers() {
@@ -558,7 +571,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::mats() const .
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Andy modification to the reference may have side effects.
+     *   Any modify to the reference may have side effects.
      */
     std::vector<GridRawImg<GLID>>& mats() {
         return cali_imgs_;
@@ -578,7 +591,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::get_fov_img(int, int) const .
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Andy modification to the reference may have side effects.
+     *   Any modify to the reference may have side effects.
      */
     GridRawImg<GLID>& get_fov_img(int x, int y) {
         return cali_imgs_.at(fov_index_(y, x));
@@ -621,7 +634,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::cell_level_stitch_points() const
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Andy modification to the reference may have side effects.
+     *   Any modify to the reference may have side effects.
      * 
      */
     std::vector<cv::Point>& cell_level_stitch_points() {
@@ -642,7 +655,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::cell_level_stitch_point(int, int) const
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Andy modification to the reference may have side effects.
+     *   Any modify to the reference may have side effects.
      */
     const cv::Point& cell_level_stitch_point(int x, int y) {
         return cell_st_pts_.at(fov_index_(y, x));
