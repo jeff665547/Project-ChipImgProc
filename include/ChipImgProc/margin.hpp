@@ -1,6 +1,6 @@
 /**
  * @file margin.hpp
- * @author Chia-Hua Chang(johnidfet@centrilliontech.com.tw)
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
  * @brief @copybrief MultiTiledMat::Margin
  * 
  */

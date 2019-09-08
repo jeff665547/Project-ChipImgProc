@@ -1,3 +1,9 @@
+/**
+ * @file grid_raw_img.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::GridRawImg
+ * 
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <Nucleona/range.hpp>

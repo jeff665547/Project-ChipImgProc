@@ -1,6 +1,6 @@
 /**
  * @file multi_tiled_mat.hpp
- * @author Chia-Hua Chang(johnidfet@centrilliontech.com.tw)
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
  * @brief @copybrief chipimgproc::MultiTiledMat
  * 
  */
