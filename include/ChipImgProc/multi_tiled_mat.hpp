@@ -447,7 +447,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::at(std::uint32_t, std::uint32_t, CELL_INFOS_FUNC&&) const
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Any modify to the reference may have side effects.
+     *   Andy modification to the reference may have side effects.
      */
     template<class CELL_INFOS_FUNC = decltype(min_cv_mean_)&>
     decltype(auto) at(
@@ -518,7 +518,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::markers()
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Any modify to the reference may have side effects.
+     *   Andy modification to the reference may have side effects.
      * 
      */
     std::vector<cv::Rect>& markers() {
@@ -558,7 +558,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::mats() const .
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Any modify to the reference may have side effects.
+     *   Andy modification to the reference may have side effects.
      */
     std::vector<GridRawImg<GLID>>& mats() {
         return cali_imgs_;
@@ -578,7 +578,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::get_fov_img(int, int) const .
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Any modify to the reference may have side effects.
+     *   Andy modification to the reference may have side effects.
      */
     GridRawImg<GLID>& get_fov_img(int x, int y) {
         return cali_imgs_.at(fov_index_(y, x));
@@ -621,7 +621,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::cell_level_stitch_points() const
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Any modify to the reference may have side effects.
+     *   Andy modification to the reference may have side effects.
      * 
      */
     std::vector<cv::Point>& cell_level_stitch_points() {
@@ -642,7 +642,7 @@ public:
     /**
      * @brief Mutable version of MultiTiledMat::cell_level_stitch_point(int, int) const
      * @details Be careful to use this version, once you use reference type to receive the return object.
-     *   Any modify to the reference may have side effects.
+     *   Andy modification to the reference may have side effects.
      */
     const cv::Point& cell_level_stitch_point(int x, int y) {
         return cell_st_pts_.at(fov_index_(y, x));
