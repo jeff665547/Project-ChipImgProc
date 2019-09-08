@@ -1,3 +1,9 @@
+/**
+ * @file mk_img_dict.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::aruco::MkImgDict
+ * 
+ */
 #pragma once
 #include <map>
 #include <cstdint>
@@ -6,9 +12,21 @@
 #include "bits_to_marker.hpp"
 namespace chipimgproc::aruco {
 
+/**
+ * @brief ArUco marker index to image mapper
+ */
 struct MkImgDict
 : public std::map<std::int32_t, cv::Mat> // marker index => image
 {
+    /**
+     * @brief Reset mapper
+     * 
+     * @param dict              ArUco dictionary.
+     * @param candidates        The marker id going to save in mapper.
+     * @param bit_width 
+     * @param side_bits_length 
+     * @param pyramid_level 
+     */
     void reset(
         const Dictionary& dict,
         const std::vector<std::int32_t>& candidates,

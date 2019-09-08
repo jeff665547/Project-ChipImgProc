@@ -1,4 +1,5 @@
 #pragma once
+/// [usage]
 #include <vector>
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/marker/txt_to_img.hpp>
@@ -62,3 +63,4 @@ auto make_yz01_layout(const std::string& pat_name, float um2px_r) {
         um2px_r
     );
 }
+/// [usage]
