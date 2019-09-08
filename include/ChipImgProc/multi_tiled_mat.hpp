@@ -269,7 +269,6 @@ struct MultiTiledMat
         }
         cell_st_pts_ = cell_st_pts;
     }
-private:
     struct MinCVMean {
         FLOAT operator()( const CellInfos& cell_infos ) const {
             auto min_cv = std::numeric_limits<FLOAT>::max();
@@ -369,12 +368,11 @@ public:
      *  For overlapping region, select the cell which has minimum CV.
      *  The functor return is a POD structure:
      *  @code
-     *  struct hidden-name {
+     *  struct MinCVAllData::Result {
      *      cv::Mat         pixels;
      *      IdxRect<FLOAT>  cell_info;
      *  };
      *  @endcode
-     *  Since the type name is hidden, so the object should use "auto" to receive the return object.
      * 
      * @return MinCVAllData Cell select functor.
      */
