@@ -32,6 +32,7 @@
 
 int main( int argc, char** argv )
 {
+/// [data_preparation]
     /*
      *  +=========================+
      *  | Declare program options |
@@ -135,7 +136,8 @@ int main( int argc, char** argv )
     //  Load marker frame images of both template and mask
     auto marker_frame_template = cv::imread( marker_frame_template_path, cv::IMREAD_GRAYSCALE );
     auto marker_frame_mask     = cv::imread( marker_frame_mask_path,     cv::IMREAD_GRAYSCALE );
-
+/// [data_preparation]
+/// [aruco_detection]
     /*
      *  +=================+
      *  | ArUco detection |
@@ -204,7 +206,8 @@ int main( int argc, char** argv )
      *      Log output
      * 
      */ 
-
+/// [aruco_detection]
+/// [output]
     /*
      *  +===================+
      *  | Output ArUco code |
@@ -215,5 +218,6 @@ int main( int argc, char** argv )
     for( auto& [ id, position ] : detected_aruco_id_position )
         std::cout << id << '\t' << position << std::endl;
 
+/// [output]
     return 0;
 }

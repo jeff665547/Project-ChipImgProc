@@ -29,7 +29,6 @@ namespace chipimgproc::rotation {
  *    direct return the current estimated angle.
  * 6. Goto 1.
  * 
- * TODO: example code
  * 
  */
 template<class Float, class RotEst, class RotCali>
