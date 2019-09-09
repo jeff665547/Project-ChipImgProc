@@ -139,6 +139,10 @@ int main( int argc, char** argv )
      *          Spacing x of marker:    37      81      101
      *          Spacing y of marker:    37      81      101
      * 
+     *                                  DVT-1   DVT-2   DVT-3
+     *                  µm to pixel:    2.68    2.68    2.4145
+     *                                         (2.4145)
+     * 
      *  Marker pattern:
      *      Zion:
      *                          . . . . . . . . . .

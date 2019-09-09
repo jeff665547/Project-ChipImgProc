@@ -80,13 +80,11 @@ int main( int argc, char** argv )
     //  For cell margin
     chipimgproc::Margin<double> margin;
 
-    /*
-        Create FOV process result storage.
-        We store gridding result(tiled_mats) and margin result(stat_mats_s)
-        seperately.
-    */
-    std::vector<chipimgproc::TiledMat<>>           tiled_mats;
-    std::vector<chipimgproc::stat::Mats<double>>   stat_mats_s;
+    //  Record the segmentation result after image gridding
+    std::vector<chipimgproc::TiledMat<>>           tile_matrixs;
+
+    //  Record the tile-matrix after feature extracting
+    std::vector<chipimgproc::stat::Mats<double>>   segm_matrixs;
 
     /*
      *  +=================================================+
@@ -192,9 +190,9 @@ int main( int argc, char** argv )
          *          Spacing x of marker:    37      81      101
          *          Spacing y of marker:    37      81      101
          * 
-         * DVT-1 2.68
-         * DVT-2 2.68 / 2.4145
-         * DVT-3 2.4145
+         *                                  DVT-1   DVT-2   DVT-3
+         *                  µm to pixel:    2.68    2.68    2.4145
+         *                                         (2.4145)
          * 
          *  Marker pattern:
          *      Zion:
@@ -339,11 +337,11 @@ int main( int argc, char** argv )
          *              Ignore the segmentation rate and find the minimum CV of this tile automatically
          */
 
-        // Save the gridding result
-        tiled_mats.push_back( tile_matrix );
+        //  Save the gridding result
+        tile_matrixs.push_back( tile_matrix );
 
-        // Save the margin result
-        stat_mats_s.push_back( feature_extraction_result.stat_mats );
+        //  Save the segmentation result
+        segm_matrixs.push_back( feature_extraction_result.stat_mats );
     }
     
     // Set the logical cell level stitch position.
