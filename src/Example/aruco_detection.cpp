@@ -38,7 +38,7 @@ int main( int argc, char** argv )
      *  +=========================+
      */
 
-    std::string raw_image_path;             //  The path of raw chip image
+    std::string image_path;                 //  The path of raw chip image
     std::string aruco_database_path;        //  The path of ArUco database
 
     std::string marker_frame_template_path; //  The path of marker frame template image
@@ -48,7 +48,7 @@ int main( int argc, char** argv )
     boost::program_options::options_description options( "Options" );
 
     options.add_options()( "help,h" , "Print this help messages" )
-        ( "image,i"    , boost::program_options::value< std::string >( &raw_image_path             )->required(),"Image path of raw chip image" )
+        ( "image,i"    , boost::program_options::value< std::string >( &image_path                 )->required(),"Image path of raw chip image" )
         ( "json,j"     , boost::program_options::value< std::string >( &aruco_database_path        )->required(),"Json path of ArUco database" )
         ( "template,t" , boost::program_options::value< std::string >( &marker_frame_template_path )->required(),"Image path of marker frame template" )
         ( "mask,m"     , boost::program_options::value< std::string >( &marker_frame_mask_path     )->required(),"Image path of marker frame mask" )
@@ -73,7 +73,7 @@ int main( int argc, char** argv )
      */
 
     //  Load raw chip image from path via OpenCV
-    auto raw_image = cv::imread( raw_image_path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH );
+    auto raw_image = cv::imread( image_path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH );
 
     /*
      *  By default, OpenCV read the image with 8 bits RGB color from cv::imread

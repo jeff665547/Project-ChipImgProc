@@ -388,20 +388,20 @@ int main( int argc, char** argv )
      * 
      *      $ Example of overlapping and stitching at three FOVs:
      * 
-     *         StitchingPoint       StitchingPoint     StitchingPoint
-     *               |                    |                  |
-     *               |  OverlappingPoint  | OverlappingPoint |  OverlappingPoint
-     *               |          |         |         |        |          |
-     *               V          V         V         V        V          V
-     *               0    81   162       162  243  324      324   405  486
-     *              +------------+      +------------+      +------------+
-     *            0 |[]   []   []|      |[]   []   []|      |[]   []   []|
-     *              |            |      |            |      |            |
-     *           81 |[]   []   []|      |[]   []   []|      |[]   []   []|
-     *              |            |      |            |      |            |
-     *          162 |[]   []   []|      |[]   []   []|      |[]   []   []|
-     *              +------------+      +------------+      +------------+
-     *                 FOV(0,0)            FOV(1,0)            FOV(2,0)
+     *         StitchingPoint       StitchingPoint      StitchingPoint
+     *               |                    |                   |
+     *               |  OverlappingMarker | OverlappingMarker |  OverlappingMarker
+     *               |          |         |         |         |          |
+     *               V          V         V         V         V          V
+     *               0    81   162       162  243  324       324   405  486
+     *              +------------+      +------------+       +------------+
+     *            0 |[]   []   []|      |[]   []   []|       |[]   []   []|
+     *              |            |      |            |       |            |
+     *           81 |[]   []   []|      |[]   []   []|       |[]   []   []|
+     *              |            |      |            |       |            |
+     *          162 |[]   []   []|      |[]   []   []|       |[]   []   []|
+     *              +------------+      +------------+       +------------+
+     *                 FOV(0,0)            FOV(1,0)             FOV(2,0)
      */
 
     //  Set the FOV sequencial ID, the order is row major
