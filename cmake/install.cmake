@@ -32,6 +32,14 @@ install(
     NAMESPACE   "${namespace}"
     DESTINATION "${config_install_dir}"
 )
+if(COPY_ALL_TP)
+    screw_show_var(hunter_root_dir)
+    install(
+        DIRECTORY ${hunter_root_dir}/
+        DESTINATION ./third_party
+        COMPONENT Runtime
+    )
+endif()
 if(INSTALL_DEPS)
     if(WIN32)
         configure_file(

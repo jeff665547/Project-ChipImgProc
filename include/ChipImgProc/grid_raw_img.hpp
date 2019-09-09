@@ -1,12 +1,38 @@
+/**
+ * @file grid_raw_img.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::GridRawImg
+ * 
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <Nucleona/range.hpp>
 namespace chipimgproc{
-
+/**
+ * @brief Type for storing rotated grid raw image.
+ * 
+ * @tparam GLID grid line storage type.
+ */
 template<class GLID = std::uint16_t>
 struct GridRawImg {
+    /**
+     * @brief Create empty GridRawImg.
+     * 
+     */
     GridRawImg() = default;
 
+    /**
+     * @brief Constructor, initial GridRawImg with rotated image and grid lines.
+     * 
+     * @tparam MAT Deduced, matrix type, must be cv::Mat or cv::Mat&.
+     * @tparam GLX Deduced, grid lines, 
+     *   must be range type and the value can be convert to GLID.
+     * @tparam GLY Deduced, grid lines, 
+     *   must be range type and the value can be convert to GLID.
+     * @param img Rotated raw image.
+     * @param glx Grid line range.
+     * @param gly Grid line range.
+     */
     template<class MAT, class GLX, class GLY>
     GridRawImg(
         MAT&& img, 
@@ -26,23 +52,82 @@ struct GridRawImg {
             gl_y_.push_back((GLID)y);
         }
     }
-    auto& mat() {
+    
+    /**
+     * @brief Get internal image.
+     * 
+     * @return const cv::Mat& Reference to internal image.
+     */
+    const cv::Mat& mat() const {
         return img_;
     }
-    const auto& mat() const {
+    
+    /**
+     * @brief Mutable version of chipimgproc::GridRawImg::mat() const.
+     * 
+     */
+    cv::Mat& mat() {
         return img_;
     }
-    const auto& gl_x() const  { return gl_x_; }
-    auto&       gl_x()        { return gl_x_; }
-    const auto& gl_y() const  { return gl_y_; }
-    auto&       gl_y()        { return gl_y_; }
-    bool        empty()       { return img_.empty(); }
+    
+    /**
+     * @brief Get X direction grid line.
+     * 
+     * @return const std::vector<GLID>& Reference to X direction grid line.
+     */
+    const std::vector<GLID>& gl_x() const  { return gl_x_; }
+    
+    /**
+     * @brief Mutable version of chipimgproc::GridRawImg::gl_x() const
+     * 
+     * @details Be careful to use this version, once you use reference type to receive the return object.
+     *   Andy modification to the reference may have side effects.
+     */
+    std::vector<GLID>&       gl_x()        { return gl_x_; }
+    
+    /**
+     * @brief Get Y direction grid line.
+     * 
+     * @return const std::vector<GLID>& Reference to Y direction grid line.
+     */
+    const std::vector<GLID>& gl_y() const  { return gl_y_; }
+
+    /**
+     * @brief Mutable version of chipimgproc::GridRawImg::gl_y() const
+     * 
+     * @details Be careful to use this version, once you use reference type to receive the return object.
+     *   Andy modification to the reference may have side effects.
+     */
+    std::vector<GLID>&       gl_y()        { return gl_y_; }
+
+    /**
+     * @brief Test if the object is empty.
+     * 
+     * @return true The object is empty.
+     * @return false The object is assigned image.
+     */
     bool        empty() const { return img_.empty(); }
-    auto        rows()        { return img_.rows; } 
-    auto        cols()        { return img_.cols; } 
+
+    /**
+     * @brief Get the row number of the image. It's pixel level, not cell level.
+     * 
+     * @return auto Deduced, same as cv::Mat::rows.
+     */
     auto        rows()  const { return img_.rows; } 
+
+    /**
+     * @brief Get the col number of the image. It's pixel level, not cell level.
+     * 
+     * @return auto Deduced, same as cv::Mat::cols.
+     */
     auto        cols()  const { return img_.cols; } 
 
+    /**
+     * @brief Get region of interested in cell level.
+     * 
+     * @param r The rectangle identify the region.
+     * @return GridRawImg the region identified.
+     */
     GridRawImg  get_roi(const cv::Rect& r) const {
         cv::Rect raw_rect(
             gl_x_.at(r.x), gl_y_.at(r.y),
@@ -68,7 +153,16 @@ struct GridRawImg {
         }
         return GridRawImg(img, gl_x, gl_y);
     }
-    auto clean_border() const {
+    /**
+     * @brief Get the image only contain 
+     *   the region from the first grid line to the last.
+     * @details The grid rotated image may have some unused border 
+     *   which has no probe location or just not the FOV defined grid region.
+     *   This function is used to trim such part of image and leave only 
+     *   the grid line located part of the image.
+     * @return GridRawImg The image after border trimmed. 
+     */
+    GridRawImg clean_border() const {
         cv::Rect roi(
             0, 0, 
             gl_x_.size() - 1, gl_y_.size() - 1
@@ -76,6 +170,11 @@ struct GridRawImg {
         return get_roi(roi);
     }
 
+    /**
+     * @brief Duplicate everything in the image. Doing deep copy.
+     * 
+     * @return GridRawImg Same data of current image.
+     */
     GridRawImg clone() const {
         return GridRawImg(
             img_.clone(),
