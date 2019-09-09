@@ -343,10 +343,10 @@ Manually include and link OpenCV & Boost are really painful, so we suggest to us
     - Use marker frame template...
       @snippet Example/aruco_detection.cpp aruco_detection
       @image html aruco-single-mk-spec.png width=540px
-      @image latex aruco-single-mk-spec.png
+      @image latex aruco-single-mk-spec.png width=13cm
       Figure 7 Marker Pattern Description and Corresponding Auxiliary Parameters for Recognition.
       @image html aruco-radius-define.png width=650px
-      @image latex aruco-radius-define.png
+      @image latex aruco-radius-define.png width=13cm
       Figure 8 The radius used in NMS algorithm with markers in an FOV (the blue rectangle).
     - Output Files
       @snippet Example/aruco_detection.cpp output
