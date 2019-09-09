@@ -81,10 +81,10 @@ int main( int argc, char** argv )
     chipimgproc::Margin<double> margin;
 
     //  Record the segmentation result after image gridding
-    std::vector<chipimgproc::TiledMat<>>           tile_matrixs;
+    std::vector<chipimgproc::TiledMat<>> tile_matrixs;
 
     //  Record the tile-matrix after feature extracting
-    std::vector<chipimgproc::stat::Mats<double>>   segm_matrixs;
+    std::vector<chipimgproc::stat::Mats<double>> segmentation_matrixs;
 
     /*
      *  +=================================================+
@@ -341,58 +341,113 @@ int main( int argc, char** argv )
         tile_matrixs.push_back( tile_matrix );
 
         //  Save the segmentation result
-        segm_matrixs.push_back( feature_extraction_result.stat_mats );
+        segmentation_matrixs.push_back( feature_extraction_result.stat_mats );
     }
+
+    /*
+     *  +======================+
+     *  | FOV images stitching |
+     *  +======================+
+     */
     
-    // Set the logical cell level stitch position.
-    // This parameter should provide by chip & reader specification.
-    // In the real application case
-    std::vector<cv::Point_<int>> st_ps({
-        {0, 0}, {74, 0}, {0, 74}, {74, 74}
+    //  Set stitch positions of top-left marker start point for each FOV
+    std::vector<cv::Point_<int>> stitch_positions({
+        {0,   0}, {162,   0}, {324,   0},
+        {0, 162}, {162, 162}, {324, 162},
+        {0, 324}, {162, 324}, {324, 324}
     });
 
-    // Set the FOV sequencial ID, the order is row major. 
-    // Provide this parameter 
-    // can make multi_tiled_mat have ability to access FOV image from FOV ID.
+    /*
+     *  The point (x,y) of stitch positions are base on the spacing of the markers, for example:
+     * 
+     *      $ Spacing (x,y) of markers for Banff are both "81"
+     * 
+     *      $ Banff images have nine FOV, and each FOV contain three markers at both X-axis and Y-axis
+     * 
+     *      $ The overlapping between two FOV of Banff images are both one column and one row of markers
+     * 
+     *      $ Example of entire Banff image:
+     * 
+     *               0    81   162  243  324  405  486
+     *              +--------------------------------+
+     *            0 |[]   []   []   []   []   []   []|      [] are presenting as markers
+     *              |                                |
+     *           81 |[]   []   []   []   []   []   []|
+     *              |                                |
+     *          162 |[]   []   []   []   []   []   []|
+     *              |                                |
+     *          243 |[]   []   []   []   []   []   []|
+     *              |                                |
+     *          324 |[]   []   []   []   []   []   []|
+     *              |                                |
+     *          405 |[]   []   []   []   []   []   []|
+     *              |                                |
+     *          486 |[]   []   []   []   []   []   []|
+     *              +--------------------------------+
+     *                      Entire Banff Image
+     * 
+     *      $ Example of overlapping and stitching at three FOVs:
+     * 
+     *         StitchingPoint       StitchingPoint     StitchingPoint
+     *               |                    |                  |
+     *               |  OverlappingPoint  | OverlappingPoint |  OverlappingPoint
+     *               |          |         |         |        |          |
+     *               V          V         V         V        V          V
+     *               0    81   162       162  243  324      324   405  486
+     *              +------------+      +------------+      +------------+
+     *            0 |[]   []   []|      |[]   []   []|      |[]   []   []|
+     *              |            |      |            |      |            |
+     *           81 |[]   []   []|      |[]   []   []|      |[]   []   []|
+     *              |            |      |            |      |            |
+     *          162 |[]   []   []|      |[]   []   []|      |[]   []   []|
+     *              +------------+      +------------+      +------------+
+     *                 FOV(0,0)            FOV(1,0)            FOV(2,0)
+     */
+
+    //  Set the FOV sequencial ID, the order is row major
     std::vector<cv::Point> fov_ids({
-        {0, 0}, {1, 0}, {0, 1}, {1, 1}
+        {0, 0}, {1, 0}, {2, 0},
+        {0, 1}, {1, 1}, {2, 1},
+        {0, 2}, {1, 2}, {2, 2}
     });
 
-    // Create multiple tiled matrix.
-    chipimgproc::MultiTiledMat<double, std::uint16_t> multi_tiled_mat(
-        tiled_mats, stat_mats_s, st_ps, fov_ids
+    //  Create a matrix with multiple tiles (all FOV) for entire image
+    chipimgproc::MultiTiledMat<double, std::uint16_t> multiple_tiled_matrix(
+        tile_matrixs,
+        segmentation_matrixs,
+        stitch_positions,
+        fov_ids
     );
 
-    /* 
-        Generate results.
-        In this example, we generate mean value heatmap and raw image stitching result.
-    */
+    //  Set stitcher and stitch FOVs in real pixel level of image
+    chipimgproc::stitch::GridlineBased stitcher;
+    auto stitched_image = stitcher( multiple_tiled_matrix );
 
-    // Create heatmap storage.
+    /*
+     *  +===========+
+     *  | Outputing |
+     *  +===========+
+     */
+
+    //  Create a empty heatmap with openCV
     cv::Mat heatmap;
 
-    // Dump multi_tiled_mat use default cell info accessor (min_cv_mean).
-    // The dump result is actually a float point matrix.
-    // For image output to tiff format, we have to convert it into integer matrix.
-    multi_tiled_mat.dump().convertTo(heatmap, CV_16U, 1);
+    //  Convert each tile into heatmap with openCV
+    multiple_tiled_matrix.dump().convertTo(
+        heatmap,
+        CV_16U,     //  Convert float to 16uint in openCV
+        1           //  Scaling
+        );
 
-    // Direct output heatmap data may generate a low value image,
-    // which is near all black and unvisable.
-    // Therefore, before write image, 
-    // we use chipimgproc::viewable to calibrate the brightness of the image
-    cv::imwrite("means_dump.tiff", chipimgproc::viewable(heatmap));
+    //  Output heatmap amd stitched images
+    cv::imwrite( "heatmap.tiff", chipimgproc::viewable( heatmap ));
+    cv::imwrite( "stitched.tiff", chipimgproc::viewable( stitched_image.mat() ));
 
-    // In heatmap image, a pixel represent a cell, 
-    // but we may still need raw image to do some other analysis.
-    // Here we stitch the image inside multi_tiled_mat into a real pixel level single image.
-    chipimgproc::stitch::GridlineBased gl_stitcher;
-    auto gl_st_img = gl_stitcher(multi_tiled_mat);
+    /*
+     *  Output the heatmap data or stitched image by default may generate a low-value image, which is not viewable
+     *  chipimgproc::viewable() will help to generate viewable image
+     */
 
-    // Direct output heatmap data may generate a low value image,
-    // which is near all black and unvisable.
-    // Therefore, before write image, 
-    // we use chipimgproc::viewable to calibrate the brightness of the image
-    cv::imwrite("stitch.tiff", chipimgproc::viewable(gl_st_img.mat()));
-
+    
     return 0;
 }
