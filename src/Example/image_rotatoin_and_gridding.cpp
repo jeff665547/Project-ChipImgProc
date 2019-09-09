@@ -247,7 +247,7 @@ int main( int argc, char** argv )
      *  +================+
      */
 
-    //  Image ridding and output the result via lambda expression
+    //  Image gridding and output the result via lambda expression
     auto grid_line = image_gridder( image, marker_layout, marker_regioins, std::cout, [](const auto& m){
         cv:imwrite( "grid_line.tiff", m );
     });
