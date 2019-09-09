@@ -86,7 +86,7 @@ class RegMat {
     }
 public:
     /**
-     * @brief Call operator, @copybrief chipimgproc::gridding::RegMat
+     * @brief Call operator, see chipimgproc::gridding::RegMat
      * 
      * @param in_src        Input image data
      * @param mk_layout     Image marker layout, provide logical marker position.

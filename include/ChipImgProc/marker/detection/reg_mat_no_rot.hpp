@@ -1,6 +1,6 @@
 /**
  * @file reg_mat_no_rot.hpp
- * @author Chia-Hua Chang (johnidet@centrilliontech.com.tw)
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
  * @brief  Detect markers in image and assume the marker layout is regular matrix distribution and ignore rotation.
  * 
  */

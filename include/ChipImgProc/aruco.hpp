@@ -71,7 +71,7 @@
  *  @snippet ChipImgProc/aruco_test.cpp usage
  * 
  *  Here is an ArUco regular marker match example:
- *  @snippet ChipImgProc/marker/detection/aruco_reg_mat_test.cpp
+ *  @snippet ChipImgProc/marker/detection/aruco_reg_mat_test.cpp usage
  */
 #pragma once
 #include "aruco/detector.hpp"

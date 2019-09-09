@@ -1,10 +1,26 @@
+/**
+ * @file gridline_based.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::stitch::GridlineBased.
+ * 
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/multi_tiled_mat.hpp>
 #include <ChipImgProc/logger.hpp>
 namespace chipimgproc{ namespace stitch{ 
+/**
+ * @brief Grid line based stitching algorithm.
+ * @details This algorithm stitch the FOV images based
+ *   on the grid line information, client should provide 
+ *   chipimgproc::MultiTiledMat object which contains cell
+ *   level stitching point and FOV grid lines then the 
+ *   stitching process may performed.
+ *   The overlapping region process is direct cover the 
+ *   current processed image iteratively.
+ */
+class GridlineBased {
 
-struct GridlineBased {
     template<class GLID, class SHIFT>
     std::vector<GLID> gridline_merge(
         const std::vector<GLID>& gl0,
@@ -60,6 +76,19 @@ struct GridlineBased {
             m.mat() = res;
         }
     }
+public:
+    /**
+     * @brief Call operator of the stitcher.
+     * @details @copydetails chipimgproc::stitch::GridlineBased
+     * 
+     * @tparam FLOAT Deduced, the float point type of chipimgproc::MultiTiledMat.
+     * @tparam GLID Deduced, the grid line storage type chipimgproc::MultiTiledMat.
+     * 
+     * @param mat The multiple tiled matrix, 
+     *   which contains the grid lines and cell level stitching points.
+     * 
+     * @return GridRawImg<GLID> The stitched image with grid line.
+     */
     template<class FLOAT, class GLID>
     GridRawImg<GLID> operator() ( const MultiTiledMat<FLOAT, GLID>& mat ) const {
         GridRawImg<GLID> res;

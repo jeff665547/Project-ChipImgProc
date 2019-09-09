@@ -12,11 +12,11 @@ namespace chipimgproc{ namespace marker{ namespace detection{
 
 /**
  * @brief This class inherits from the class cv:Rect,
- *        which records the width and height of the shape, and the xy coordinate of top-left corner,
+ *        which records the width and height of the shape and the xy coordinate of top-left corner,
  *        with additional marker location index and matching quality score.
  *        This class can be applied to any integer scaling level of image such as
  *        integral-pixel-level, cell-level and marker-level scales,
- *        except micron-level scale.
+ *        except micron-level scales.
  */
 struct MKRegion : public cv::Rect {
     /**

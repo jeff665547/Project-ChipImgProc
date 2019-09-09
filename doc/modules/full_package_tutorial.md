@@ -1,14 +1,41 @@
-Getting start {#mainpage}
+
+ChipImgProc {#mainpage}
 ===
 
-# Index {#index}
+[TOC]
 
-* @ref import-chipimgproc-by-hunter   "Import ChipImgProc by Hunter(recommended)"
-* @ref build-chipimgproc-from-source  "Build ChipImgProc from source"
-* @ref manually-import-chipimgproc    "Manually import ChipImgProc"
-* @ref a-basic-example                "A basic example from FOV to heatmap"
+# Introduction
 
-## Import ChipImgProc by Hunter(recommended) {#import-chipimgproc-by-hunter}
+This C++ library is a chip image-processing library that helps user correct the chip images, and applies gridding process to extract the biological message of each probe.
+
+Centrillion Technologies produce a series of chips, such as Banff, ZION, YZ01 etc. Each hybridized chip will be arranged on the chip tray and scanned by SUMMIT. During the process of scanning, due to the size of camera lens, the chip will be separated into several parts to be scanned. The image of each part is called the field of view (FOV), and the number of FOV is different from the types of chips. After SUMMIT finishes the scanning process, the functions in this library will preliminarily correct the FOVs, and all FOVs of a chip will then be stitched to produce a high-resolution image of a chip in the next library (Image Stitching).
+
+@image html tray-to-chip.png width=800px
+@image latex tray-to-chip.png
+Figure 1 From Chip Tray to Chip
+
+@image html chip-to-aruco-marker.png width=550px
+@image latex chip-to-aruco-marker.png
+Figure 2 From Chip to Marker
+
+@image html aruco-marker-spec.png width=400px
+@image latex aruco-marker-spec.png
+Figure 3 Marker Composition
+
+Figure 4 Grid Lines, Cells and Probes
+
+SUMMIT uses three different channels, bright field (BF), red light (red), and green light (green), to scan chips. Each channel will make functions in this library recognize its own marker pattern, which helps us locate the chip position in the FOV. In most cases, the ArUco marker is recognized on the BF channel; the AM3 marker is recognized on the red channel; and the AM1 marker is recognized on the green channel [[Marker Recognition](#pattern-recognition)]. The patterns of the ArUco markers are distinct from marker to marker, but the AM1 and AM3 markers are not. On the other hand, because of the systematic error caused by the imperfect system, the scanning results often require small-angle rotation calibration to correct the images. We perform this process with the estimation of the rotation angles judged by makers in each FOV [[Image Rotation](#image-rotation)].
+
+After finishing image correction, we will crop the image to remove the noise surrounding the chips. We also grid the image to index each probe location [[Image Gridding](#image-gridding)]. Finally, the intensity of a probe is determined by the most stable region, defined as the minimum coefficient of variation (minCV) in that region whose size is user-defined, in the corresponding cell [[Intensity Extraction](#intensity-extraction)]. The overall workflow of this library is illustrated below.
+
+@image html tutorial-flowchart.png
+@image latex tutorial-flowchart.png
+
+Figure 5 The workflow of ChipImgProc
+
+# Quick Start
+
+## Import ChipImgProc by Hunter(recommended)
 
 To use the Hunter package manager, all upstream will be built,
 user no need to build ChipImgProc before user project develop.
@@ -123,7 +150,7 @@ int main() {
 
 ```
 
-## Build ChipImgProc from source by CMake on Windows MinGW {#build-chipimgproc-from-source}
+## Build ChipImgProc from source by CMake on Windows MinGW
 
 If you don't want to use Hunter in your client project, you may build the ChipImgProc manually.
 
@@ -186,7 +213,7 @@ build\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTAL
 In this case, Build script will not need test data and of course, no test code will be built.
 Only library source will be compiled into binary.
 
-## Manually import ChipImgProc {#manually-import-chipimgproc}
+## Manually import ChipImgProc
 
 Import ChipImgProc may need several compiler flags and definitions,
 These compiler options not only from ChipImgProc, but OpenCV and other upstream.
@@ -276,6 +303,50 @@ should find a way to link these binary manually.
 
 Manually include and link OpenCV & Boost are really painful, so we suggest to use CMake & Hunter to do such link works.
 
-## A basic example from FOV to heatmap {#a-basic-example}
+## A basic example from FOV to heatmap
 
 @snippet ChipImgProc/multi_tiled_mat_test.cpp usage
+
+## Detail features guide
+
+* [Marker Recognition](#marker-recognition)
+* [ArUco Detection](#aruco-detection)
+* [AM1, AM3 Detection](#am1-am3-detection)
+* [Image Rotation](#image-rotation)
+* [Image Gridding](#image-gridding)
+* [Intensity Extraction](#intensity-extraction)
+
+# Marker Recognition
+
+- TODO:
+
+## ArUco Detection
+
+- This example code will help you build the Image-ArUco detection app.
+- Input:
+  1. A TIFF file of chip image (The raw image from SUMMIT). Its path is specified in variable `raw_image_path` in the example code.
+  2. A JSON file of ArUco database (A json database which stores 250 of ArUco code with 6x6 bits size each). Its path is specified in variable `aruco_database_path` in the example code.
+  3. A collection of ArUco IDs arranged in an std::vector. The arrangement order of markers is from the top-left to the bottom-right of the chip. It is specified in variable `aruco_ids` in the example code.
+  4. Two TIFF files for marker frame template and marker frame mask. Their paths are specified in variables `marker_frame_template_path` and `marker_frame_mask_path` respectively.
+    @image html aruco-single-mk-spec.png width=600px
+    @image latex aruco-single-mk-spec.png
+    Figure 6 Marker Recognition Principle
+    - The marker frame template and the marker frame mask are used to identify the marker locations within an FOV roughly.
+- Output:
+  - A collection of detected ArUco IDs and their xy-positions in pixel scale.
+- Example:
+  - Data Preparation
+    @snippet Example/aruco_detection.cpp data_preparation
+
+  - ArUco Detection
+    - Detect the ArUco marker in the chip image.
+    - Use marker frame template...
+      @snippet Example/aruco_detection.cpp aruco_detection
+      @image html aruco-single-mk-spec.png width=540px
+      @image latex aruco-single-mk-spec.png width=13cm
+      Figure 7 Marker Pattern Description and Corresponding Auxiliary Parameters for Recognition.
+      @image html aruco-radius-define.png width=650px
+      @image latex aruco-radius-define.png width=13cm
+      Figure 8 The radius used in NMS algorithm with markers in an FOV (the blue rectangle).
+    - Output Files
+      @snippet Example/aruco_detection.cpp output

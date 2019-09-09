@@ -15,10 +15,14 @@
 #include <ChipImgProc/utils/pos_comp_by_score.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
 /**
- *  @brief      Detect markers in image and assume the marker layout is regular matrix distribution.
+ *  @brief      This class, named regular matrix (RegMat), is used to
+ *              detect a rectangular array of markers, arranged in rows and columns.
+ *              Given a raw image and corresponding marker layout descriptor,
+ *              this class aims to return a collection of detected marker locations, sizes 
+ *              and subcript indices.
+ * 
  *  @details    Here is the example:
  *      @snippet ChipImgProc/marker/detection/reg_mat_test.cpp usage
- * 
  */
 class RegMat {
     template<class T>
