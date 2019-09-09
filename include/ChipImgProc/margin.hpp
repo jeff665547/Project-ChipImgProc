@@ -1,7 +1,7 @@
 /**
  * @file margin.hpp
  * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
- * @brief @copybrief MultiTiledMat::Margin
+ * @brief @copybrief chipimgproc::Margin
  * 
  */
 #pragma once

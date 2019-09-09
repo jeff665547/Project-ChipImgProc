@@ -14,7 +14,7 @@ namespace chipimgproc { namespace stat{
  * @brief A statistic matrix set contains the mean, 
  *   standard deviation coefficient of variation and pixel numbers for each grid cell.
  * 
- * @tparam FLOAT @copybrief chipimgproc::stat::Mats::FloatType.
+ * @tparam FLOAT The float point type, use to store the statistic data.
  */
 template<class FLOAT = float>
 struct Mats

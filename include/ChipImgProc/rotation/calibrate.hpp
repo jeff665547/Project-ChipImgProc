@@ -14,7 +14,6 @@ namespace chipimgproc{ namespace rotation{
 /**
  *    @brief     Rotate the image by given angle.
  *    @details   Input the angle and image, the function rotate the image in-place. 
- *               Detail information can see here @ref improc_image_rotation.
  */
 struct Calibrate
 {

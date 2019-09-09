@@ -12,7 +12,7 @@ namespace chipimgproc { namespace stat{
  * @brief The statistic data cell, contains mean value and standard deviation,
  *   coefficient of variation and pixel numbers. 
  * 
- * @tparam FLOAT @copybrief chipimgproc::stat::Cell::FloatType.
+ * @tparam FLOAT The float point type, use to store the statistic data.
  */
 template<class FLOAT = float>
 struct Cell

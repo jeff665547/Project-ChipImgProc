@@ -1,3 +1,4 @@
+/// [usage]
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/detection/aruco_reg_mat.hpp>
@@ -99,3 +100,4 @@ TEST(aruco_reg_mat, basic_test) {
     // Due to the image quality variant, it may not detect all markers
     // For image gridding process, it should detect 2 marker in deferent column and row at least.
 }
+/// [usage]

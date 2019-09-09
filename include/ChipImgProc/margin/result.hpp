@@ -1,3 +1,9 @@
+/**
+ * @file ChipImgProc/margin/result.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw) 
+ * @brief @copybrief chipimgproc::margin::Result
+ * 
+ */
 #pragma once
 #include <cstdint>
 #include <ChipImgProc/stat/mats.hpp>

@@ -71,7 +71,7 @@ struct MatUnit {
     {}
     /**
      * @brief Convert MatUnit to string.
-     * @detail PX is "pixel", CELL is "cell".
+     * @details PX is "pixel", CELL is "cell".
      * @return std::string 
      */
     std::string to_string() const {

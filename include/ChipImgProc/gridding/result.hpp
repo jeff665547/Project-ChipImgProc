@@ -1,5 +1,5 @@
 /**
- * @file result.hpp
+ * @file ChipImgProc/gridding/result.hpp
  * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
  * @brief @copybrief chipimgproc::gridding::Result
  * 

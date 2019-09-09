@@ -33,6 +33,10 @@ struct IdxRect
 : public cv::Rect
 , public stat::Cell<FLOAT> 
 {
+    /**
+     * @brief The FOV row major sequencial order ID.
+     * 
+     */
     std::uint16_t img_idx;
 };
 namespace detail{
