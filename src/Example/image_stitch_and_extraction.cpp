@@ -440,14 +440,18 @@ int main( int argc, char** argv )
         );
 
     //  Output heatmap amd stitched images
-    cv::imwrite( "heatmap.tiff", chipimgproc::viewable( heatmap ));
-    cv::imwrite( "stitched.tiff", chipimgproc::viewable( stitched_image.mat() ));
+    cv::imwrite( "raw_intensity_heatmap.tiff", chipimgproc::viewable( heatmap ));
+    cv::imwrite( "stitched_image.tiff", chipimgproc::viewable( stitched_image.mat() ));
 
     /*
      *  Output the heatmap data or stitched image by default may generate a low-value image, which is not viewable
      *  chipimgproc::viewable() will help to generate viewable image
      */
 
+    //  Output the raw intensity
+    std::ofstream tsv( "raw_intensity.tsv" );
+    tsv << multiple_tiled_matrix.dump();
+    tsv.close();
     
     return 0;
 }

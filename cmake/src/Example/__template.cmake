@@ -7,6 +7,7 @@ target_include_directories(${__screw_target} PUBLIC
 target_link_libraries(${__screw_target} PUBLIC
     ChipImgProc-utils
     ChipImgProc-sharpness
+    ChipImgProc-stitch
     Boost::program_options
     Nucleona::Nucleona
     ${CMAKE_THREAD_LIBS_INIT}
