@@ -52,7 +52,7 @@ std::string figure(
   , const int width 
   , const int height
 ) {
-    cv::namedWindow(name, ::CV_WINDOW_NORMAL);
+    cv::namedWindow(name, cv::WINDOW_NORMAL);
     cv::moveWindow(name, x, y);
     cv::resizeWindow(name, width, height);
     return name;
@@ -62,8 +62,8 @@ cv::Mat imread(const boost::filesystem::path& fname)
 {
     return cv::imread(
         fname.string()
-      , ::CV_LOAD_IMAGE_ANYCOLOR
-      | ::CV_LOAD_IMAGE_ANYDEPTH
+      , cv::IMREAD_ANYCOLOR
+      | cv::IMREAD_ANYDEPTH
     );
 }
 

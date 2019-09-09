@@ -1,7 +1,8 @@
 /**
- *    @file      ChipImgProc/calibrate.hpp
- *    @author    Alex Lee
- *    @brief     Rotate the image by given angle.
+ * @file      calibrate.hpp
+ * @author    Alex Lee
+ * @brief     Rotate the image by given angle.
+ * 
  */
 #pragma once
 #include <cmath>
@@ -12,8 +13,7 @@ namespace chipimgproc{ namespace rotation{
 
 /**
  *    @brief     Rotate the image by given angle.
- *    @details Input the angle and image, the function rotate the image in-place.
- *    @details Detail information can see here @ref improc_image_rotation
+ *    @details   Input the angle and image, the function rotate the image in-place. 
  */
 struct Calibrate
 {

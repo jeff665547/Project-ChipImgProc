@@ -19,7 +19,7 @@ TEST(multi_image_general_gridding, basic_test) {
     auto multi_tiled_mat = gridder(test_img_paths, st_ps);
     auto&& mean_float_acc = chipimgproc::wrapper::bind_acc(
         multi_tiled_mat, 
-        nucleona::copy(decltype(multi_tiled_mat)::min_cv_mean)
+        nucleona::copy(multi_tiled_mat.min_cv_mean())
     );
     cv::Mat_<float> mean_float = multi_tiled_mat.dump();
     auto du = std::chrono::system_clock::now() - start_time;

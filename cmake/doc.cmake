@@ -1,5 +1,5 @@
 find_package(Doxygen)
-if(DOXYGEN_FOUND)
+if(DOXYGEN_FOUND AND BUILD_DOC)
     add_custom_target( doc_doxygen ALL
         COMMAND ${DOXYGEN_EXECUTABLE} doc.cfg
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

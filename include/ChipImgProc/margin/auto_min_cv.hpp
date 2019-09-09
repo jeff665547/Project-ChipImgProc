@@ -79,7 +79,6 @@ struct AutoMinCV
      * @param   windows_height  The result section height in grid cell after auto margin.
      * @param   v_result        The process result debug image view.
      */
-    // using GLID = int;
     template<class GLID>
     auto operator()( 
           TiledMat<GLID>&           tiled_src
