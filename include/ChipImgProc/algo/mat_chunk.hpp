@@ -25,9 +25,11 @@ struct MatChunk
             })
         ;
         return ranges::view::for_each(y_anchors, [x_anchors, &mat](auto&& y_a) mutable {
-            auto&& [y, y_size] = y_a;
+            auto& y = std::get<0>(y_a);
+            auto& y_size = std::get<1>(y_a);
             return ranges::view::for_each(x_anchors, [y, y_size, &mat](auto&& x_a) mutable {
-                auto&& [x, x_size] = x_a;
+                auto& x = std::get<0>(x_a);
+                auto& x_size = std::get<1>(x_a);
                 return ranges::yield(
                     std::make_tuple(
                         x, y,
@@ -57,9 +59,11 @@ struct MatChunk
             })
         ;
         return ranges::view::for_each(y_anchors, [x_anchors, &mat](auto&& y_a) mutable {
-            auto&& [y, y_size] = y_a;
+            auto& y = std::get<0>(y_a);
+            auto& y_size = std::get<1>(y_a);
             return ranges::view::for_each(x_anchors, [y, y_size, &mat](auto&& x_a) mutable {
-                auto&& [x, x_size] = x_a;
+                auto& x = std::get<0>(x_a);
+                auto& x_size = std::get<1>(x_a);
                 return ranges::yield(
                     std::make_tuple(
                         x, y,
