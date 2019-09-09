@@ -29,3 +29,7 @@ hunter_config(
     OpenCV-Extra
     VERSION "3.4.0"
 )
+hunter_config(
+    range-v3
+    VERSION "0.5.0"
+)
