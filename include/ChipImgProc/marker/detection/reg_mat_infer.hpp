@@ -11,8 +11,9 @@
 namespace chipimgproc::marker::detection {
 
 /**
- * @brief Inference the missing marker and standardize the marker position
- * 
+ * @brief Given a set of marker regions and dimensions of matrix (i.e. number of rows and columns),
+ *        this functor tries to standardize marker locations by imputing
+ *        the missing marker positions, and fits them to an regular grid-distributed matrix.
  */
 constexpr class RegMatInfer {
     void anchor_infer(std::size_t expect, std::vector<double>& ancs, std::ostream& out) const {
@@ -39,8 +40,8 @@ constexpr class RegMatInfer {
     }
 public:
     /**
-     * @brief Given existing marker regions and matrix row and column,
-     *        inference the missing marker and re-position the markers to fit the regular matrix.
+     * @brief Given a set of marker regions and dimensions of matrix (i.e. number of rows and columns),
+     *        this functor standardize the marker locations.
      * 
      * @tparam T By default, std::uint16_t. Deduced, The input image(for debug) value type.
      * @param mk_regs   Marker regions with missing or slightly not fit the regular matrix
