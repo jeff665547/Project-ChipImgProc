@@ -13,7 +13,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/video.hpp>
 #include <opencv2/video/tracking.hpp>
-#include <optional>
+#include <ChipImgProc/optional.hpp>
 #include <ChipImgProc/utils.h>
 #include <cinttypes>
 #include "utils.hpp"
