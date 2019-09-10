@@ -17,14 +17,14 @@ private:
         return file_sink;
     }
     auto create_logger() const {
-        auto log = std::make_shared<spdlog::logger>("CIMP", console_sink());
-        log->sinks().push_back(file_sink());
-        log->set_pattern("[%Y-%m-%d %H:%M:%S.%e][%n][%l][thread %t] %v");
-        return log;
+        auto p_log = std::make_shared<spdlog::logger>("CIMP", console_sink());
+        p_log->sinks().push_back(file_sink());
+        p_log->set_pattern("[%Y-%m-%d %H:%M:%S.%e][%n][%l][thread %t] %v");
+        return p_log;
     }
-    auto& core() const {
-        static auto log(create_logger());
-        return *log;
+    spdlog::logger& core() const {
+        static auto p_log(create_logger());
+        return *p_log;
     }
 public:
     template<class... Args>
