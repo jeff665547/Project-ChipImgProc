@@ -2,7 +2,6 @@
  * @file ChipImgProc/gridding/reg_mat.hpp
  * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
  * @brief @copybrief chipimgproc::gridding::RegMat
- * 
  */
 #pragma once
 #include <ChipImgProc/utils.h>
@@ -14,14 +13,22 @@
 #include "utils.hpp"
 namespace chipimgproc{ namespace gridding{
 /**
- * @brief Grid the input image with given marker layout (chipimgproc::marker::Layout) 
- *   and marker regions (chipimgproc::marker::detection::MKRegion).
+ * @brief   Given a marker layout descriptor (chipimgproc::marker::Layout) and
+ *          a collection of marker regions (chipimgproc::marker::detection::MKRegion),
+ *          this RegMat class aims to obtain a set of rectangular bounding boxes
+ *          representing the feature probes we identified,
+ *          and a collection of the horizontal and vertical grid lines we calculated.
+ *           
  * @details @copybrief chipimgproc::gridding::RegMat
- *   This gridding algorithm require markers to be regular matrix 
- *   and the position must standardized, which means it usually called with 
- *   chipimgproc::marker::detection::reg_mat_infer. Here is the example:
- *   @snippet ChipImgProc/gridding/reg_mat_test.cpp usage
- * 
+ *          This gridding algorithm assumes that the markers are
+ *          regular grid-distributed and well standardized.
+ *          The standardization means that the missing marker locations are
+ *          imputed and calibrated by other successfully detected markers
+ *          within an FOV image.
+ *          The details of location marker standardization can be refer to the class 
+ *　　　　　 chipimgproc::marker::detection::reg_mat_infer.
+ *          Here shows an example:
+ *          @snippet ChipImgProc/gridding/reg_mat_test.cpp usage
  */
 class RegMat {
     using MKRegion = marker::detection::MKRegion;
