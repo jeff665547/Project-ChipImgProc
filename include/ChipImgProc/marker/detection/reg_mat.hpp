@@ -1,3 +1,8 @@
+/**
+ *  @file       ChipImgProc/marker/detection/reg_mat.hpp
+ *  @author     Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ *  @brief      Detect markers in image and assume the marker layout is regular matrix distribution.
+ */
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <ChipImgProc/marker/layout.hpp>
@@ -7,26 +12,35 @@
 #include <Nucleona/tuple.hpp>
 #include <Nucleona/range.hpp>
 #include <ChipImgProc/algo/fixed_capacity_set.hpp>
-#include <ChipImgProc/marker/detection/pos_comp_by_score.hpp>
+#include <ChipImgProc/utils/pos_comp_by_score.hpp>
 namespace chipimgproc{ namespace marker{ namespace detection{
-
-struct RegMat {
+/**
+ *  @brief      This class, named regular matrix (RegMat), is used to
+ *              detect a rectangular array of markers, arranged in rows and columns.
+ *              Given a raw image and corresponding marker layout descriptor,
+ *              this class aims to return a collection of detected marker locations, sizes 
+ *              and subcript indices.
+ * 
+ *  @details    Here is the example:
+ *      @snippet ChipImgProc/marker/detection/reg_mat_test.cpp usage
+ */
+class RegMat {
     template<class T>
     auto generate_raw_marker_regions(
         const cv::Mat_<T>&      src, 
         const Layout&           mk_layout, 
-        const MatUnit&          unit,
+        const MatUnit&          unit, 
         std::ostream&           out
     ) const {
         // marker interval between marker
-        auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
+        auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit); // chip.json
 
         // marker w, h
-        auto mk_width  = mk_layout.get_marker_width (unit) ;
-        auto mk_height = mk_layout.get_marker_height(unit) ;
+        auto mk_width  = mk_layout.get_marker_width (unit) ; // chip.json
+        auto mk_height = mk_layout.get_marker_height(unit) ; // chip.json
 
         // marker layout width and height
-        auto mk_mat_w = mk_invl_x * (mk_layout.mk_map.cols - 1) + mk_width  ;
+        auto mk_mat_w = mk_invl_x * (mk_layout.mk_map.cols - 1) + mk_width  ; // fov marker num
         auto mk_mat_h = mk_invl_y * (mk_layout.mk_map.rows - 1) + mk_height ;
 
         // marker layout origin
@@ -67,7 +81,7 @@ struct RegMat {
                 marker_region.height = y - y_last;
                 marker_region.x_i    = x_i - 1;
                 marker_region.y_i    = y_i - 1;
-                marker_region.info(out);
+                // marker_region.info(out);
                 marker_regions.push_back(marker_region);
                 x_last_i = x_i;
             }
@@ -75,24 +89,6 @@ struct RegMat {
         }
         return marker_regions;
     }
-    // void filter_low_score_marker(
-    //     std::vector<MKRegion>& mk_regs
-    // ) const {
-    //     // TODO: fix use of erase
-    //     std::vector<int> idx;
-    //     for(int i = 0; i < mk_regs.size(); i ++ ) {
-    //         idx.push_back(i);
-    //     }
-    //     std::sort(idx.begin(), idx.end(), [&mk_regs](auto a, auto b){
-    //         return mk_regs.at(a).score < mk_regs.at(b).score;
-    //     });
-    //     auto trim_num = mk_regs.size() / 4;
-    //     idx.resize(trim_num);
-
-    //     for(auto& id : idx) {
-    //         mk_regs.erase(mk_regs.begin() + id);
-    //     }
-    // }
     template<class T, class FUNC>
     auto template_matching(
         const cv::Mat_<T>&      src               , 
@@ -131,7 +127,7 @@ struct RegMat {
                 sub_tgt.rows - mk.rows + 1,
                 sub_tgt.cols - mk.cols + 1
             );
-            cv::matchTemplate(sub_tgt, mk, sub_candi_score, CV_TM_CCORR_NORMED, mask);
+            cv::matchTemplate(sub_tgt, mk, sub_candi_score, cv::TM_CCORR_NORMED, mask);
             // auto tmp = norm_u8(sub_candi_score, 0, 0);
             sub_score = sub_candi_score;
             auto mk_cols = mk_des.get_std_mk(unit).cols;
@@ -155,6 +151,30 @@ struct RegMat {
         return marker_regions;
 
     }
+public:
+    /**
+     * @brief Call operator of RegMat type, 
+     *        given marker layout and image, return marker regions.
+     * 
+     * @tparam T            (Deduced) Input matrix value type, for centrillion Summit image, 
+     *                      the white channel usually use std::uint8_t. 
+     *                      and probe channel use std::uint16_t.
+     * @param src           Input image.
+     * @param mk_layout     The marker layout of current process image, 
+     *                      for different chip spec should have different chip marker layout. 
+     * @param unit          Image unit level, can be MatUnit::PX (pixel level) or MatUnit::CELL (cell level).
+     * @param cand_mk_i     Use the i-th candidate marker in marker layout to match the image. 
+     *                      By default is 0, usually means the standard marker pattern.
+     * @param out           The debug log message output, can be any STL ostream, by default is null stream
+     * @param v_bin         The debug pre-process image output callback, the callback form is void(const cv::Mat&) type. 
+     *                      Current implementation is 8bit normalization image.
+     * @param v_search      The debug image output callback, the callback form is void(const cv::Mat&) type. 
+     *                      Current implementation is show the marker searching space.
+     * @param v_marker      The debug image output callback, the callback form is void(const cv::Mat&) type.
+     *                      Current implementation is show the marker segmentation location
+     * @return std::vector<MKRegion> 
+     *                      A vector of marker regions
+     */
     template<class T>
     std::vector<MKRegion> operator()(
         const cv::Mat_<T>&      src, 
@@ -170,13 +190,12 @@ struct RegMat {
             src, mk_layout, unit, cand_mk_i, 
             [&out](auto&& sub_score, auto&& mk_r, auto&& mk_cols, auto&& mk_rows) {
                 auto max_points = make_fixed_capacity_set<cv::Point>(
-                    20, PosCompByScore(sub_score)
+                    20, utils::PosCompByScore(sub_score)
                 );
                 cv::Point max_loc;
                 float max_score = 0;
                 for(int y = 0; y < sub_score.rows; y ++ ) {
                     for(int x = 0; x < sub_score.cols; x ++ ) {
-                        auto& score = sub_score(y, x);
                         max_points.emplace(cv::Point(x, y));
                     }
                 }

@@ -1,3 +1,9 @@
+/**
+ * @file pseudo.hpp
+ * @author Chia-Hua Chang (johnidfet@centrilliontech.com.tw)
+ * @brief @copybrief chipimgproc::gridding::Pseudo
+ * 
+ */
 #pragma once
 #include "result.hpp"
 #include "utils.hpp"
@@ -5,7 +11,22 @@
 #include <ChipImgProc/utils.h>
 namespace chipimgproc::gridding{
 
+/**
+ * @brief Pesudo gridding. Actually do nothing, 
+ *        just generate the general gridding result (chipimgproc::gridding::Result)
+ *        from the grid lines.
+ * 
+ */
 struct Pseudo {
+    /**
+     * @brief Call operator.
+     * 
+     * @param gl_x      Grid line points along the x direction.
+     * @param gl_y      Grid line points along the y direction.
+     * @param v_result  Debug view, show the gridding result.
+     * @param in_src    Debug image, for show the gridding result.
+     * @return Result   General gridding result.
+     */
     Result operator()(
         const std::vector<double>&        gl_x,
         const std::vector<double>&        gl_y, 

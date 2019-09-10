@@ -32,8 +32,26 @@ install(
     NAMESPACE   "${namespace}"
     DESTINATION "${config_install_dir}"
 )
+if(COPY_ALL_TP)
+    screw_show_var(hunter_root_dir)
+    install(
+        DIRECTORY ${hunter_root_dir}/
+        DESTINATION ./third_party
+        COMPONENT Runtime
+    )
+endif()
 if(INSTALL_DEPS)
-    configure_file(cmake/bundle.cmake.in ${CMAKE_BINARY_DIR}/bundle.cmake @ONLY)
+    if(WIN32)
+        configure_file(
+            cmake/win/bundle.cmake.in 
+            ${CMAKE_BINARY_DIR}/bundle.cmake @ONLY
+        )
+    elseif(UNIX)
+        configure_file(
+            cmake/lx/bundle.cmake.in
+            ${CMAKE_BINARY_DIR}/bundle.cmake @ONLY
+        )
+    endif()
     install(
         SCRIPT ${CMAKE_BINARY_DIR}/bundle.cmake
         COMPONENT Dependencies

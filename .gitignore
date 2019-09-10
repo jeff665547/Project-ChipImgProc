@@ -64,4 +64,6 @@ stage/
 workdir/
 doc/output
 version.h
+include/summit
+ms-build/
 .bak/

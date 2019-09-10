@@ -40,14 +40,14 @@ CentOS_CI:
         - rm -rf build
         - mkdir -p build
         - cd build
-        - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DENABLE_LOG=OFF
+        - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DENABLE_LOG=OFF -DINSTALL_DEPS=ON
         - cmake --build . --target install
         - cd ..
         - rm -rf stage
         - rm -rf build
         - mkdir -p build
         - cd build
-        - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DENABLE_LOG=ON
+        - cmake ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DENABLE_LOG=ON -DINSTALL_DEPS=ON
         - cmake --build . --target install
         - ctest --verbose
     only:

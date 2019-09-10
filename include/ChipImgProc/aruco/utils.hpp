@@ -83,6 +83,16 @@ struct Utils {
         }
         return res;
     }
+    // static std::map<cv::Point, int, PointLess> aruco_point_to_ids(const nlohmann::json& id_map) {
+    //     std::map<cv::Point, int, PointLess> res;
+    //     for(auto it = id_map.begin(); it != id_map.end(); it ++ ) {
+    //         auto id = std::stoi(it.key());
+    //         auto arr = *it;
+    //         cv::Point point(arr[0], arr[1]);
+    //         res[point] = id;
+    //     }
+    //     return res;
+    // }
     /**
      *  @brief Convert points from float to integer.
      *  @param p_vec A point container which element should be 

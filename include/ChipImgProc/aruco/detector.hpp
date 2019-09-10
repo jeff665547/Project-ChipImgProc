@@ -1,7 +1,9 @@
 /**
  *  @file    ChipImgProc/aruco/detector.hpp
  *  @author  Chia-Hua Chang, Alex Lee
- *  @brief   Detect ArUco markers in an image.
+ *  @brief   @copybrief chipimgproc::aruco::Detector
+ *  @details The ArUco marker detection algorithm
+ * 
  */
 #pragma once
 #include <cstdint>
@@ -17,6 +19,10 @@
 #include "utils.hpp"
 #include "dictionary.hpp"
 #include <Nucleona/stream/null_buffer.hpp>
+#include <ChipImgProc/logger.hpp>
+#include "mk_img_dict.hpp"
+#include <ChipImgProc/algo/fixed_capacity_set.hpp>
+#include <ChipImgProc/utils/pos_comp_by_score.hpp>
 
 namespace chipimgproc::aruco {
 
@@ -46,7 +52,11 @@ class Detector {
     , ids_                ()
     {}
     /**
-     * @brief  Reset the detector parameters
+     * @brief  Reset the detector parameters.
+     * @details The detector parameters include ArUco dictionary, image process algorithm parameter, chip marker specification. 
+     *   For the chip marker related parameter, consider the image:
+     *   @image html aruco-single-mk-spec.png width=600px
+     *   @image latex aruco-single-mk-spec.png
      * @param  dict            Dictionary for ArUco coding binaries.
      * @param  pyramid_level   A number of downsampling levels for speeding up marker localization.
      *                         The value is an integer > 0. Experientially, setting the value of levels to 2 or 3 is good enough.
@@ -115,17 +125,30 @@ class Detector {
         cell_size_      = cv::Size( cell_size, cell_size );
         ids_            = ids;
 
+        auto side_bits_length = coding_bits_ + border_bits_ * 2 + fringe_bits_ * 2;
         auto length = margin_size_ * 2;
-        length += a_bit_width_ * (coding_bits_ + border_bits_ * 2 + fringe_bits_ * 2);
+        length += a_bit_width_ * side_bits_length;
 
         cv::resize(templ_, templ_, cv::Size(length, length));
         cv::resize(mask_ , mask_ , cv::Size(length, length));
-        cv::pyrDown(templ_, small_templ_);
-        cv::pyrDown(mask_ , small_mask_ );
+        if(pyramid_level_ > 0) {
+            cv::pyrDown(templ_, small_templ_);
+            cv::pyrDown(mask_ , small_mask_ );
+        }
         for (auto i = 1; i < pyramid_level_; ++i) {
             cv::pyrDown(small_templ_, small_templ_);
             cv::pyrDown(small_mask_ , small_mask_ );
         }
+
+        marker_img_dict_.reset(
+            dict, ids, a_bit_width, 
+            coding_bits_,
+            pyramid_level
+        );
+
+    }
+    auto aruco_img(std::int32_t mk_index) const {
+        return marker_img_dict_.mk_idx_at(mk_index, small_templ_);
     }
     /**
      *  @brief   Detect markers in an image
@@ -149,7 +172,9 @@ class Detector {
             
         // do pyramid downsampling
         cv::Mat_<uint8_t> small_image;
-        cv::pyrDown(image, small_image);
+        if(pyramid_level_ > 0) {
+            cv::pyrDown(image, small_image);
+        }
         for (auto i = 1; i < pyramid_level_; ++i)
             cv::pyrDown(small_image, small_image);
         
@@ -190,11 +215,13 @@ class Detector {
             cv::Matx<float,2,3> warp_mat = cv::Matx<float,2,3>::eye();
             double score = -1;
             try{
+                // cv::imwrite("view.tiff", view);
                 score = cv::findTransformECC(view, templ_, warp_mat, cv::MOTION_EUCLIDEAN, criteria, mask_);
             } catch(const cv::Exception& e) {
                 logger << "ECC convergence failure. skip this one\n";
                 continue;
             }
+            chipimgproc::log.debug("ECC score: {}", score);
             // logger << "ECC score: " << score << '\n';
 
             // transform the anchor points
@@ -300,6 +327,7 @@ class Detector {
     }
   private:
     const Dictionary*           dictionary_          ;
+    MkImgDict                   marker_img_dict_     ; // marker index => image
     std::int32_t                pyramid_level_       ; // interger > 0
     std::int32_t                coding_bits_         ;
     std::int32_t                border_bits_         ;

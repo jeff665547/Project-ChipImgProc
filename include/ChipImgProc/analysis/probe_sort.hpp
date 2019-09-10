@@ -10,7 +10,7 @@ namespace chipimgproc{ namespace analysis{
 constexpr struct ProbeSort {
     template<class MAT>
     auto operator() (const MAT& mat ) const {
-        auto&& mean = wrapper::bind_acc(mat, MAT::min_cv_mean);
+        auto&& mean = wrapper::bind_acc(mat, mat.min_cv_mean());
         auto v_points = make_points<cv::Point>(mat);
         std::vector<cv::Point> points(v_points.begin(), v_points.end());
         std::sort(points.begin(), points.end(), [&mean](

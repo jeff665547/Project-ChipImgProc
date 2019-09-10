@@ -55,8 +55,8 @@ struct TxtToImg {
                     (int)std::round(cell_c_px), 
                     (int)std::round(cell_r_px)
                 );
-                cv::rectangle(img, cell, mat(i,j), CV_FILLED);
-                cv::rectangle(mask, cell, mask_cl(i, j), CV_FILLED);
+                cv::rectangle(img, cell, mat(i,j), cv::FILLED);
+                cv::rectangle(mask, cell, mask_cl(i, j), cv::FILLED);
                 j ++;
             }
             i ++;
