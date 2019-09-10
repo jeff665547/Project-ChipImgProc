@@ -88,6 +88,7 @@ class ArucoRegMat
         
     }
 public:
+
     /**
      * @brief Set the ArUco marker dictionary.
      * @param db    The JSON format ArUco database. The database
@@ -99,6 +100,7 @@ public:
         auto dict = aruco::Dictionary::from_json(dict_json);
         set_dict_(std::move(dict));
     }
+
     /**
      * @brief Equivlent to set_dict(const nlohmann::json& db, const std::string& key)
      *        but use JSON file path as the ArUco database source
@@ -112,6 +114,7 @@ public:
         fin >> db;
         set_dict(db, key);
     }
+
     /**
      * @brief Set the internal ArUco detector parameters.
      * 
@@ -176,6 +179,7 @@ public:
             mk_pos_to_id_[mk_index_map_[id]] = id;
         }
     }
+
     /**
      * @brief Call operator, detect ArUco marker as regular matrix.
      * 
@@ -258,6 +262,7 @@ public:
         }
         return raw_mk_rs;
     }
+
     /**
      * @brief Call operator, detect ArUco marker as regular matrix.
      * 
@@ -299,6 +304,7 @@ public:
         }
         return res;
     }
+
     /**
      * @brief Call operator, detect ArUco marker as regular matrix.
      * 
