@@ -12,18 +12,19 @@
 namespace chipimgproc{ namespace rotation{
 
 /**
- *    @brief     Rotate the image by given angle.
- *    @details   Input the angle and image, the function rotate the image in-place. 
+ *    @brief     This functor aims to rotate the image with a given rotation angle in degrees.
+ *    @details   Input the angle and image, the function rotates the image in-place. 
  */
 struct Calibrate
 {
     public:
         
         /**
-         *    @brief Rotate the image by given angle.
-         *    @param in_src   The input image.
-         *    @param theta    The input rotate angle.
-         *    @param v_result Show the rotate result.
+         *    @brief Rotate the image with a given angle.
+         *    @param in_src    The input image.
+         *    @param theta     The input rotation angle. Positive values mean counter-clockwise rotation
+         *                     (the coordinate origin is assumed to be the top-left corner).
+         *    @param v_result  Show the rotation result.
          */
         template<class FLOAT>
         auto operator()( 

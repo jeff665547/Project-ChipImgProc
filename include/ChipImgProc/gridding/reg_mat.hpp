@@ -14,8 +14,8 @@
 #include "utils.hpp"
 namespace chipimgproc{ namespace gridding{
 /**
- * @brief Grid the input image with given marker layout(chipimgproc::marker::Layout) 
- *   and marker regions(chipimgproc::marker::detection::MKRegion).
+ * @brief Grid the input image with given marker layout (chipimgproc::marker::Layout) 
+ *   and marker regions (chipimgproc::marker::detection::MKRegion).
  * @details @copybrief chipimgproc::gridding::RegMat
  *   This gridding algorithm require markers to be regular matrix 
  *   and the position must standardized, which means it usually called with 

@@ -146,10 +146,14 @@ private:
     cv::Point pos_px_;
 };
 /**
- * @brief Marker layout, use to present logical level marker position and pattern.
- *        Currently only support single style pattern and regular matrix distribution.
- *        The multiple style pattern ie. ArUco markers is not yet done.
- * @details The layout generation example
+ * @brief The Layout class is a description structure of marker style and marker placement in the physical design of the chip.
+ *        It defines the marker positions in logical level, indexing by rows and columns of the regular matrix.
+ *        Given the GDS file of the chip, miscellaneous sizes and relative locations of the markers can also 
+ *        be specified in cell-level and pixel-level respectively. Currently, this class only supports 
+ *        homogeneous marker style and regular grid-distributed layout type.
+ *        The ArUco marker whose patterns are distinct from each other is not supported by this class.
+ *
+ * @details The following shows the examples of layout generation
  *      @snippet ChipImgProc/make_layout.hpp usage
  */
 struct Layout {

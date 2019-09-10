@@ -17,9 +17,9 @@ namespace chipimgproc{ namespace marker{ namespace detection{
 /**
  *  @brief      This class, named regular matrix (RegMat), is used to
  *              detect a rectangular array of markers, arranged in rows and columns.
- *              Given a raw image and corresponding marker layout descriptor,
- *              this class aims to return a collection of detected marker locations, sizes 
- *              and subcript indices.
+ *              Given a raw image and corresponding marker layout descriptor (chipimgproc::marker::Layout),
+ *              this class will output a collection of marker region objects (chipimgproc::marker::detection::MKRegion),
+ *              which contains the detected marker location, size, and corresponding subcript marker indices.
  * 
  *  @details    Here is the example:
  *      @snippet ChipImgProc/marker/detection/reg_mat_test.cpp usage
