@@ -4,12 +4,16 @@
 
 ### Requirement
 * Your project must be a CMake project
-* GCC >= 7.3
+* Download and install gcc from https://sourceforge.net/projects/mingw-w64/
+* GCC = 7.3, Architecture = x86_64, posix, seh, 0
+* Download and install CMake from https://cmake.org/download/
 * CMake >= 3.10
 
 ### Steps
 
 ```bat
+ChipImgProc\> git submodule init
+ChipImgProc\> git submodule update
 ChipImgProc\> mkdir build
 ChipImgProc\> cd build
 build\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
@@ -22,8 +26,10 @@ build\> cmake --build . --target install
 
 ### Requirment
 * Your project must be a CMake project
-* GCC >= 7.3
+* GCC = 7.3, Architecture = x86_64, posix, seh, 0
 * CMake >= 3.10
+
+
 
 ### General hunter configuration
 
