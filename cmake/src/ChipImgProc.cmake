@@ -4,5 +4,4 @@ target_link_libraries(${__screw_target} PUBLIC
     ChipImgProc-sharpness
     ChipImgProc-hough_transform
     ChipImgProc-utils
-    ChipImgProc-logger
 )

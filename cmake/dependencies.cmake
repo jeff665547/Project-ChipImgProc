@@ -45,12 +45,12 @@ find_package(range-v3 CONFIG REQUIRED)
 # spdlog
 if(ENABLE_LOG)
     hunter_add_package(spdlog)
-    find_package(spdlog)
+    find_package(spdlog CONFIG REQUIRED)
 endif()
 
 # fmt
 hunter_add_package(fmt)
-find_package(fmt)
+find_package(fmt CONFIG REQUIRED)
 
 # threads
 find_package(Threads REQUIRED)
