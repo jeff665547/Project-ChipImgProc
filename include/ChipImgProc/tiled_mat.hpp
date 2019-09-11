@@ -12,8 +12,8 @@ namespace chipimgproc{
  *           location markers, XY grid lines, and a collection of 
  *           tiles each bounding the feature probe region of interest.
  * 
- * @tparam   GLID denotes a template parameter with the integer variable type. 
- *           It generalized the location of horizontal and vertical grid lines in pixels
+ * @tparam   GLID denotes a template parameter with the integer variable type, and 
+ *           generalizes the location of horizontal and vertical grid lines in pixels
  */
 template<class GLID = std::uint16_t>
 struct TiledMat

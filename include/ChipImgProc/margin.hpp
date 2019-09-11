@@ -17,12 +17,18 @@
 namespace chipimgproc{
 
 /**
- * @brief The margin functor type, doing statistic 
- *        and cell ROI to the gridding result.
+ * @brief    This Margin class is a callable function object type.
+ *           It provides a set of optional probe signal extraction methods for 
+ *           summarizing the pixel intensities of each probe region of interest into 
+ *           a collection of statistics such as mean, standard deviation, 
+ *           coefficient of variation and the amount of pixels for calculation.
  * 
- * @tparam FLOAT The float point type used in this data structure, 
- *   and is use to trade off the performance and numerical accuracy.
- * @tparam GLID The grid line type used by input tiled matrix.
+ * @tparam   FLOAT denotes a template parameter with a floating point variable type.
+ *           This parameter determines the numerical accuracy of the summarization process.
+ *           The precision of the floating point type reflects a trade off 
+ *           between computational speed and numerical accuracy.
+ * @tparam   GLID denotes a template parameter with the integer variable type, and
+ *           generalizes the location of horizontal and vertical grid lines in pixels.
  */
 template<
     class FLOAT = float, 
@@ -30,56 +36,51 @@ template<
 >
 struct Margin {
     /**
-     * @brief Call operator, call the margin method by given name.
-     *   Doing statistic and cell ROI to the gridding result.
+     * @brief    This is a function call operator. It summarize the pixel intensities of
+     *           each probe region of interest into a collection of statistics.
+     *
+     * @param    method refers to the string token denoting the option of extraction methods.
+     *           Currently, the following string tokens and methods are available.
+     *
+     *           * auto_min_cv
+     *             
+     *             This method takes the center 66% of the area from the given tile, and then
+     *             searches a smaller window from the shrinkage area based on minimum CV criterion.
+     *             The window size is specified by the parameter @a param.seg_rate, 
+     *             which refers to the relative size of the shrinkage area.
+     *              
+     *           * mid_seg
+     *
+     *             This method takes the center region of the area from the given tile object to
+     *             summarize the probe signal. The size of center region is specified by the 
+     *　　　　　　 parameter @a param.seg_rate, which refers to the relative size of the given tile area.
      * 
-     * @param method Margin method name, 
-     *   there are serval choice and description:
+     *           * percentile
+     *
+     *             This method takes the center 60% of the area from the given tile, and then
+     *             takes the percentile of pixel intensities from the shrinkage area to summarize the probe signal.
+     *             The setting of percentile is specified by the parameter @a param.seg_rate, 
+     *             which refers to a ratio value between 0 and 1.
      * 
-     *   * auto_min_cv
-     * 
-     *     Autometic search the minimum cv region in the grid cell.
-     *     The margin process will first shrink the cell space 
-     *     inward by 34% on both direction,
-     *     and search the minimum cv region 
-     *     with @a param.seg_rate size in the space.
-     * 
-     *   * mid_seg
-     * 
-     *     Only do the middle segmentation by given @a param.seg_rate.
-     * 
-     *   * percentile
-     * 
-     *     The margin process will first shrink the cell space 
-     *     inward by 20% on both direction,
-     *     and sampling middle @a param.seg_rate part 
-     *     of current space pixel distribution.
-     * 
-     *   * max
+     *           * max
      *     
-     *     The margin process will first shrink the cell space 
-     *     inward by 20% on both direction,
-     *     and select the max pixel value in current space.
+     *             This method takes the center 60% of the area from the given tile, and then
+     *             takes the maximum of pixel intensities from the shrinkage area to summarize the probe signal.
      * 
-     *   * only_stat
+     *           * only_stat
      *     
-     *     Do not do any sampling.
+     *             This method takes all of pixel intensities within the area 
+     *             specified by the given tile object for summarization.
      * 
-     *  The method auto_min_cv, mid_seg and only_stat 
-     *  will do the CV computing after the cell segmentation, 
-     *  while the percentile and max method will not do the 
-     *  CV computing after the cell segmentation. 
-     * 
-     * @param param The margin parameter pack, 
-     *              include segmentation rate, tiled matrix 
-     *              and a flag for determine
-     *              if the margin result tiles should replace 
-     *              the origin tiled matrix. 
-     *              See the class margin::Param document for details.
-     * 
-     * @return margin::Result<FLOAT> The result statistic data matrix,
-     *              include mean, standard deviation, coefficient of variation, pixel numbers.
-     *   
+     * @param    param the a parameter pack which contains the segmentation rate (between 0 and 1), 
+     *           tiled matrix, and a boolean flag to indicate whether each tile of image content 
+     *           should be replaced by results of calculation. 
+     *           Please see the class chipimgproc::margin::Param for details
+     *
+     * @return   a matrix of statistics with chipimgproc::margin::Result<FLOAT> class type,
+     *           which includes the means, standard deviations, coefficients of variation, 
+     *           and the amount of pixels for summarization.
+     *           Please see the class chipimgproc::margin::Result for details
      */
     margin::Result<FLOAT> operator()(
         const std::string&          method, 
