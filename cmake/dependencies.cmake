@@ -45,15 +45,21 @@ if(MSVC)
     target_compile_options(range-v3 INTERFACE /permissive-)
 endif()
 
+# fmt
+hunter_add_package(fmt)
+find_package(fmt CONFIG REQUIRED)
+
 # spdlog
 if(ENABLE_LOG)
     hunter_add_package(spdlog)
     find_package(spdlog CONFIG REQUIRED)
+    target_compile_definitions(spdlog::spdlog INTERFACE 
+        SPDLOG_FMT_EXTERNAL=1
+    )
+    target_link_libraries(spdlog::spdlog INTERFACE 
+        fmt::fmt
+    )
 endif()
-
-# fmt
-hunter_add_package(fmt)
-find_package(fmt CONFIG REQUIRED)
 
 # threads
 find_package(Threads REQUIRED)
