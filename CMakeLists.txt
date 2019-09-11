@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11.0)
+cmake_minimum_required(VERSION 3.13.0)
 include(cmake/HunterGate.cmake)
 set(
     HUNTER_CACHE_SERVERS
@@ -8,7 +8,7 @@ set(
     "Hunter cache servers"
 )
 HunterGate(
-    URL "http://gitlab.centrilliontech.com.tw:10080/centrillion/hunter.git"
+    URL "ssh://git@gitlab.centrilliontech.com.tw:10022/centrillion/hunter.git"
     SHA1 7534d27dc7d7c18381f995a4ef48140d1e6279ed 
     FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
 )
