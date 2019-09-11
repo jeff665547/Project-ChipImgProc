@@ -5,10 +5,13 @@ find_dependency(OpenCV)
 find_dependency(Boost COMPONENTS thread system filesystem)
 find_dependency(Nucleona)
 find_dependency(nlohmann_json)
-if(@ENABLE_LOG@0)
+if(@ENABLE_LOG@)
     find_dependency(spdlog)
     target_compile_definitions(spdlog::spdlog INTERFACE 
         SPDLOG_FMT_EXTERNAL=1
+    )
+    target_link_libraries(spdlog::spdlog INTERFACE 
+        fmt::fmt
     )
 endif()
 find_dependency(range-v3)

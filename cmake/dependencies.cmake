@@ -56,6 +56,9 @@ if(ENABLE_LOG)
     target_compile_definitions(spdlog::spdlog INTERFACE 
         SPDLOG_FMT_EXTERNAL=1
     )
+    target_link_libraries(spdlog::spdlog INTERFACE 
+        fmt::fmt
+    )
 endif()
 
 # threads
