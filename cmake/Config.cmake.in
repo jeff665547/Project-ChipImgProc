@@ -7,6 +7,9 @@ find_dependency(Nucleona)
 find_dependency(nlohmann_json)
 if(@ENABLE_LOG@0)
     find_dependency(spdlog)
+    target_compile_definitions(spdlog::spdlog INTERFACE 
+        SPDLOG_FMT_EXTERNAL=1
+    )
 endif()
 find_dependency(range-v3)
 find_dependency(fmt)
