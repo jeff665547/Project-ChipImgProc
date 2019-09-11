@@ -41,16 +41,19 @@ list(APPEND BUNDLE_RT_DIRS ${OpenCV_DIR}/x${BITS}/${OpenCV_RUNTIME}/lib)
 # range v3
 hunter_add_package(range-v3)
 find_package(range-v3 CONFIG REQUIRED)
+if(MSVC)
+    target_compile_options(range-v3 INTERFACE /permissive-)
+endif()
 
 # spdlog
 if(ENABLE_LOG)
     hunter_add_package(spdlog)
-    find_package(spdlog)
+    find_package(spdlog CONFIG REQUIRED)
 endif()
 
 # fmt
 hunter_add_package(fmt)
-find_package(fmt)
+find_package(fmt CONFIG REQUIRED)
 
 # threads
 find_package(Threads REQUIRED)
