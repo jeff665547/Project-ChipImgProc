@@ -9,10 +9,10 @@ if(NOT "${__screw_target}" STREQUAL ChipImgProc-utils)
         ChipImgProc-utils
     )
 endif()
-if(NOT "${__screw_target}" STREQUAL ChipImgProc-logger)
-    target_link_libraries(${__screw_target} PUBLIC
-        ChipImgProc-logger
-    )
-endif()
+# if(NOT "${__screw_target}" STREQUAL ChipImgProc-logger)
+#     target_link_libraries(${__screw_target} PUBLIC
+#         ChipImgProc-logger
+#     )
+# endif()
 
 screw_show_var(__screw_target)

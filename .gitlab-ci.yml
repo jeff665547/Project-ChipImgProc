@@ -23,6 +23,7 @@ Win_CI:
         - ctest --verbose
     only:
         - v0.5.x
+        - v0.6.x
     tags:
         - WIN
 
@@ -52,5 +53,6 @@ CentOS_CI:
         - ctest --verbose
     only:
         - v0.5.x
+        - v0.6.x
     tags:
         - CENTOS

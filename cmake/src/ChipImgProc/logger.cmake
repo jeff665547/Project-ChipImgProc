@@ -3,4 +3,8 @@ if(ENABLE_LOG)
     target_compile_definitions(${__screw_target} PUBLIC 
         CHIPIMGPROC_ENABLE_LOG
     )
+    target_link_libraries(
+        ${__screw_target} PUBLIC 
+        spdlog::spdlog 
+    )
 endif()
