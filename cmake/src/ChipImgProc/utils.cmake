@@ -7,3 +7,4 @@ target_link_libraries(${__screw_target} PUBLIC
     ChipImgProc-logger
 )
 target_compile_definitions(${__screw_target} PUBLIC OPENCV_TRAITS_ENABLE_DEPRECATED)
+target_link_libraries(${__screw_target} PUBLIC range-v3)

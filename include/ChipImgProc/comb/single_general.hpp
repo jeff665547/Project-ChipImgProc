@@ -4,6 +4,7 @@
  * @author Chia-Hua Chang
  */
 #pragma once
+#include <ChipImgProc/optional.hpp>
 #include <ChipImgProc/rotation/line_detection.hpp>
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
 #include <ChipImgProc/rotation/marker_vec.hpp>

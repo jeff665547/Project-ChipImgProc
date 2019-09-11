@@ -67,3 +67,4 @@ version.h
 include/summit
 ms-build/
 .bak/
+ms-stage/
