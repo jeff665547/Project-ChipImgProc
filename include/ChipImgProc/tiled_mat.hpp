@@ -7,11 +7,13 @@
 #include <Nucleona/range.hpp>
 namespace chipimgproc{
 
-
 /**
- *  @brief   Image matrix include after gridding, include grid tile informations.
- *  @tparam  The integer type use to score the grid line position, 
- *           this depend on the image size.
+ * @brief    This TiledMat structure consists of an FOV image,
+ *           location markers, XY grid lines, and a collection of 
+ *           tiles each bounding the feature probe region of interest.
+ * 
+ * @tparam   GLID denotes a template parameter with the integer variable type. 
+ *           It generalized the location of horizontal and vertical grid lines in pixels
  */
 template<class GLID = std::uint16_t>
 struct TiledMat
@@ -183,6 +185,7 @@ struct TiledMat
         );
         gl_y_.swap(tmp_y);
     }
+    
     /**
      * @brief The internal tile index.
      * @details The index store the mapping of grid position and tile list.
@@ -192,6 +195,7 @@ struct TiledMat
     cv::Mat index() const {
         return index_.clone();
     }
+
     /**
      * @brief Get the grid line covered region on image.
      * @return The bound rectangle of image.
@@ -204,6 +208,7 @@ struct TiledMat
             w, h
         );
     }
+
     /**
      * @brief Get the grid line covered region on image.
      * @return The bound rectangle of image.
@@ -211,13 +216,15 @@ struct TiledMat
     cv::Mat get_roi_image() const {
         return cali_img_(get_image_roi());
     }
+
     /**
-     * @brief Create TiledMat object form gridding result.
-     * @param grid_res      A parameter pack include the gridding algorithm output, 
-     *                      basically the chipimgproc::gridding::Result type
-     * @param rot_cali_img  Image after rotation calibration.
-     * @param mk_layout     Chip depended marker layout on rot_cali_img.
-     */
+      * @brief    This static function creates a TiledMat object with the previous gridding results.
+      *
+      * @param    grid_res      a pack of parameters storing the image gridding results.
+      *                         Typically, the structure data type is chipimgproc::gridding::Result class.
+      * @param    rot_cali_img  a rotation calibrated image.
+      * @param    mk_layout     a chip-dependent marker layout description for rot_cali_img.
+      */
     template<class GRID_RES>
     static TiledMat<GLID> make_from_grid_res(
         GRID_RES&               grid_res        , 
