@@ -164,6 +164,7 @@ int main( int argc, char** argv )
 
     //  Detecting ArUco marker
     auto detected_aruco_id_position = detector.detect_markers( raw_image, std::cout );
+/// [aruco_detection]
 
     /* 
      *  ArUco database:
@@ -206,7 +207,6 @@ int main( int argc, char** argv )
      *      Log output
      * 
      */ 
-/// [aruco_detection]
 /// [output]
     /*
      *  +===================+
