@@ -44,23 +44,23 @@ struct Margin {
      *
      *           * auto_min_cv
      *             
-     *             This method takes the center 66% of the area from the given tile, and then
+     *             This method takes the center 66% of the feature area, and then
      *             searches a smaller window from the shrinkage area based on minimum CV criterion.
      *             The window size is specified by the parameter @a param.seg_rate, 
      *             which refers to the relative size of the shrinkage area.
      *              
      *           * mid_seg
      *
-     *             This method takes the center region of the area from the given tile object to
-     *             summarize the probe signal. The size of center region is specified by the 
-     *　　　　　　 parameter @a param.seg_rate, which refers to the relative size of the given tile area.
+     *             This method takes the center region of the feature area to summarize the probe signal.
+     *             The size of center region is specified by the parameter @a param.seg_rate, 
+     *             which refers to the relative size of the given tile area.
      * 
      *           * percentile
      *
      *             This method takes the center 60% of the area from the given tile, and then
      *             takes the percentile of pixel intensities from the shrinkage area to summarize the probe signal.
      *             The setting of percentile is specified by the parameter @a param.seg_rate, 
-     *             which refers to a ratio value between 0 and 1.
+     *             which refers to a floating point between 0 and 1.
      * 
      *           * max
      *     
