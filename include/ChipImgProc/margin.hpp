@@ -71,6 +71,7 @@ struct Margin {
      *     
      *             This method takes all of pixel intensities within the area 
      *             specified by the given tile object for summarization.
+     *             The parameter @a param.seg_rate is unused.
      * 
      * @param    param the a parameter pack which contains the segmentation rate (between 0 and 1), 
      *           tiled matrix, and a boolean flag to indicate whether each tile of image content 
