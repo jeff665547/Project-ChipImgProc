@@ -81,10 +81,12 @@ struct TilesWrapper {
  * @details Here is an example:
  *   @snippet ChipImgProc/multi_tiled_mat_test.cpp usage
  * 
- * @tparam FLOAT The float point type used in this data structure, 
- *   and is use to trade off the performance and numerical accuracy.
- * @tparam GLID The grid line type, 
- *   and is use to limit the memory usage of the grid line storages.
+ * @tparam   FLOAT denotes a template parameter with a floating point variable type.
+ *           This parameter determines the numerical accuracy of the summarization process.
+ *           The precision of the floating point type reflects a trade off 
+ *           between computational speed and numerical accuracy.
+ * @tparam   GLID denotes a template parameter with the integer variable type, and
+ *           generalizes the location of horizontal and vertical grid lines in pixels.
  */
 template<
     class FLOAT = float,
