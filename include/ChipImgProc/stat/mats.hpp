@@ -11,23 +11,25 @@
 namespace chipimgproc { namespace stat{
 
 /**
- * @brief A statistic matrix set contains the mean, 
- *   standard deviation coefficient of variation and pixel numbers for each grid cell.
+ * @brief    This Mats class contains a collection of matrices 
+ *           for storing the mean values, standard deviations, 
+ *           coefficients of variation, and the amount of pixels 
+ *           for summarization for each grid cell.
  * 
- * @tparam FLOAT The float point type, use to store the statistic data.
+ * @tparam   FLOAT denotes the floating point vriable type.
+ *           This template parameter generalizes the 
+ *           storing type of the statistic data.
  */
 template<class FLOAT = float>
 struct Mats
 {
     /**
-     * @brief The float point type, use to store the statistic data.
-     * 
+     * @brief    the floating point type for storing the statistic data
      */
     using FloatType = FLOAT;
 
     /**
      * @brief Create a empty Mats.
-     * 
      */
     Mats() = default;
 
@@ -45,9 +47,10 @@ struct Mats
     {}
 
     /**
-     * @brief Select a intrested region and reset to the Mats.
+     * @brief    This function selects a region from the original matrices, and 
+     *           assigns the selected submatrices to the data members respectively.
      * 
-     * @param r A region of interested.
+     * @param    r a region of interest
      */
     void roi(const cv::Rect& r) {
         mean   = mean   (r);
@@ -57,25 +60,25 @@ struct Mats
     }
 
     /**
-     * @brief A matrix of mean value.
+     * @brief a matrix of mean values.
      * 
      */
     cv::Mat_<FLOAT>         mean    ;
 
     /**
-     * @brief A matrix of standard deviation.
+     * @brief a matrix of standard deviations
      * 
      */
     cv::Mat_<FLOAT>         stddev  ;
 
     /**
-     * @brief A matrix of coefficient of variation.
+     * @brief a matrix of coefficients of variation
      * 
      */
     cv::Mat_<FLOAT>         cv      ;
 
     /**
-     * @brief A matrix of cell pixel numbers.
+     * @brief a matrix of pixel numbers calculated per cell
      * 
      */
     cv::Mat_<std::uint32_t> num     ;
