@@ -31,7 +31,7 @@ int main( int argc, char** argv )
      *  +=========================+
      */
 
-    std::string image_path;         //  The path of raw chip image
+    std::string image_path;             //  The path of raw chip image
     std::string marker_pattern_path;    //  The path of marker pattern
 
     boost::program_options::variables_map op;
@@ -70,7 +70,7 @@ int main( int argc, char** argv )
      * 
      *      "cv::IMREAD_ANYCOLOR" for RGB color
      *      "cv::IMREAD_ANYDEPTH" for depth with our raw image (16 bits)
-    */
+     */
 
     /*
      *  +==============================+
@@ -79,7 +79,7 @@ int main( int argc, char** argv )
      */
 
 
-    // Load marker
+    //  Load marker
     std::ifstream marker_file_in( marker_pattern_path );
     auto [ marker, mask ] = chipimgproc::marker::Loader::from_txt( marker_file_in, std::cout );
 
@@ -138,6 +138,10 @@ int main( int argc, char** argv )
      *      Column number of marker:    3       3       3
      *          Spacing x of marker:    37      81      101
      *          Spacing y of marker:    37      81      101
+     * 
+     *                                  DVT-1   DVT-2   DVT-3
+     *                  µm to pixel:    2.68    2.68    2.4145
+     *                                         (2.4145)
      * 
      *  Marker pattern:
      *      Zion:
@@ -247,7 +251,7 @@ int main( int argc, char** argv )
      *  +================+
      */
 
-    //  Image ridding and output the result via lambda expression
+    //  Image gridding and output the result via lambda expression
     auto grid_line = image_gridder( image, marker_layout, marker_regioins, std::cout, [](const auto& m){
         cv:imwrite( "grid_line.tiff", m );
     });
