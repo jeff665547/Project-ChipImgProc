@@ -1,3 +1,13 @@
+#include <ChipImgProc/marker/layout.hpp>
+#include <ChipImgProc/marker/loader.hpp>
+#include <ChipImgProc/marker/detection/reg_mat.hpp>
+#include <ChipImgProc/marker/detection/reg_mat_infer.hpp>
+#include <ChipImgProc/rotation/marker_vec.hpp>
+#include <ChipImgProc/rotation/calibrate.hpp>
+#include <ChipImgProc/gridding/reg_mat.hpp>
+#include <ChipImgProc/stitch/gridline_based.hpp>
+#include <ChipImgProc/margin.hpp>
+#include <ChipImgProc/multi_tiled_mat.hpp>
 int main()
 {
     /*
