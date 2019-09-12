@@ -73,10 +73,10 @@ struct TilesWrapper {
 
 }
 /**
- * @brief Container of multiple tiled fov images. 
- *   Provide chip level abstraction coordinates access to cell data, 
- *   And lazy evaluate to the cell detail properties, 
- *   include region position, pixels and statistic data.
+ * @brief    This MultiTiledMat class provides an integrated structure of TiledMat objects 
+ *           for all the processed FOV images, and builds a chip-level consensus on tile 
+ *           positioning among FOVs, gridding results, statistical summary and 
+ *           miscellaneous properties.
  * 
  * @details Here is an example:
  *   @snippet ChipImgProc/multi_tiled_mat_test.cpp usage
@@ -500,17 +500,18 @@ public:
     }
 
     /**
-     * @brief Dump the multiple tiled matrix into a normal cv::Mat
+     * @brief    This function exports the results as a heatmap matrix in cell-level
+     * 
      * @details The multiple tiled matrix will use the given function
      *   to process the cell info data and save all cell process result into a matrix.
      *   The default behavior is MultiTiledMat::min_cv_mean, 
      *   which means the return matrix is actually the heatmap.
      * 
-     * @tparam FUNC Same as the MultiTiledMat::at accessor, 
-     *   but only allow the return type is float point.
+     * @tparam   FUNC Same as the MultiTiledMat::at accessor, 
+     *           but only allow the return type is float point.
      * 
-     * @param func Same as the MultiTiledMat::at accessor, 
-     *   but only allow the return type is float point.
+     * @param    func Same as the MultiTiledMat::at accessor, 
+     *           but only allow the return type is float point.
      * @return cv::Mat 
      */
     template<class FUNC = decltype(min_cv_mean_)&>
