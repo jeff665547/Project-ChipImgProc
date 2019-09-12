@@ -10,7 +10,8 @@
 #include <ChipImgProc/logger.hpp>
 namespace chipimgproc{ namespace stitch{ 
 /**
- * @brief Grid line based stitching algorithm.
+ * @brief    Grid line based stitching algorithm.
+ * 
  * @details This algorithm stitch the FOV images based
  *   on the grid line information, client should provide 
  *   chipimgproc::MultiTiledMat object which contains cell
