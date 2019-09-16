@@ -1,4 +1,4 @@
-/// [include]
+/// [code]
 #include <ChipImgProc/marker/layout.hpp>
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
@@ -10,9 +10,7 @@
 #include <ChipImgProc/margin.hpp>
 #include <ChipImgProc/multi_tiled_mat.hpp>
 #include <boost/program_options.hpp>
-/// [include]
 
-/// [code]
 /*
  *  This example code will help you to build the application to:
  *      1. Marker detecting
