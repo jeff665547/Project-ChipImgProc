@@ -26,7 +26,7 @@ namespace chipimgproc{ namespace gridding{
  *          imputed and calibrated by other successfully detected markers
  *          within an FOV image.
  *          The details of location marker standardization can be refer to the class 
- *　　　　　 chipimgproc::marker::detection::reg_mat_infer.
+ *          chipimgproc::marker::detection::reg_mat_infer.
  *          Here shows an example:
  *          @snippet ChipImgProc/gridding/reg_mat_test.cpp usage
  */
