@@ -314,15 +314,6 @@ int main( int argc, char** argv )
             nullptr
         };
 
-        /*
-         *  Segmentation rate:
-         *      The % of margin segmentation from outside to inside, only use in "mid_seg" mode
-         *      Default rate is 0.6
-         * 
-         *  Tile replacement:
-         *      Is segmented tile result replace the tile-matrix or not
-         */
-
         //  Feature extracting
         chipimgproc::margin::Result<double> feature_extraction_result = margin(
             "auto_min_cv",              //  Feature extracting mode

@@ -11,8 +11,8 @@ ArUco Marker Detection
   2. A JSON file of ArUco database (A json database which stores 250 of ArUco code with 6x6 bits size each). Its path is specified in variable `aruco_database_path` in the example code.
   3. A collection of ArUco IDs arranged in an std::vector. The arrangement order of markers is from the top-left to the bottom-right of a chip. It is specified in variable `aruco_ids` in the example code.
   4. Two TIFF files for marker frame template and marker frame mask. Their paths are specified in variables `marker_frame_template_path` and `marker_frame_mask_path` respectively.
-    @image html aruco-single-mk-spec.png width=600px
-    @image latex aruco-single-mk-spec.png
+    @image html aruco-mk-intro.png width=600px
+    @image latex aruco-mk-intro.png
     Figure 5 Marker Recognition Principle
       - The marker frame template and the marker frame mask are used to identify the marker locations within an FOV roughly.
 - Output:
@@ -22,7 +22,7 @@ ArUco Marker Detection
     @snippet Example/aruco_detection.cpp data_preparation
   - ArUco Detection
     - Detect and decode the ArUco marker in the chip image one by one.
-    - This process will be repeated until all ArUco markers in a FOV are detected, and the detection details are discribed as follows:
+    - This process will be repeated until all ArUco markers in a FOV are detected, and the detection details are described as follows:
         1. Identify the most similar region to the marker frame in an FOV by using marker frame template (`marker_frame_template`) and marker frame mask (`marker_frame_mask`), and take that region as the true marker position.
         2. Decode the ArUco marker in the marker frame found in the previous step, and store the decoding result into a collection.
         3. To find the position of the next marker frame more accurately, we take the current marker as the center, and use the non-maximum suppression (NMS) algorithm to exclude an user-defined circular region indicating the non-optimal matching locations.

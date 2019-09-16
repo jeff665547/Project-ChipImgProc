@@ -32,7 +32,6 @@
 
 int main( int argc, char** argv )
 {
-/// [data_preparation]
     /*
      *  +=========================+
      *  | Declare program options |
@@ -67,6 +66,7 @@ int main( int argc, char** argv )
         exit(1);
     }
 
+/// [data_preparation]
     /*
      *  +========================+
      *  | Image data preparation |

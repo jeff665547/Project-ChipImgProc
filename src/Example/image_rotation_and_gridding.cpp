@@ -225,8 +225,8 @@ int main( int argc, char** argv )
     auto marker_regions = marker_detector(
         image,
         marker_layout,
-        chipimgproc::MatUnit::PX,   //  Marker detecte with pixel unit (PX) or cell unit (CELL) 
-        0,                          //  Default mode to use perfect marker pattern
+        chipimgproc::MatUnit::PX,   //  Marker detection mode
+        0,                          //  Use standard marker pattern
         std::cout
         );
     /// [marker_detection]
@@ -253,8 +253,8 @@ int main( int argc, char** argv )
     //  Auto-inference to fill the vacancy marker positions
     marker_regions = chipimgproc::marker::detection::reg_mat_infer(
         marker_regions,
-        3,                  //  Number of markers ine one Row
-        3,                  //  Number of markers ine one Column
+        3,                  //  Number of markers ine one row in an FOV.
+        3,                  //  Number of markers ine one column in an FOV.
         image
         );
     /// [vacant_markers_inference]
