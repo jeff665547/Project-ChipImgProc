@@ -10,6 +10,13 @@ p.reference, p.definition {
 
 /* @group Heading Levels */
 
+h1 {
+    font-size: 20px;
+}
+h2 {
+    font-size: 16px;
+}
+
 h1.groupheader {
     font-size: 150%;
 }

@@ -155,7 +155,7 @@ int main()
          *  | Image feature extracting |
          *  +==========================+
          */
-
+        /// [image-feature-extracting]
         //  Set the parameters for feature extraction. 0.6 is the segmentation rate.
         chipimgproc::margin::Param<> feature_extraction_param { 
             0.6, 
@@ -169,6 +169,7 @@ int main()
             "auto_min_cv", 
             feature_extraction_param
         );
+        /// [image-feature-extracting]
 
         //  Save the gridding result
         tile_matrixs.push_back( tile_matrix );

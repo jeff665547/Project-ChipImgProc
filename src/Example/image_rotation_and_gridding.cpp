@@ -54,6 +54,8 @@ int main( int argc, char** argv )
         exit(1);
     }
 
+    /// [image_data_preparation]
+
     /*
      *  +========================+
      *  | Image data preparation |
@@ -95,6 +97,8 @@ int main( int argc, char** argv )
         81,     //  Spacing y of marker
         2.68    //  µm to pixel
     );
+
+    /// [image_data_preparation]
 
     /*
      *
@@ -202,6 +206,7 @@ int main( int argc, char** argv )
      * 
      */
 
+    /// [marker_detection]
     /*
      *  +=====================================+
      *  | Marker detection and image rotation |
@@ -217,34 +222,44 @@ int main( int argc, char** argv )
     chipimgproc::gridding::RegMat image_gridder;
     
     //  Detecting marker
-    auto marker_regioins = marker_detector(
+    auto marker_regions = marker_detector(
         image,
         marker_layout,
         chipimgproc::MatUnit::PX,   //  Marker detecte with pixel unit (PX) or cell unit (CELL) 
         0,                          //  Default mode to use perfect marker pattern
         std::cout
         );
+    /// [marker_detection]
     
+    /// [angle_detection]
     //  Detecting image rotation theta (degree)
-    auto theta = theta_detector( marker_regioins, std::cout );
-
-    //  Rotating the image via detected theta (degree)
-    image_rotator( image, theta );
+    auto theta = theta_detector( marker_regions, std::cout );
 
     // Outputing
     std::cout << theta << std::endl;
+    /// [angle_detection]
 
+    /// [image_rotate]
+    //  Rotating the image via detected theta (degree)
+    image_rotator( image, theta );
+    /// [image_rotate]
+
+    /// [image_marker_refine]
     //  Re-detecting the marker
-    marker_regioins = marker_detector( image, marker_layout, chipimgproc::MatUnit::PX, 0, std::cout );
+    marker_regions = marker_detector( image, marker_layout, chipimgproc::MatUnit::PX, 0, std::cout );
+    /// [image_marker_refine]
 
+    /// [vacant_markers_inference]
     //  Auto-inference to fill the vacancy marker positions
-    marker_regioins = chipimgproc::marker::detection::reg_mat_infer(
-        marker_regioins,
+    marker_regions = chipimgproc::marker::detection::reg_mat_infer(
+        marker_regions,
         3,                  //  Number of markers ine one Row
         3,                  //  Number of markers ine one Column
         image
         );
+    /// [vacant_markers_inference]
 
+    /// [image_gridding]
     /*
      *  +================+
      *  | Image gridding |
@@ -252,9 +267,10 @@ int main( int argc, char** argv )
      */
 
     //  Image gridding and output the result via lambda expression
-    auto grid_line = image_gridder( image, marker_layout, marker_regioins, std::cout, [](const auto& m){
+    auto grid_line = image_gridder( image, marker_layout, marker_regions, std::cout, [](const auto& m){
         cv:imwrite( "grid_line.tiff", m );
     });
+    /// [image_gridding]
 
     return 0;
 }

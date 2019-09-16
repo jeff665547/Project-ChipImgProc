@@ -297,15 +297,17 @@ int main( int argc, char** argv )
         //  Image gridding and output the result via lambda expression
         auto grid_line = image_gridder( image, marker_layout, marker_regioins, std::cout );
 
+        /// [image-feature-preparation]
         //  Convert the gridding result into a tile-matrix
         auto tile_matrix = chipimgproc::TiledMat<>::make_from_grid_res( grid_line, image, marker_layout );
+        /// [image-feature-preparation]
 
         /*
          *  +==========================+
          *  | Image feature extracting |
          *  +==========================+
          */
-
+        /// [image-feature-extraction]
         //  Set the parameters for feature extraction
         chipimgproc::margin::Param<> feature_extraction_param { 
             0.6,            //  Segmentation rate
@@ -328,6 +330,7 @@ int main( int argc, char** argv )
             "auto_min_cv",              //  Feature extracting mode
             feature_extraction_param
         );
+        /// [image-feature-extraction]
 
         /*
          *  Feature extracting mode:
@@ -347,6 +350,7 @@ int main( int argc, char** argv )
         segmentation_matrixs.push_back( feature_extraction_result.stat_mats );
     }
 
+    /// [image-multi_tiled-stitch]
     /*
      *  +======================+
      *  | FOV images stitching |
@@ -421,10 +425,13 @@ int main( int argc, char** argv )
         stitch_positions,
         fov_ids
     );
+    /// [image-multi_tiled-stitch]
 
+    /// [image-stitching]
     //  Set stitcher and stitch FOVs in real pixel level of image
     chipimgproc::stitch::GridlineBased stitcher;
     auto stitched_image = stitcher( multiple_tiled_matrix );
+    /// [image-stitching]
 
     /*
      *  +===========+
