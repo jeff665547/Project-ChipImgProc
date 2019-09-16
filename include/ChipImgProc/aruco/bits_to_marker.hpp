@@ -66,6 +66,11 @@ constexpr struct BitsToMarker {
         return img_tmp;
     }
 
-} bits_to_marker;
+} 
+/**
+ * @brief convert aruco code integer to marker image
+ * 
+ */
+bits_to_marker;
 
 }

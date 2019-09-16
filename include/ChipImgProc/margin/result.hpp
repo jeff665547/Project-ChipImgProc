@@ -10,7 +10,7 @@ namespace chipimgproc{ namespace margin{
 /**
  * @brief    This template structure is a wrapper containing 
  *           the results of the chipimgproc::Margin callable object.
- *   @copybrief chipimgproc::stat::Mats
+ *           see chipimgproc::stat::Mats for details.
  * 
  * @tparam   FLOAT denotes the floating point variable type.
  *           This template parameter generalizes the 

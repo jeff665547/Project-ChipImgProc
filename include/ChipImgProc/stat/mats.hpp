@@ -16,7 +16,7 @@ namespace chipimgproc { namespace stat{
  *           coefficients of variation, and the amount of pixels 
  *           for summarization for each grid cell.
  * 
- * @tparam   FLOAT denotes the floating point vriable type.
+ * @tparam   FLOAT denotes the floating point variable type.
  *           This template parameter generalizes the 
  *           storing type of the statistic data.
  */
