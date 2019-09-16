@@ -368,9 +368,7 @@ Link libraries:
   * opencv_*
   * (too much of them, not list all)
 * OpenCV upstream dependent
-  * libjasper
   * jpeg
-  * libwebp
   * png
   * libtiff
 * Boost
