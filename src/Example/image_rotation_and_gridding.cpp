@@ -115,10 +115,10 @@ int main( int argc, char** argv )
      *      µm in the Column for one cell (a probe)
      * 
      *  Spacing µm of cell:
-     *      µm between cell and cell (a prboe and a probe)
+     *      µm between cell and cell (a probe and a probe)
      * 
      *  Row number of markers:
-     *      Number of markers ine one Row
+     *      Number of markers in one Row
      * 
      *  Column number of markers:
      *      Number of markers ine one Column

@@ -1,3 +1,4 @@
+/// [code]
 #include <ChipImgProc/marker/layout.hpp>
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
@@ -245,3 +246,4 @@ int main()
     
     return 0;
 }
+/// [code]

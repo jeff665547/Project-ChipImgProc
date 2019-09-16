@@ -5,7 +5,7 @@ A Toy Example
 Here is a toy example to help users get the hand of this library.
 
 - This is an example code for converting all the raw FOVs of the Banff chip into the final heatmap.
-  @snippet Example/image_stitch_and_extraction.cpp code
+  @snippet Example/toy-example.cpp code
 
 Where to next
 =============
