@@ -65,6 +65,6 @@ workdir/
 doc/output
 version.h
 include/summit
-ms-build/
+*-build/
 .bak/
-ms-stage/
+*-stage/
