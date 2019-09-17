@@ -17,11 +17,11 @@ int main()
      *  +=====================+
      */
 
-    std::string image_folder_path = "./Banff_Images/";      //  The path of image folder, which contains nine FOV of raw images (Banff)
-    std::string marker_pattern_path = "./Banff_CY3.tsv";    //  The path of marker pattern
+    std::string image_folder_path = "./Banff_Images/";      //  The path to the image folder, which contains nine FOVs of raw images (Banff)
+    std::string marker_pattern_path = "./Banff_CY3.tsv";    //  The path to the marker pattern file
     
-    // Store the folder path which contains FOV in the image_folder_path variable.
-    // Store the .tsv file path of marker pattern in the marker_pattern_path variable.
+    // Store the folder path that contains FOVs in the image_folder_path variable.
+    // Store the .tsv file path to the marker pattern in the marker_pattern_path variable.
 
     /*
      *  +=========+
@@ -75,6 +75,8 @@ int main()
         
         //  Read the image.
         cv::Mat_<std::uint16_t> image = cv::imread( image_fov_paths[i], cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH );
+        //  For more information, see the "Fluorescence Marker Detection" section.
+
 
         /*
          *  +==============================+
@@ -102,6 +104,8 @@ int main()
             81,     
             2.68    
         );
+        //  For more information, see the "Fluorescence Marker Detection" section.
+
 
         /*
          *  +=====================================+
@@ -117,19 +121,22 @@ int main()
             0,                          
             std::cout
             );
+        //  For more information, see the "Fluorescence Marker Detection" section.
 
         //  Estimate the image rotation angle (degree).
         auto theta = theta_detector( marker_regions, std::cout );
+        //  For more information, see the "Image Rotation Angle Estimation and Calibration" section.
 
         //  Rotate the image via the estimated rotation angle (Image Calibration).
         image_rotator( image, theta );
-
+        //  For more information, see the "Image Rotation Angle Estimation and Calibration" section.
 
         //  Since the marker positions have been changed after the image calibration, 
         //  we have to re-detect the marker positions.
         
         //  Re-detecting the marker.
         marker_regions = marker_detector( image, marker_layout, chipimgproc::MatUnit::PX, 0, std::cout );
+        //  For more information, see the "Fluorescence Marker Detection" section.
 
         //  Auto-inference to fill the vacant marker positions.
         marker_regions = chipimgproc::marker::detection::reg_mat_infer(
@@ -138,6 +145,8 @@ int main()
             3,
             image
             );
+        //  For more information, see the "Image Rotation Angle Estimation and Calibration" section.
+
 
         /*
          *  +================+
@@ -147,9 +156,12 @@ int main()
 
         //  Image gridding
         auto grid_line = image_gridder( image, marker_layout, marker_regions, std::cout );
+        //  For more information, see the "Image Gridding" section.
 
         //  Convert the gridding result into a tile-matrix (Figure 8).
         auto tile_matrix = chipimgproc::TiledMat<>::make_from_grid_res( grid_line, image, marker_layout );
+        //  For more information, see the "Image Feature Extraction" section.
+
 
         /*
          *  +==========================+
@@ -164,13 +176,14 @@ int main()
             true, 
             nullptr
         };
+        //  For more information, see the "Image Feature Extraction" section.
 
         //  Image Feature Extraction (minCV).
         chipimgproc::margin::Result<double> feature_extraction_result = margin(
             "auto_min_cv", 
             feature_extraction_param
         );
-        /// [image-feature-extracting]
+        //  For more information, see the "Image Feature Extraction" section.
 
         //  Save the gridding result
         tile_matrixs.push_back( tile_matrix );
@@ -193,6 +206,7 @@ int main()
         {0, 162}, {162, 162}, {324, 162},
         {0, 324}, {162, 324}, {324, 324}
     });
+    //  For more information, see the "Image Stitching" section.
 
     //  Set the FOV sequential ID, the order is row major.
     std::vector<cv::Point> fov_ids({
@@ -200,6 +214,7 @@ int main()
         {0, 1}, {1, 1}, {2, 1},
         {0, 2}, {1, 2}, {2, 2}
     });
+    //  For more information, see the "Image Stitching" section.    
 
     //  Create a matrix with multiple tiles (all FOV) for entire image.
     chipimgproc::MultiTiledMat<double, std::uint16_t> multiple_tiled_matrix(
@@ -208,10 +223,12 @@ int main()
         stitch_positions,
         fov_ids
     );
+    //  For more information, see the "Image Stitching" section.
 
     //  Set the stitcher and stitch FOVs inside the multi_tiled_mat object into a real pixel-level image.
     chipimgproc::stitch::GridlineBased stitcher;
     auto stitched_image = stitcher( multiple_tiled_matrix );
+    //  For more information, see the "Image Stitching" section.
 
     /*
      *  +===========+
