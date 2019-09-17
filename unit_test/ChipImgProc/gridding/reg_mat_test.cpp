@@ -55,7 +55,7 @@ TEST(reg_mat_layout, operator_call_test) {
 
     // do the gridding, and pass the debug viewer into algorithm. 
     auto gl_res = gridding(img, mk_layout, mk_regs, std::cout, [](const auto& m){
-        cv:imwrite("debug_gridding.tiff", m);
+        cv:imwrite("debug_gridding_basic.tiff", m);
     });
     
     // the gl_res contains all workable grid lines, 
@@ -97,6 +97,6 @@ TEST(reg_mat_layout, hard_case) {
     mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
     mk_regs = chipimgproc::marker::detection::reg_mat_infer(mk_regs, 0, 0, img);
     auto gl_res = gridding(img, mk_layout, mk_regs, std::cout, [](const auto& m){
-        cv:imwrite("debug_gridding.tiff", m);
+        cv:imwrite("debug_gridding_hard.tiff", m);
     });
 }

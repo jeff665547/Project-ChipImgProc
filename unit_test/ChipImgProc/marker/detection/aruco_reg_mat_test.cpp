@@ -3,6 +3,8 @@
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/detection/aruco_reg_mat.hpp>
 #include "../../make_layout.hpp"
+#include <ChipImgProc/marker/view.hpp>
+
 TEST(aruco_reg_mat, basic_test) {
     // In this using case, we are going to recognize the ArUco marker from the image.
     // The input is a Banff FOV image and the output is the ArUco marker regions (a vector of cv::Rect)
@@ -97,6 +99,7 @@ TEST(aruco_reg_mat, basic_test) {
     for(auto mk_r : mk_regs) {
         mk_r.info(std::cout);
     }
+    cv::imwrite("view.tiff", chipimgproc::marker::view(img0, mk_regs));
     // Due to the image quality variant, it may not detect all markers
     // For image gridding process, it should detect 2 marker in deferent column and row at least.
 }
