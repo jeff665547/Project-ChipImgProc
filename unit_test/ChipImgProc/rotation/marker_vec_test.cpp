@@ -34,6 +34,7 @@ TEST(reg_mat_layout, operator_call_test) {
 
     // output
     std::cout << theta << std::endl;
+    EXPECT_LT(std::abs(theta - 0.623), 0.01);
 }
 /// [usage]
 TEST(reg_mat_layout, hard_case) {
@@ -52,4 +53,5 @@ TEST(reg_mat_layout, hard_case) {
     auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
     auto theta = marker_fit(mk_regs, std::cout);
     std::cout << theta << std::endl;
+    EXPECT_LT(std::abs(theta + 0.141), 0.01);
 }

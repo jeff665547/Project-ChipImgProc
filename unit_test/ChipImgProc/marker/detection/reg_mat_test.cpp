@@ -63,13 +63,13 @@ TEST(reg_mat_layout, hard_case) {
     reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, 
         std::cout, 
         [](const cv::Mat& mat){
-            cv::imwrite("debug_bin.tiff", mat);
+            cv::imwrite("debug_bin_hard.tiff", mat);
         }, 
         [](const cv::Mat& mat){
-            cv::imwrite("debug_search.tiff", mat);
+            cv::imwrite("debug_search_hard.tiff", mat);
         }, 
         [](const cv::Mat& mat){
-            cv::imwrite("debug_marker.tiff", mat);
+            cv::imwrite("debug_marker_hard.tiff", mat);
         });
 }
 
