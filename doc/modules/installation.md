@@ -14,14 +14,16 @@ It is highly recommended to use the package manager
 because manually linking the third party libraries
 and figuring out all dependencies is tedious.
 
-Use the package manager to maintain the dependencies may save a lot of time.
+[Use the package manager](@ref use-the-package-manager) to maintain the dependencies may save a lot of time.
 
 Use the Package Manager {#use-the-package-manager}
 ===================
 
-To use Hunter package manager, all dependencies will be built during your project configuration step, which means you won't need to manually build any code but your project.
+All dependencies can be managed by the Hunter package manager,
+and will be built during your project configuration step.
+Users do not need to manually build any dependencies.
 
-It may take several minutes to build your project dependencies,
+It may take several minutes to build dependencies,
 but this only happened when the first time you build the project
 
 The reason we use CMake + GCC+ Hunter package manager is to support multiple platforms,
@@ -31,9 +33,9 @@ which include:
 * Linux ARM
 * Windows x84/64
 
-and of course cross-compiling (for example compile ARM binary on x86 machine).
+and of course cross-compiling (for example compile the ARM binaries on a x86 machine).
 In this case, we need a way to lock the dependencies
-which should not be bothered by platform self-owned library.
+which should not be interfered by libraries built for the host platform.
 
 Also, GNU compiler is the most portable compiler in syntax level.
 
@@ -48,7 +50,7 @@ Requirements
 * For Linux g++
   * g++ >= 7.3 (7.3 is recommended and well tested)
   * CMake >= 3.13
-* For MSVC, Windows + MSVC 15.9
+* For MSVC, Windows + MSVC 15.9 (experimental)
   * g++ >= 7.3 (7.3 is recommended and well tested)
   * CMake >= 3.13
   * MSVC >= v15.9 **and** <= v14.1 (both needed)
@@ -62,6 +64,9 @@ By hacking the Boost build code, we found:
 
 Therefore, we use v14.1 to build the engine
 and use the engine to call the v15.9 and build Boost code.
+
+The MSVC build is currently an experimental feature,
+which has not been fully tested.
 
 Hunter configuration
 --------------------
@@ -161,6 +166,41 @@ int main() {
 }
 
 ```
+
+Build the full example
+-----------------------
+
+The current directory tree:
+
+```bash
+Example/
+    CMakeLists.txt
+    foo.cpp
+    cmake/
+        packages.cmake
+```
+
+* MinGW + Windows
+  @code
+  Example\\> mkdir build
+  Example\\> cd build
+  build\\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+  build\\> cmake --build . --target install
+  @endcode
+* MSVC + Windows
+  @code
+  Example\\> mkdir build
+  Example\\> cd build
+  build\\> cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+  build\\> cmake --build . --target install --config Release
+  @endcode
+* Linux + GCC
+  @code
+  Example$ mkdir build
+  Example$ cd build
+  build$ cmake .. -DCMAKE_INSTALL_PREFIX="../stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+  build$ cmake --build . --target install
+  @endcode
 
 Manually Build (g++/MinGW) {#manually-build-gcc}
 =======================
@@ -435,12 +475,12 @@ Troubleshooting
     Please make sure the project is not downloaded from Gitlab download icon link
     @image html gitlab-download-icon-link.png width=300px
     @image latex gitlab-download-icon-link.png
-    We assume the user who visits the download icon or the release tags only needs to use the package but run the unit tests and examples.
+    We assume the user who visits the download icon or the release tags only needs to use the package and do not want to run the unit tests and examples.
     Therefore, the user download project in that way should use an alternative configure command:
     @code
     ChipImgProc\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release" -DCOPY_ALL_TP=ON -DBUILD_TESTS=OFF
     @endcode
-    In this case, the CMake script may just build the project API without the unit test which means the test data is not required.
+    In this case, the CMake script may just build the project API without the unit test and the test data.
 
 * Missing libraries
 
