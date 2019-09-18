@@ -1,5 +1,5 @@
 
-# ChipImgProc manual index {#mainpage}
+# ChipImgProc Manual Index {#mainpage}
 
 * [Introduction](@ref doc/modules/introduction.md)
 * Getting Started
