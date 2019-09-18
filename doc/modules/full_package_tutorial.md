@@ -35,7 +35,7 @@ Figure 5 The workflow of ChipImgProc
 
 # Quick Start
 
-## Import ChipImgProc by Hunter(recommended)
+## Import ChipImgProc by Hunter(Recommended)
 
 To use the Hunter package manager, all upstream will be built,
 user no need to build ChipImgProc before user project develop.
@@ -61,7 +61,7 @@ and use GNU compiler which is most portable in syntax level.
 * CMake >= 3.13
 * MSVC <= v141 build tool
 
-### Hunter configuration
+### Hunter Configuration
 
 1. Download Hunter Gate from [our Gitlab](http://gitlab.centrilliontech.com.tw:10080/centrillion/gate/blob/URL-git-commit/cmake/HunterGate.cmake).
 2. Put HunterGate.cmake to *\<your_project\>*/cmake/ directory.
@@ -98,7 +98,7 @@ and use GNU compiler which is most portable in syntax level.
         hunter_add_package(ChipImgProc)
         find_package(ChipImgProc CONFIG REQUIRED)
 
-### A full example
+### A Full Example
 
 cmake/packages.cmake
 
@@ -150,14 +150,14 @@ int main() {
 
 ```
 
-## Build ChipImgProc from source by CMake on Windows MinGW
+## Build ChipImgProc from Source by CMake on Windows MinGW
 
 If you don't want to use Hunter in your client project, you may build the ChipImgProc manually.
 
 In this case, ChipImgProc still use Hunter to maintain its self's upstream but
 there wouldn't be any Hunter code in client project and the library link to ChipImgProc may be a struggle.
 
-### ChipImgProc build requirements
+### ChipImgProc Build Requirements
 
 * GCC >= 7.3 (7.3 is recommended and well tested)
 * CMake >= 3.13
@@ -165,7 +165,7 @@ there wouldn't be any Hunter code in client project and the library link to Chip
 
 The main library compiler is GCC, MSVC is required by Boost build flow.
 
-### Client project requirements
+### Client Project Requirements
 
 * GCC same as ChipImgProc build
 
@@ -176,7 +176,7 @@ In this case wChipImgProc should be compiled in MSVC, but during the work on MSV
 we found there are many syntax difference between GCC and MSVC even use Visual Studio 2019.
 It probably standard support issue or just compiler bugs.
 
-### ChipImgProc build steps
+### ChipImgProc Build Steps
 
 Assume the project is download from git clone.
 
@@ -199,7 +199,7 @@ build\> cmake --build . --target install
 :: All upstream library will put in ChipImgProc\stage\third_party
 ```
 
-### About Gitlab download icon link
+### About Gitlab Download Icon Link
 
 @image html gitlab-download-icon-link.png width=300px
 @image latex gitlab-download-icon-link.png
@@ -213,7 +213,7 @@ build\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTAL
 In this case, Build script will not need test data and of course, no test code will be built.
 Only library source will be compiled into binary.
 
-## Manually import ChipImgProc
+## Manually Import ChipImgProc
 
 Import ChipImgProc may need several compiler flags and definitions,
 These compiler options not only from ChipImgProc, but OpenCV and other upstream.
@@ -293,7 +293,7 @@ should find a way to link these binary manually.
     * comdlg32
     * advapi32
 
-### Trouble shooting
+### Trouble Shooting
 
 * Missing link library
 
@@ -303,11 +303,11 @@ should find a way to link these binary manually.
 
 Manually include and link OpenCV & Boost are really painful, so we suggest to use CMake & Hunter to do such link works.
 
-## A basic example from FOV to heatmap
+## A Basic Example from FOV to Heatmap
 
 @snippet ChipImgProc/multi_tiled_mat_test.cpp usage
 
-## Detail features guide
+## Detail Features Guide
 
 * [Marker Recognition](#marker-recognition)
 * [ArUco Detection](#aruco-detection)

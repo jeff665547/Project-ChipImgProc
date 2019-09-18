@@ -1,14 +1,14 @@
 
-Image gridding
+Image Gridding
 ==============
 
 Gridding
 ========
 
-Turning now to the brief introduction on image rotation
+Turning now to the brief introduction on image rotation.
 
-Input
------
+Gridding input
+--------------
 
 1. A loaded raw chip image (The raw image from SUMMIT). It is loaded by OpenCV in the AM1, AM3 marker detection section.
 2. A marker layout object generated from `chipimgproc::marker::make_single_pattern_reg_mat_layout()` function in the AM1, AM3 marker detection section.
@@ -16,8 +16,8 @@ Input
 4. A logger - Log output.
 5. (Optional) Output file settings.
 
-Output
-------
+Gridding output
+---------------
 
 1. A grid line object.
 

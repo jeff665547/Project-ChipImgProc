@@ -4,35 +4,69 @@ Installation
 
 [TOC]
 
-Use package manager
+There are three ways to use ChipImgProc:
+
+1. [Use CMake and directly import by the package manager](@ref use-the-package-manager)
+2. [Manually build and import by g++](@ref manually-build-gcc)
+3. [Manually build and import by MSVC](@ref manually-build-msvc)
+
+It is highly recommended to use the package manager
+because manually linking the third party libraries
+and figuring out all dependencies is tedious.
+
+[Use the package manager](@ref use-the-package-manager) to maintain the dependencies may save a lot of time.
+
+Use the Package Manager {#use-the-package-manager}
 ===================
 
-To use the Hunter package manager, all upstream will be built,
-user no need to build ChipImgProc before user project develop.
+All dependencies can be managed by the Hunter package manager,
+and will be built during your project configuration step.
+Users do not need to manually build any dependencies.
 
-It may takes several minutes to build upstream dependencies,
-but it only happened in the first time build.
+It may take several minutes to build dependencies,
+but this only happened when the first time you build the project
 
-The reason we use CMake + MinGW + Hunter package manager is because
-ChipImgProc as a library package it is required to support multiple platform, include:
+The reason we use CMake + GCC+ Hunter package manager is to support multiple platforms,
+which include:
 
 * Linux x86 64/32bit
 * Linux ARM
 * Windows x84/64
 
-And of course cross compiling.
-In this case, we need a way to lock upstream which should not be bother by platform owned library
-and use GNU compiler which is most portable in syntax level.
+and of course cross-compiling (for example compile the ARM binaries on a x86 machine).
+In this case, we need a way to lock the dependencies
+which should not be interfered by libraries built for the host platform.
+
+Also, GNU compiler is the most portable compiler in syntax level.
 
 Requirements
 ------------
 
 * Your project must be a CMake project
-* GCC >= 7.3 (7.3 is recommended and well tested)
-* CMake >= 3.13
-* MSVC <= v141 build tool
+* For MinGW, g++ + Windows
+  * g++ >= 7.3 (7.3 is recommended and well tested)
+  * CMake >= 3.13
+  * MSVC <= v14.1 build tool
+* For Linux g++
+  * g++ >= 7.3 (7.3 is recommended and well tested)
+  * CMake >= 3.13
+* For MSVC, Windows + MSVC 15.9 (experimental)
+  * g++ >= 7.3 (7.3 is recommended and well tested)
+  * CMake >= 3.13
+  * MSVC >= v15.9 **and** <= v14.1 (both needed)
 
-The main library compiler is GCC, MSVC is required by Boost build flow.
+The MSVC 14.1 is required by Boost 1.69 build flow.
+By hacking the Boost build code, we found:
+
+* Boost build an engine and use the engine to build the Boost code.
+* The compiler used to build the engine and Boost code can be different.
+* The build script used to build the Boost build engine is unable to detect the MSVC > v14.1
+
+Therefore, we use v14.1 to build the engine
+and use the engine to call the v15.9 and build Boost code.
+
+The MSVC build is currently an experimental feature,
+which has not been fully tested.
 
 Hunter configuration
 --------------------
@@ -57,17 +91,21 @@ Hunter configuration
             OpenCV-Extra
             VERSION "3.4.0"
         )
+        hunter_config(
+            range-v3
+            VERSION "0.5.0"
+        )
 
-4. Add following code into CMakeLists.txt and place before ```project(...)```.
+4. Add the following code into CMakeLists.txt and place before ```project(...)```.
 
         include(cmake/HunterGate.cmake)
         HunterGate(
             URL "http://gitlab.centrilliontech.com.tw:10080/centrillion/hunter.git"
-            SHA1 7534d27dc7d7c18381f995a4ef48140d1e6279ed
+            SHA1 4b533d7a7e942310124dfb388d5141dd72f52381
             FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
         )
 
-5. Add following code after ```project(...)```.
+5. Add the following code after ```project(...)```.
 
         hunter_add_package(ChipImgProc)
         find_package(ChipImgProc CONFIG REQUIRED)
@@ -94,6 +132,10 @@ hunter_config(
     OpenCV-Extra
     VERSION "3.4.0"
 )
+hunter_config(
+    range-v3
+    VERSION "0.5.0"
+)
 ```
 
 CMakeLists.txt
@@ -103,7 +145,7 @@ cmake_minimum_required(VERSION 3.13.0)
 include(cmake/HunterGate.cmake)
 HunterGate(
     URL "http://gitlab.centrilliontech.com.tw:10080/centrillion/hunter.git"
-    SHA1 7534d27dc7d7c18381f995a4ef48140d1e6279ed
+    SHA1 4b533d7a7e942310124dfb388d5141dd72f52381
     FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
 )
 project(ChipImgProc-example)
@@ -125,34 +167,68 @@ int main() {
 
 ```
 
-Manually build (MinGW)
+Build the full example
+-----------------------
+
+The current directory tree:
+
+```bash
+Example/
+    CMakeLists.txt
+    foo.cpp
+    cmake/
+        packages.cmake
+```
+
+* MinGW + Windows
+  @code
+  Example\\> mkdir build
+  Example\\> cd build
+  build\\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+  build\\> cmake --build . --target install
+  @endcode
+* MSVC + Windows
+  @code
+  Example\\> mkdir build
+  Example\\> cd build
+  build\\> cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+  build\\> cmake --build . --target install --config Release
+  @endcode
+* Linux + GCC
+  @code
+  Example$ mkdir build
+  Example$ cd build
+  build$ cmake .. -DCMAKE_INSTALL_PREFIX="../stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+  build$ cmake --build . --target install
+  @endcode
+
+Manually Build (g++/MinGW) {#manually-build-gcc}
 =======================
 
 If you don't want to use Hunter in your client project, you may build the ChipImgProc manually.
 
-In this case, ChipImgProc still use Hunter to maintain its self's upstream but
-there wouldn't be any Hunter code in client project but because ChipImgProc use a plenty of packages, the library link of client project probably complicates.
+In this case, ChipImgProc still uses Hunter to maintain its dependencies and the user will need to manually imports these libraries.
 
-Build requirements (MinGW)
-------------------
+Build requirements (g++/MinGW)
+------------------------------
 
-* GCC >= 7.3 (7.3 is recommended and well tested)
+* g++ >= 7.3 (7.3 is recommended and well tested)
 * CMake >= 3.13
-* MSVC <= v14.1 build tool
+* MSVC <= v14.1 build tool (only required on Windows)
 
-The main library compiler is GCC, MSVC is required by Boost build flow.
+The main library compiler is g++, MSVC is required by Boost on Windows build flow.
 
-Client project requirements (MinGW)
----------------------------
+Client project requirements (g++/MinGW)
+---------------------------------------
 
-* GCC same as ChipImgProc build
+* g++ same version as ChipImgProc used in build
 
-The ChipImgProc is built from GCC, therefore you must use GCC to link them.
+The ChipImgProc is built from g++, therefore you must use g++ to link them.
 
-Build steps (MinGW)
+Build steps (g++/MinGW)
 -----------------------
 
-Assume the project is download from git clone.
+Assuming the project is downloaded via git clone:
 
 ```bat
 :: Download submodules (ChipImgProcTestData)
@@ -163,64 +239,53 @@ ChipImgProc\> git submodule update
 ChipImgProc\> mkdir build
 ChipImgProc\> cd build
 
-:: Configure build, will build all upstream dependencies
+:: Configure build, will build all dependencies
 build\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release" -DCOPY_ALL_TP=ON
 
 :: Build project, and install
 build\> cmake --build . --target install
 
 :: Now the result will put in ChipImgProc\stage
-:: All upstream library will put in ChipImgProc\stage\third_party
+:: All libraries will put in ChipImgProc\stage\third_party
 ```
 
-Gitlab download icon link
----
+After the build step, you have to link the ChipImgProc manually.
+See [manually import](@ref manually-import) for details.
 
-@image html gitlab-download-icon-link.png width=300px
-@image latex gitlab-download-icon-link.png
-
-We assume the users visit the download icon link or the release tags just want to use the library but run the unit test, which means the users download project in such way should use an the alternative configure command:
-
-```bat
-ChipImgProc\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release" -DCOPY_ALL_TP=ON -DBUILD_TESTS=OFF
-```
-
-In this case, Build script will not need test data and of course, no test code will be built.
-Only library source will be compiled into binary.
-
-Manually build (MSVC - experimental)
+Manually Build (MSVC - Experimental) {#manually-build-msvc}
 ====================================
 
-The MSVC build is currently an experimental feature which is less test.
+The MSVC build is currently an experimental feature,
+which has not been fully tested.
 
 Build requirements (MSVC)
-------------------
+-------------------------
 
 * CMake >= 3.13
-* MSVC >= v15.9 and <= v14.1 (both needed)
+* MSVC >= v15.9 **and** <= v14.1 (both needed)
 
 The MSVC 14.1 is required by Boost 1.69 build flow.
 By hacking the Boost build code, we found:
 
-* Boost build a build engine and use the build engine to build the Boost code.
-* The build tool used to build build engine and Boost code can be different.
+* Boost build an engine and use the engine to build the Boost code.
+* The compiler used to build the engine and Boost code can be different.
 * The build script used to build the Boost build engine is unable to detect the MSVC > v14.1
 
-Therefore, we use v14.1 to build the build engine
-and the build engine call the v15.9 to build Boost code.
+Therefore, we use v14.1 to build the engine
+and use the engine to call the v15.9 and build Boost code.
 
 Client project requirements (MSVC)
 ----------------------------------
 
-* MSVC same as ChipImgProc build.
+* MSVC same version as ChipImgProc used in build.
 
-Different version of MSVC may not compatible in library binary interface (ABI),
-which may cause link fail.
+Different versions of MSVC may give rise to defeat binary interface (ABI),
+which may cause library link failures.
 
 Build steps (MSVC)
 -----------
 
-Assume the project is download from git clone.
+Assuming the project is downloaded via git clone:
 
 ```bat
 :: Download submodules (ChipImgProcTestData)
@@ -231,26 +296,29 @@ ChipImgProc\> git submodule update
 ChipImgProc\> mkdir build
 ChipImgProc\> cd build
 
-:: Configure build, will build all upstream dependencies
+:: Configure build, will build all dependencies
 build\> cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release" -DCOPY_ALL_TP=ON
 
 :: Build project, and install
 build\> cmake --build . --target install
 
 :: Now the result will put in ChipImgProc\stage
-:: All upstream library will put in ChipImgProc\stage\third_party
+:: All libraries will put in ChipImgProc\stage\third_party
 ```
 
-Manually import
+After the build step, you have to link the ChipImgProc manually.
+See [manually import](@ref manually-import) for details.
+
+Manually Import (on Windows) {#manually-import}
 ===============
 
 Import ChipImgProc may need several compiler flags and definitions,
-These compiler options not only from ChipImgProc, but OpenCV and other upstream.
+these compiler options are not only required by ChipImgProc but also OpenCV and other dependencies.
 
-Here we list all client's upstream and compiler options, the client project
-should find a way to link these binary manually.
+Here we list all client's dependencies and corresponding compiler options, the user's project
+should link these binaries manually.
 
-Use gcc
+Use GCC
 ---
 
 C++ flags:
@@ -264,7 +332,7 @@ Include directory:
 * ChipImgProc\\stage\\third_party\\include
 * ChipImgProc\\stage\\third_party\\include\\opencv
 
-C++ Define flags (nessesary):
+C++ define flags (nessesary):
 
 * CHIPIMGPROC_ENABLE_LOG
 * NUCLEONA_RANGE_USE_V3
@@ -292,7 +360,7 @@ Link libraries:
 * OpenCV
   * libopencv_*
   * (too much of them, not list all)
-* OpenCV upstream dependent
+* OpenCV dependencies
   * liblibjasper
   * libjpeg
   * liblibwebp
@@ -321,10 +389,13 @@ Link libraries:
     * oleaut32
     * advapi32
 
-The win32 API may optionally used by some module in opencv, user probably (not always) need to link them.
+The WIN32 API may be used by some modules in OpenCV, users would probably (not always) need to link them as well.
 
-Use MSVC
---------
+Here we explain the import details for Windows + GCC platform.
+There is no difference for Linux, but the OS API should change to Linux system libraries, like *glibc*, etc.
+
+Use the MSVC
+------------
 
 C++ flags:
 
@@ -338,7 +409,7 @@ Include directory:
 * ChipImgProc\\stage\\third_party\\include
 * ChipImgProc\\stage\\third_party\\include\\opencv
 
-C++ Define flags (nessesary):
+C++ define flags (nessesary):
 
 * BOOST_ALL_NO_LIB=1
 * CHIPIMGPROC_ENABLE_LOG
@@ -367,7 +438,7 @@ Link libraries:
 * OpenCV
   * opencv_*
   * (too much of them, not list all)
-* OpenCV upstream dependent
+* OpenCV dependencies
   * jpeg
   * png
   * libtiff
@@ -394,21 +465,32 @@ Link libraries:
     * oleaut32
     * advapi32
 
-The win32 API may optionally used by some module in opencv, user probably (not always) need to link them.
+The WIN32 API may be used by some modules in OpenCV, users would probably (not always) need to link them as well.
 
-Trouble shooting
+Troubleshooting
 ---
 
-* We not list all libraries
+* Unable to download submodule(test data)
 
-    The components in Nucleona and ChipImgProc is actually much more than the list,
-    Here we only list the highest used parts, user may just import all components in library directories
-    to avoid some missing link problem.
+    Please make sure the project is not downloaded from Gitlab download icon link
+    @image html gitlab-download-icon-link.png width=300px
+    @image latex gitlab-download-icon-link.png
+    We assume the user who visits the download icon or the release tags only needs to use the package and do not want to run the unit tests and examples.
+    Therefore, the user download project in that way should use an alternative configure command:
+    @code
+    ChipImgProc\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release" -DCOPY_ALL_TP=ON -DBUILD_TESTS=OFF
+    @endcode
+    In this case, the CMake script may just build the project API without the unit test and the test data.
 
-* Missing link library
+* Missing libraries
 
-    The library link is highly depend on user code, your code may require alternative link order or use more library beyond the following list.
+    The components in Nucleona and ChipImgProc use more libraries than that in the list,
+    user may just import all files in library directories
+    to avoid some missing libraries.
+    The libraries linking highly depend on user's code, your code may require alternative link order
+    or more libraries beyond the given list.
     We put all dependencies in the \<*ChipImgProc install prefix*>/lib and \<*ChipImgProc install prefix*>/third_party.
-    You should be able to find any missing library and add to your link command.
+    You should be able to find any missing libraries and add them into your link command.
 
-Manually include and link OpenCV & Boost are really painful, so we suggest to use CMake & Hunter to do such link works.
+Manually include and link OpenCV & Boost are usually painful,
+so we strongly recommend the use of CMake & Hunter that can do the dirty work for you.

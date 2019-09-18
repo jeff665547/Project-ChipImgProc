@@ -1,5 +1,5 @@
 
-Image rotation angle estimation and calibration
+Image Rotation Angle Estimation and Calibration
 ===============================================
 
 [TOC]
@@ -16,7 +16,7 @@ The estimation method of the rotation angle for Zion, Banff and Yz01 chip is ill
 
 The following is a brief introduction on the code of the image rotation.
 
-Estimate the rotation angle
+Estimate the Rotation Angle
 ===========================
 
 Estimation input
@@ -49,12 +49,12 @@ Rotation output
 
 It doesn't return anything; rather it rotates and modfies the original image.
 
-Rotation Example
+Rotation example
 ----------------
 
 @snippet Example/image_rotation_and_gridding.cpp image_rotate
 
-Refine marker position
+Refine Marker Position
 ======================
 
 Re-detect the position of the marker to get the corrected position of the marker after calibrating the image.
@@ -78,7 +78,7 @@ Refinement example
 
 @snippet Example/image_rotation_and_gridding.cpp image_marker_refine
 
-Vacant markers inference
+Vacant Markers Inference
 ========================
 
 Infer the position of the vacant markers that cannot be recognized by our previous functions.
