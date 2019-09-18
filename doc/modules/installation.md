@@ -16,7 +16,7 @@ and figuring out all dependencies is tedious.
 
 Use the package manager to maintain the dependencies may save a lot of time.
 
-Use the package manager {#use-the-package-manager}
+Use the Package Manager {#use-the-package-manager}
 ===================
 
 To use Hunter package manager, all dependencies will be built during your project configuration step, which means you won't need to manually build any code but your project.
@@ -162,7 +162,7 @@ int main() {
 
 ```
 
-Manually build (g++/MinGW) {#manually-build-gcc}
+Manually Build (g++/MinGW) {#manually-build-gcc}
 =======================
 
 If you don't want to use Hunter in your client project, you may build the ChipImgProc manually.
@@ -170,7 +170,7 @@ If you don't want to use Hunter in your client project, you may build the ChipIm
 In this case, ChipImgProc still uses Hunter to maintain its dependencies and the user will need to manually imports these libraries.
 
 Build requirements (g++/MinGW)
-------------------
+------------------------------
 
 * g++ >= 7.3 (7.3 is recommended and well tested)
 * CMake >= 3.13
@@ -179,7 +179,7 @@ Build requirements (g++/MinGW)
 The main library compiler is g++, MSVC is required by Boost on Windows build flow.
 
 Client project requirements (g++/MinGW)
----------------------------
+---------------------------------------
 
 * g++ same version as ChipImgProc used in build
 
@@ -212,14 +212,14 @@ build\> cmake --build . --target install
 After the build step, you have to link the ChipImgProc manually.
 See [manually import](@ref manually-import) for details.
 
-Manually build (MSVC - experimental) {#manually-build-msvc}
+Manually Build (MSVC - Experimental) {#manually-build-msvc}
 ====================================
 
 The MSVC build is currently an experimental feature,
 which has not been fully tested.
 
 Build requirements (MSVC)
-------------------
+-------------------------
 
 * CMake >= 3.13
 * MSVC >= v15.9 **and** <= v14.1 (both needed)
@@ -269,7 +269,7 @@ build\> cmake --build . --target install
 After the build step, you have to link the ChipImgProc manually.
 See [manually import](@ref manually-import) for details.
 
-Manually import (on Windows) {#manually-import}
+Manually Import (on Windows) {#manually-import}
 ===============
 
 Import ChipImgProc may need several compiler flags and definitions,
@@ -292,7 +292,7 @@ Include directory:
 * ChipImgProc\\stage\\third_party\\include
 * ChipImgProc\\stage\\third_party\\include\\opencv
 
-C++ Define flags (nessesary):
+C++ define flags (nessesary):
 
 * CHIPIMGPROC_ENABLE_LOG
 * NUCLEONA_RANGE_USE_V3
@@ -354,8 +354,8 @@ The WIN32 API may be used by some modules in OpenCV, users would probably (not a
 Here we explain the import details for Windows + GCC platform.
 There is no difference for Linux, but the OS API should change to Linux system libraries, like *glibc*, etc.
 
-Use MSVC
---------
+Use the MSVC
+------------
 
 C++ flags:
 
@@ -369,7 +369,7 @@ Include directory:
 * ChipImgProc\\stage\\third_party\\include
 * ChipImgProc\\stage\\third_party\\include\\opencv
 
-C++ Define flags (nessesary):
+C++ define flags (nessesary):
 
 * BOOST_ALL_NO_LIB=1
 * CHIPIMGPROC_ENABLE_LOG

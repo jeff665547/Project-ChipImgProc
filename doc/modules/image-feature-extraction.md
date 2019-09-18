@@ -6,7 +6,7 @@ Image Feature Extraction
 
 In this section, we determine the intensity of a feature probe by the most representative region defined by the minimum coefficient of variation (minCV) criterion in that cell. The size of the representative region is user-defined.
 
-Extraction method
+Extraction Method
 ==================
 
 Extraction method for Zion, Banff, and Yz01 chips
@@ -19,7 +19,7 @@ Extraction method for Zion, Banff, and Yz01 chips
 
 The following is a brief introduction on the code of the intensity extraction.
 
-Data preparation for image feature extraction
+Data Preparation for Image Feature Extraction
 =============================================
 
 Data preparation input
@@ -39,7 +39,7 @@ Data preparation example
 
 @snippet Example/image_stitch_and_extraction.cpp image-feature-preparation
 
-Feature extraction
+Feature Extraction
 ==================
 
 Feature extraction input

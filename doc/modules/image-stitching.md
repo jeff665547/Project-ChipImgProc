@@ -1,10 +1,10 @@
 
-Image stitching
+Image Stitching
 ===============
 
 After finishing extracting features, the final section of this tutorial addresses ways of stitching all FOVs into a complete chip image for Zion, Banff, and Yz01 chips.
 
-Data preparation for image stitching
+Data Preparation for Image Stitching
 ====================================
 
 Data preparation input
@@ -25,7 +25,7 @@ Data preparation example
 
 @snippet Example/image_stitch_and_extraction.cpp image-multi_tiled-stitch
 
-Data FOV images stitching
+Data FOV Images Stitching
 =========================
 
 Data FOV images input

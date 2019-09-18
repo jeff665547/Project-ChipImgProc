@@ -4,7 +4,7 @@ Fluorescence Marker Detection
 
 This example will help you to build the fluorescence marker detection app for Zion, Banff, Yz01 chips.
 
-Data preparation for the fluorescence marker detection
+Data Preparation for the Fluorescence Marker Detection
 ======================================================
 
 Fluorescence marker input
