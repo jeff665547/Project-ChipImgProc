@@ -278,7 +278,6 @@ these compiler options are not only required by ChipImgProc but also OpenCV and 
 Here we list all client's dependencies and corresponding compiler options, the user's project
 should link these binaries manually.
 
-
 Use GCC
 ---
 
