@@ -22,7 +22,7 @@ In addition, the scanning results often require a small-angle rotation calibrati
 
 After finishing image correction, one might want to will crop the image to discard the uninterested region. The image is gridded and each feature is assigned to an index (x, y) according to the grid [[Image Gridding](@ref doc/modules/image-gridding.md)].
 
-Finally, the intensity of a feature probe can be determined by the most representative region defined by the minimum coefficient of variation (minCV) criterion in that region whose size is user-defined, in the corresponding cell [[Image Feature Extraction](@ref doc/modules/image-feature-extraction.md)]. The overall workflow of a typical use of this library is illustrated below (Figure 4).
+Finally, the intensity of a feature probe can be determined by the most representative region defined by the minimum coefficient of variation (minCV) criterion in that region whose size is user-defined, in the corresponding cell [[Probe Intensity Extraction](@ref doc/modules/probe-intensity-extraction.md)]. The overall workflow of a typical use of this library is illustrated below (Figure 4).
 
 @image html tutorial-flowchart.png width=600px
 @image latex tutorial-flowchart.png

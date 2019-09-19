@@ -32,7 +32,7 @@ Data preparation input
 Data preparation output
 -----------------------
 
-1. A tile matrix object (Figure 8).
+1. A tile matrix object (Figure 9).
 
 Data preparation example
 ------------------------
