@@ -24,7 +24,7 @@ As illustrated in the figure 10, for each cell, take the center-shrunk region of
 
   @image html mid-seg.png width=670px
   @image latex mid-seg.png width=13cm
-  Figure 10 The Middle Segmentation Mode.
+  Figure 10 The middle segmentation mode.
 
 
 
