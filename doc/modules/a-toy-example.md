@@ -20,6 +20,6 @@ For information on estimating the rotation angle and calibrating the chip image,
 
 For information on gridding the chip image, see [Image Gridding](@ref doc/modules/image-gridding.md).
 
-For information on using minCV to define the probe intensity, see [Image Feature Extraction](@ref doc/modules/image-feature-extraction.md).
+For information on using minCV to define the probe intensity, see [Probe Intensity Extraction](@ref doc/modules/probe-intensity-extraction.md).
 
 For information on stitching all FOVs into a complete chip image, see [Image Stitching](@ref doc/modules/image-stitching.md).
