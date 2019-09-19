@@ -101,7 +101,7 @@ Hunter configuration
         include(cmake/HunterGate.cmake)
         HunterGate(
             URL "http://gitlab.centrilliontech.com.tw:10080/centrillion/hunter.git"
-            SHA1 4b533d7a7e942310124dfb388d5141dd72f52381
+            SHA1 3ee31bb3a84dd5bb18981787260f224afb55af62
             FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
         )
 
@@ -145,7 +145,7 @@ cmake_minimum_required(VERSION 3.13.0)
 include(cmake/HunterGate.cmake)
 HunterGate(
     URL "http://gitlab.centrilliontech.com.tw:10080/centrillion/hunter.git"
-    SHA1 4b533d7a7e942310124dfb388d5141dd72f52381
+    SHA1 3ee31bb3a84dd5bb18981787260f224afb55af62
     FILEPATH ${CMAKE_CURRENT_LIST_DIR}/cmake/packages.cmake
 )
 project(ChipImgProc-example)
