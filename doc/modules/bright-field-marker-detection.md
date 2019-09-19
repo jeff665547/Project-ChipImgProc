@@ -44,19 +44,19 @@ ArUco Marker Detection
 
       - Pyramid level:
 
-        The "Level" parameter (unit: counting numbers) means the number of iterations of the pyramid down-smapling process. This parameter is used to speed up the ArUco marker localization. For more information on this algorithm, see [here](https://en.wikipedia.org/wiki/Pyramid_(image_processing)).
+        The "Level" parameter (unit: iteration number) means the number of iterations of the pyramid down-smapling process. This parameter is used to speed up the ArUco marker localization. For more information on this algorithm, see [here](https://en.wikipedia.org/wiki/Pyramid_(image_processing)).
       - Border width:
 
-        The distance (unit: a side length of a cell) between coding region of ArUco and marker frame template. (Illustrated as "b" in figure 6)
+        The distance (cell) between coding region of ArUco and marker frame template. (Illustrated as "b" in figure 6)
       - Fringe width:
 
-        The width (unit: a side length of a cell) of marker frame template. (Illustrated as "f" in figure 6, dark blue area.)
+        The width (cell) of marker frame template. (Illustrated as "f" in figure 6, dark blue area.)
       - Bits width:
 
-        The width (unit: pixel) of a cell. (Illustrated as "p" in figure 6)
+        The width (pixel) of a cell. (Illustrated as "p" in figure 6)
       - Margin size:
 
-        The width (unit: pixel) of the marker frame mask. (Illustrated as "m" in figure 6, light blue area.)
+        The width (pixel) of the marker frame mask. (Illustrated as "m" in figure 6, light blue area.)
       - Marker frame template:
 
         The dark blue area in the figure 6. It is loaded from a raw chip image with the use of OpenCV.
@@ -65,13 +65,13 @@ ArUco Marker Detection
         The light blue area in the figure 6. It is loaded from a raw chip image with the use of OpenCV.
       - Number of marker counts:
 
-        The maximum number of counts (unit: counting numbers) of ArUco markers in an FOV. For example, the number of marker counts is nine for the Yz01 and Banff chip.
+        The maximum number of counts of ArUco markers in an FOV. For example, the number of marker counts is nine for the Yz01 and Banff chip.
       - Length of radius:
 
-        The minimum distance (unit: pixel) between each ArUco markers. That means there are no other ArUco markers of interest presenting in the circular region illustrated in the figure 7. The radius of the circular region is user-specified.
+        The minimum distance (pixel) between each ArUco markers. That means there are no other ArUco markers of interest presenting in the circular region illustrated in the figure 7. The radius of the circular region is user-specified.
       - Cell size:
 
-        The width (unit: pixel) of the binary determination region. (Illustrated as "s" in figure 6)
+        The width (pixel) of the binary determination region. (Illustrated as "s" in figure 6)
       - ArUco IDs:
 
         The vector of ArUco IDs.
@@ -81,7 +81,7 @@ ArUco Marker Detection
 
     @image html aruco-single-mk-spec.png width=540px
     @image latex aruco-single-mk-spec.png width=13cm
-    Figure 6 Marker Pattern Description and Corresponding Auxiliary Parameters for Recognition. (A cell is equivalent to a bit here.)
+    Figure 6 Marker pattern description and corresponding auxiliary parameters for recognition. (A cell is equivalent to a bit here.)
 
     @image html aruco-radius-define.png width=650px
     @image latex aruco-radius-define.png width=13cm

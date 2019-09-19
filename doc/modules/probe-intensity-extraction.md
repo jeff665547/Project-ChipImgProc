@@ -6,16 +6,25 @@ Probe Intensity Extraction
 
 In this section, we determine the intensity of a probe by the most representative region defined by the minimum coefficient of variation (minCV) criterion in that cell. The size of the representative region is user-defined.
 
-The minCV mode
+The minCV Mode
 ==============
 
 1. For each cell, use the sliding window whose size is user-defined to find the representative region.
 2. For each window, let @f$X_{ij}@f$ be the intensity pixel value of the @f$i_{th}@f$ row and the @f$j_{th}@f$ column in a window, @f$\mathbb \mu = \frac{\sum_{i,j} X_{ij}}{mn}@f$,  @f$\mathbb \sigma^2 = \frac{\sum_{i,j} (X_{ij}-\mu)^2}{mn-1}@f$,  coefficient of variation @f$CV = \frac{\sigma}{\mu}@f$, where m is the number of rows (in pixels) in a given-sized window, n is the number of columns (in pixels) in a given-sized window.
-3. For each cell, take the window having minimum CV within that cell as the most representative region, and use the mean of that region to define the intensity of that cell.
+3. For each cell, take the window having minimum CV within that cell as the most representative region, and use the average intensity of that region to define the intensity of that cell.
 
   @image html image-margin.jpg width=670px
   @image latex image-margin.jpg width=13cm
   Figure 9 The tile matrix of an FOV (Banff (AM1), Yz01(AM1)).
+
+The Middle Segmentation Mode (Mid_seg)
+======================================
+
+As illustrated in the figure 10, for each cell, take the center-shrunk region of that cell as the representative region, and use the average intensity of that region to summarize the probe signal. The size of the center region is determined by the relative percentage shrinking from the cell margin, and the percentage is user-specified.
+
+  @image html mid-seg.png width=670px
+  @image latex mid-seg.png width=13cm
+  Figure 10 The Middle Segmentation Mode.
 
 The following is a brief introduction to the code of the intensity extraction.
 
