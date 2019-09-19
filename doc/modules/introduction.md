@@ -2,7 +2,7 @@
 Introduction
 ===
 
-Centrillion Technologies produces a series of chips, such as Banff, ZION, YZ01, etc. Chips are arranged on the 384 or 96 chip tray (Figure 1) and scanned by SUMMIT Reader. During the process of scanning, due to the view field size of the microscope, the chip will be separated into several parts to be scanned. The image of each part is called a field of view (FOV), and the amount of acquired FOVs depends on the types of chips. After SUMMIT Reader finishes the scanning process, the functions in this library can be applied to process the images of acquired FOVs, and all FOVs of a chip will be stitched to produce a high-resolution image of a chip (Figure 2).
+Centrillion Technologies produces a series of chips, such as Banff, ZION, YZ01, etc. Chips are arranged on the 384 or 96 chip tray (Figure 1) and scanned by SUMMIT Reader. During the process of scanning, due to the view field size of the microscope, the chip will be separated into several parts to be scanned. The image of each part is called a field of view (FOV), and the amount of acquired FOVs depends on the types of chips. After SUMMIT Reader finishes the scanning process, the functions in this library can be applied to process the images of acquired FOVs, and all FOVs of a chip stitch to produce a high-resolution image of a chip (Figure 2).
 
 @image html tray-to-chip.png width=800px
 @image latex tray-to-chip.png
@@ -16,13 +16,13 @@ Figure 2 A stitched image of a chip. The marker region is enlarged and highlight
 @image latex aruco-marker-spec.png
 Figure 3 Marker Composition
 
-SUMMIT Reader usually use three different channels, bright field (BF), red light (red), and green light (green), to scan a chip. During the scanning process, functions in this library are called to recognize the marker pattern in accordance with each channel, and that helps us locate the chip position in the FOV. In most cases, the ArUco markers are recognized in the BF channel [[Bright-Field Marker Detection](@ref doc/modules/bright-field-marker-detection.md)]; the AM3 markers are recognized in the red channel; and the AM1 markers are recognized in the green channel [[Fluorescence Marker Detection](@ref doc/modules/fluorescence-marker-detection.md)] (Figure 3). The patterns of the ArUco markers differ from marker to marker in a chip, but the AM1 and AM3 markers are consistent to each other with respect to its imaging channel.
+SUMMIT Reader usually uses three different channels, bright field (BF), red light (red), and green light (green), to scan a chip. Functions in this library are used to recognize the marker pattern in accordance with each channel. In most cases, the ArUco markers are recognized in the BF channel [[Bright-Field Marker Detection](@ref doc/modules/bright-field-marker-detection.md)]; the AM3 markers are recognized in the red channel; and the AM1 markers are recognized in the green channel [[Fluorescence Marker Detection](@ref doc/modules/fluorescence-marker-detection.md)] (Figure 3). The patterns of the ArUco markers differ from marker to marker in a chip, but the AM1 and AM3 markers are consistent in corresponding channel.
 
-On the other hand, because of the placement uncertainty of the chip, the scanning results often require a small-angle rotation calibration to correct the orientation of images. The estimation of the rotation angles is judged by the relative position of makers in each FOV [[Image Rotation Angle Estimation and Calibration](@ref doc/modules/image-rotation-angle-estimation-and-calibration.md)].
+In addition, the scanning results often require a small-angle rotation calibration to correct the orientation of images. The estimation of the rotation angles is judged by the relative position of makers in each FOV [[Image Rotation Angle Estimation and Calibration](@ref doc/modules/image-rotation-angle-estimation-and-calibration.md)].
 
-After finishing image correction, we will crop the image to discard the uninterested region. We will also grid the image and assign x,y index to each feature according to the grid [[Image Gridding](@ref doc/modules/image-gridding.md)].
+After finishing image correction, one might want to will crop the image to discard the uninterested region. The image is gridded and each feature is assigned to an index (x, y) according to the grid [[Image Gridding](@ref doc/modules/image-gridding.md)].
 
-Finally, the intensity of a feature probe is determined by the most representative region defined by the minimum coefficient of variation (minCV) criterion in that region whose size is user-defined, in the corresponding cell [[Image Feature Extraction](@ref doc/modules/image-feature-extraction.md)]. The overall workflow of a typical use of this library is illustrated below (Figure 4).
+Finally, the intensity of a feature probe can be determined by the most representative region defined by the minimum coefficient of variation (minCV) criterion in that region whose size is user-defined, in the corresponding cell [[Image Feature Extraction](@ref doc/modules/image-feature-extraction.md)]. The overall workflow of a typical use of this library is illustrated below (Figure 4).
 
 @image html tutorial-flowchart.png width=600px
 @image latex tutorial-flowchart.png
