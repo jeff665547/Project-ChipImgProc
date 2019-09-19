@@ -6,7 +6,7 @@ Installation
 
 There are three ways to use ChipImgProc:
 
-1. [Use CMake and directly import by the package manager](@ref use-the-package-manager)
+1. [Use CMake and package manager to build and import to your project](@ref use-the-package-manager)
 2. [Manually build](@ref manually-build-gcc) and [import by g++](@ref manually-import-gcc)
 3. [Manually build](@ref manually-build-msvc) and [import by MSVC](@ref manually-import-msvc)
 
