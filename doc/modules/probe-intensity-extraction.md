@@ -17,10 +17,10 @@ The minCV Mode
   @image latex image-margin.jpg width=13cm
   Figure 9 The tile matrix of an FOV (Banff (AM1), Yz01(AM1)).
 
-The middle segmentation mode (Mid_seg)
-======================================
+The middle segmentation mode
+============================
 
-As illustrated in the figure 10, for each cell, take the center-shrunk region of that cell as the representative region, and use the average intensity of that region to summarize the probe signal. The size of the center region is determined by the relative percentage shrinking from the cell margin, and the percentage is user-specified.
+Another probe intensity extraction method is the middle segmentation mode (mid_seg). As illustrated in the figure 10, for each cell, take the center-shrunk region of that cell as the representative region, and use the average intensity of that region to summarize the probe signal. The size of the center region is determined by the relative percentage shrinking from the cell margin, and the percentage is user-specified.
 
   @image html mid-seg.png width=670px
   @image latex mid-seg.png width=13cm
