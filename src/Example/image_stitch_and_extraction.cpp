@@ -171,10 +171,10 @@ int main( int argc, char** argv )
          *      The distance (µm) between cell and cell (a probe and a probe)
          * 
          *  Row number of markers:
-         *      Number of markers ine one Row
+         *      Number of markers in one Row
          * 
          *  Column number of markers:
-         *      Number of markers ine one Column
+         *      Number of markers in one Column
          * 
          *  Spacing x of marker:
          *      The spacing (cell counts) between first top-left cell (probe) of each marker along X axis
@@ -285,8 +285,8 @@ int main( int argc, char** argv )
         //  Auto-inference to fill the vacancy marker positions
         marker_regioins = chipimgproc::marker::detection::reg_mat_infer(
             marker_regioins,
-            3,                  //  Number of markers ine one Row
-            3,                  //  Number of markers ine one Column
+            3,                  //  Number of markers in one Row
+            3,                  //  Number of markers in one Column
             image
             );
 
