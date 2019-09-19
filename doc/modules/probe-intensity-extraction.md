@@ -26,6 +26,8 @@ As illustrated in the figure 10, for each cell, take the center-shrunk region of
   @image latex mid-seg.png width=13cm
   Figure 10 The Middle Segmentation Mode.
 
+
+
 The following is a brief introduction to the code of the intensity extraction.
 
 Data Preparation for Probe Intensity Extraction
