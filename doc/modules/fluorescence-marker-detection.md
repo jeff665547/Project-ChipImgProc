@@ -112,7 +112,7 @@ Parameters
     The height (µm) of one cell (a probe).
 - Width (µm) of cell:
     The width (µm) of one cell (a probe).
-- Spacing µm of cell:
+- Spacing (µm) of cell:
     The distance (µm) between cell and cell (a probe and a probe). The white part between two cells in the figure 6.
     
     @image html aruco-single-mk-spec.png width=540px
@@ -140,9 +140,9 @@ Parameters for different chips
 
 |  Parameters  | Zion | Banff | Yz01 |
 |:------------:|:----:|:-----:|:----:|
-| Row µm of cell | 9 | 4 | 3 |
-| Column µm of cell | 9 | 4 | 3 |
-| Spacing µm of cell | 2 | 1 | 1 |
+| Height (µm) of cell | 9 | 4 | 3 |
+| Width (µm) of cell | 9 | 4 | 3 |
+| Spacing (µm) of cell | 2 | 1 | 1 |
 | Row number of marker | 3 | 3 | 3 |
 | Column number of marker | 3 | 3 | 3 |
 | Spacing x of marker | 37 | 81 | 101 |
