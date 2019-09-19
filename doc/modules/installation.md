@@ -7,8 +7,8 @@ Installation
 There are three ways to use ChipImgProc:
 
 1. [Use CMake and directly import by the package manager](@ref use-the-package-manager)
-2. [Manually build and import by g++](@ref manually-build-gcc)
-3. [Manually build and import by MSVC](@ref manually-build-msvc)
+2. [Manually build](@ref manually-build-gcc) and [import by g++](@ref manually-import-gcc)
+3. [Manually build](@ref manually-build-msvc) and [import by MSVC](@ref manually-import-msvc)
 
 It is highly recommended to use the package manager
 because manually linking the third party libraries
@@ -58,7 +58,7 @@ Requirements
 The MSVC 14.1 is required by Boost 1.69 build flow.
 By hacking the Boost build code, we found:
 
-* Boost build an engine and use the engine to build the Boost code.
+* Boost builds an engine and use the engine to build the Boost code.
 * The compiler used to build the engine and Boost code can be different.
 * The build script used to build the Boost build engine is unable to detect the MSVC > v14.1
 
@@ -267,7 +267,7 @@ Build requirements (MSVC)
 The MSVC 14.1 is required by Boost 1.69 build flow.
 By hacking the Boost build code, we found:
 
-* Boost build an engine and use the engine to build the Boost code.
+* Boost builds an engine and use the engine to build the Boost code.
 * The compiler used to build the engine and Boost code can be different.
 * The build script used to build the Boost build engine is unable to detect the MSVC > v14.1
 
@@ -318,7 +318,7 @@ these compiler options are not only required by ChipImgProc but also OpenCV and 
 Here we list all client's dependencies and corresponding compiler options, the user's project
 should link these binaries manually.
 
-Use GCC
+Use GCC {#manually-import-gcc}
 ---
 
 C++ flags:
@@ -394,7 +394,7 @@ The WIN32 API may be used by some modules in OpenCV, users would probably (not a
 Here we explain the import details for Windows + GCC platform.
 There is no difference for Linux, but the OS API should change to Linux system libraries, like *glibc*, etc.
 
-Use the MSVC
+Use the MSVC {#manually-import-msvc}
 ------------
 
 C++ flags:
