@@ -1,3 +1,4 @@
+/// [include]
 #include <ChipImgProc/marker/layout.hpp>
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/marker/detection/reg_mat.hpp>
@@ -9,10 +10,12 @@
 #include <ChipImgProc/margin.hpp>
 #include <ChipImgProc/multi_tiled_mat.hpp>
 #include <boost/program_options.hpp>
+/// [include]
 
+/// [code]
 /*
  *  This example code will help you to build the application to:
- *      1. Marker detecteing
+ *      1. Marker detecting
  *      2. Image rotating
  *      3. Image gridding
  *      4. Image feature extracting
@@ -457,3 +460,4 @@ int main( int argc, char** argv )
     
     return 0;
 }
+/// [code]
