@@ -94,7 +94,7 @@ Fluorescence marker input
 Fluorescence marker output
 --------------------------
 
-- A Rotated image with gridded-line.
+- A rotated image with gridded-line.
 
 Fluorescence marker example
 ---------------------------
@@ -113,7 +113,7 @@ Parameters
 - Width (µm) of cell:
     The width (µm) of one cell (a probe).
 - Spacing (µm) of cell:
-    The distance (µm) between cell and cell (a probe and a probe). The white part between two cells in the figure 6.
+    The distance (µm) between adjacent cells (a probe and a probe). The white part between two cells in the figure 6.
     
     @image html aruco-single-mk-spec.png width=540px
     @image latex aruco-single-mk-spec.png width=13cm

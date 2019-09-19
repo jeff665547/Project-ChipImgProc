@@ -2,7 +2,7 @@
 Introduction
 ===
 
-Centrillion Technologies produces a series of chips, such as Banff, ZION, YZ01, etc. Chips are arranged on the 384 or 96 chip tray (Figure 1) and scanned by SUMMIT Reader. During the process of scanning, due to the view field size of the microscope, the chip will be separated into several parts to be scanned. The image of each part is called a field of view (FOV), and the amount of acquired FOVs depends on the types of chips. After SUMMIT Reader finishes the scanning process, the functions in this library can be applied to process the images of acquired FOVs, and all FOVs of a chip stitch to produce a high-resolution image of a chip (Figure 2).
+Centrillion Technologies produces a series of chips, such as Banff, ZION, YZ01, etc. Chips are arranged on the 384 or 96 chip tray (Figure 1) and scanned by SUMMIT Reader. During the process of scanning, due to the view field size of the microscope, the chip will be separated into several parts to be scanned. The image of each part is called a field of view (FOV), and the amount of acquired FOVs depends on the types of chips. After SUMMIT Reader finishes the scanning process, the functions in this library can be applied to process the images of acquired FOVs, and stitch all FOVs of a chip to produce a high-resolution image of a chip (Figure 2).
 
 @image html tray-to-chip.png width=800px
 @image latex tray-to-chip.png
@@ -20,7 +20,7 @@ SUMMIT Reader usually uses three different channels, bright field (BF), red ligh
 
 In addition, the scanning results often require a small-angle rotation calibration to correct the orientation of images. The estimation of the rotation angles is judged by the relative position of makers in each FOV [[Image Rotation Angle Estimation and Calibration](@ref doc/modules/image-rotation-angle-estimation-and-calibration.md)].
 
-After finishing image correction, one might want to will crop the image to discard the uninterested region. The image is gridded and each feature is assigned to an index (x, y) according to the grid [[Image Gridding](@ref doc/modules/image-gridding.md)].
+After finishing image correction, one might want to crop the image to discard the uninterested region. The image is gridded and each feature is assigned to an index (x, y) according to the grid [[Image Gridding](@ref doc/modules/image-gridding.md)].
 
 Finally, the intensity of a feature probe can be determined by the most representative region defined by the minimum coefficient of variation (minCV) criterion in that region whose size is user-defined, in the corresponding cell [[Probe Intensity Extraction](@ref doc/modules/probe-intensity-extraction.md)]. The overall workflow of a typical use of this library is illustrated below (Figure 4).
 
