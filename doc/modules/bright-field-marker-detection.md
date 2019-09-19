@@ -18,6 +18,7 @@ ArUco Marker Detection
     @image html marker-frame-tiff.png width=600px
     @image latex marker-frame-tiff.png
     Figure 5 Marker Recognition Principle. The marker frame template and the marker frame mask are used to identify the marker locations within an FOV roughly.
+    
 - Output:
   - A collection of detected ArUco IDs and their xy-positions in pixels.
 - Example:
@@ -81,6 +82,7 @@ ArUco Marker Detection
     @image html aruco-single-mk-spec.png width=540px
     @image latex aruco-single-mk-spec.png width=13cm
     Figure 6 Marker Pattern Description and Corresponding Auxiliary Parameters for Recognition. (A cell is equivalent to a bit here.)
+
     @image html aruco-radius-define.png width=650px
     @image latex aruco-radius-define.png width=13cm
     Figure 7 The radius of the circular region between markers in an FOV (the blue rectangle).
