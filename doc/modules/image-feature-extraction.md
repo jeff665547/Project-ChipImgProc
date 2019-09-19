@@ -46,7 +46,7 @@ Intensity extraction input
 ------------------------
 
 1. A string that set the feature extracting mode. There are two modes can be chosen. If we use "auto_min_cv", that means we ignore the segmentation rate and find the minimum CV of this tile automatically. The default mode for feature extraction is "mid_seg" using only segmentation rate and reducing the tile from outside to inside.
-2. A floating point for the segmentation rate. The segmentation rate is the percentage of the margin shrinking inward. For more information, see `chipimgproc::margin::operator()() const`.
+2. A floating point for the segmentation rate. The segmentation rate is the percentage of the margin shrinking inward. For more information, see chipimgproc::Margin for details.
 3. A reference to the tile matrix.
 4. A boolean value indicating whether segmented tile results replace the tile-matrix or not.
 5. A null pointer.
