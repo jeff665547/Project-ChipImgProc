@@ -77,7 +77,7 @@ struct IterationCali {
         const int start_record_theta_time = 2;
 
         cv::Mat tmp = src.clone();
-        Float theta_off, theta;
+        Float theta_off, theta(0);
         int iter_times = 0;
         std::vector<Float> candi_theta;
         auto rot_est = [this, &tmp](auto&&... args) {
