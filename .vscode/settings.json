@@ -1,5 +1,11 @@
 {
     "markdownlint.config": {
         "MD046": false
-    }
+    },
+    "cSpell.words": [
+        "Gitlab",
+        "chipimgproc",
+        "cmake",
+        "submodule"
+    ]
 }
