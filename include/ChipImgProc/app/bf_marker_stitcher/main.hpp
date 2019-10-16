@@ -54,7 +54,7 @@ public:
         po::options_description desc( "Allowed options") ;
         desc.add_options()
             ( "help,h",    "show help message" )
-            ( "images,i", po::value< std::string >()->required(), "The list file of image paths with Z path ordering" )
+            ( "images,i", po::value< std::string >()->required(), "The list file of image paths with ordering" )
             ( "arucoj,j", po::value< std::string >()->required(), "The json file of aruco database" )
             ( "mktemp,t", po::value< std::string >()->required(), "Image path of marker frame template" )
             ( "mkmask,m", po::value< std::string >()->required(), "Image path of marker frame mask" )
@@ -181,17 +181,26 @@ void Run( GET_PARAMETERS&& args )
         points.emplace_back( cv::Point( aruco_mk[0].x, aruco_mk[0].y ));
     }
 
-    std::cerr << "\n";
-    for( auto&& point : points ) std::cerr << point << "\n";
-    std::cerr << "\n";
+    auto k = 0;
+    auto zero_x = points[0].x;
+    auto zero_y = points[0].y;
 
-    points[0] = cv::Point( points[0].x, points[0].y );
-    points[1] = cv::Point( points[1].x-30, points[1].y-17 );
-    points[2] = cv::Point( points[2].x-15, points[2].y-35 ); // 25
+    //  Marker distance is 980 per marker V x2  V x4
+    std::vector< std::size_t > shift({ 0, 1960, 3920 });
 
-    std::cerr << "\n";
-    for( auto&& point : points ) std::cerr << point << "\n";
-    std::cerr << "\n";
+    for( std::size_t j = 0; j < args.y; ++j )
+    {
+        for( std::size_t i = 0; i < args.x; ++i )
+        {
+            points[k] = cv::Point
+            (
+                // Shifting the image to align with the fist FOV
+                points[k].x + (( zero_x - points[k].x ) * 2 ) + shift[i],
+                points[k].y + (( zero_y - points[k].y ) * 2 ) + shift[j]
+            );
+            k++;
+        }
+    }
 
     cv::Mat full_image = chipimgproc::stitch::add( args.images, points );
     cv::imwrite( args.output_path, full_image );
