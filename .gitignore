@@ -66,5 +66,5 @@ doc/output
 version.h
 include/summit
 ms-build/
-.bak/
 ms-stage/
+.bak/
