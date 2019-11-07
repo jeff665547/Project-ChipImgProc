@@ -253,8 +253,8 @@ int main( int argc, char** argv )
 
     /// [vacant_markers_inference]
     //  Auto-inference to fill the vacancy marker positions
-    marker_regioins = chipimgproc::marker::detection::reg_mat_infer(
-        marker_regioins,
+    marker_regions = chipimgproc::marker::detection::reg_mat_infer(
+        marker_regions,
         3,                  //  Number of markers in one Row
         3,                  //  Number of markers in one Column
         image
