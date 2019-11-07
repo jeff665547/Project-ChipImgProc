@@ -32,6 +32,8 @@
 
 int main( int argc, char** argv )
 {
+    /// [data_preparation]
+
     /*
      *  +=========================+
      *  | Declare program options |
@@ -73,15 +75,16 @@ int main( int argc, char** argv )
      *  +========================+
      */
 
-    //  Load raw chip image from path via OpenCV
+    //  Load a raw chip image from path via OpenCV
     auto raw_image = cv::imread( image_path, cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH );
 
     /*
      *  By default, OpenCV read the image with 8 bits RGB color from cv::imread
-     *  We don't want OpenCV reduce our raw chip image to the depth with 8 bits only
-     *  So we give the parameter and set to:
+     *  We don't want OpenCV to reduce our raw chip image to the depth with 8 bits only
+     *  So we set the parameter to:
      * 
      *      "cv::IMREAD_ANYCOLOR" for RGB color
+     *                             or
      *      "cv::IMREAD_ANYDEPTH" for depth with our raw image (16 bits)
     */
 
@@ -104,7 +107,7 @@ int main( int argc, char** argv )
 
     /*
      *  The coordinate is mapping start at top-left between the raw chip image and the vector of ArUco ID
-     *  And echa ArUco ID represente to an ArUco marker on the raw chip image
+     *  And each ArUco ID representes an ArUco marker on the raw chip image
      * 
      *      Raw Chip Image      Vector of ArUco ID
      *      +------------>      +------------>
@@ -136,8 +139,10 @@ int main( int argc, char** argv )
     //  Load marker frame images of both template and mask
     auto marker_frame_template = cv::imread( marker_frame_template_path, cv::IMREAD_GRAYSCALE );
     auto marker_frame_mask     = cv::imread( marker_frame_mask_path,     cv::IMREAD_GRAYSCALE );
-/// [data_preparation]
-/// [aruco_detection]
+
+    /// [data_preparation]
+    /// [aruco_detection]
+
     /*
      *  +=================+
      *  | ArUco detection |
@@ -149,8 +154,8 @@ int main( int argc, char** argv )
     detector.reset(
         aruco_dict_6x6_250,     //  ArUco database
         3,                      //  Pyramid level
-        1,                      //  Border bits
-        1,                      //  Fringe bits
+        1,                      //  Border width
+        1,                      //  Fringe width
         13.4,                   //  Bits width
         8.04,                   //  Margin size
         marker_frame_template,  //  marker frame template
@@ -171,43 +176,49 @@ int main( int argc, char** argv )
      *      Database of 250 ArUco code with size 6x6
      * 
      *  Pyramid level:
-     *      A level for down-sampling which to speed up the ArUco marker detection
+     *      The "Level" parameter (unit: counting numbers) means the iteration times for doing down-smapling for speeding up the ArUco marker localization
      * 
-     *  Border bits:
-     *      A bit distance between coding region of ArUco and  marker frame template
+     *  Border width:
+     *      The distance (one unit: the side length of a cell) between coding region of ArUco and marker frame template
      * 
-     *  Fringe bits:
-     *      A bit width of marker frame template
+     *  Fringe width:
+     *      The width (one unit: the side length of a cell) of marker frame template
      * 
      *  Bits width:
-     *      A bit width of each pixels
+     *      The width (one unit: one pixel) of a cell
      * 
      *  Margin size:
-     *      A bit with of marker frame mask
+     *      The width (one unit: one pixel) of the marker frame mask
      * 
      *  Marker frame template:
-     *      Marker frame inside pattern
+     *      Marker frame of inside pattern
      * 
      *  Marker frame mask:
-     *      Marker frame outside border
+     *      Marker frame of outside border
      * 
      *  Number of marker counts:
-     *      Maximum count of ArUco markers
+     *      The maximum number of counts (unit: counting numbers) of ArUco markers in an FOV
+     *      For example, the number of marker counts is nine for the Yz01 and Banff chip
      * 
      *  Number of radius:
-     *      Minimum distance between each ArUco markers
+     *      The minimum distance (unit: pixel) between each ArUco markers
+     *      That means there are no other ArUco markers of interest presenting in the circular region
+     *      The radius of the circular region is user-specified
      * 
      *  Cell size:
-     *      A bit with of binary determination region
+     *      The width (unit: pixel) of the binary determination region
      * 
      *  ArUco IDs:
-     *      Vector of ArUco IDs
+     *      The vector of ArUco IDs
      * 
      *  Logger:
      *      Log output
      * 
      */ 
-/// [output]
+
+    /// [aruco_detection]
+    /// [output]
+
     /*
      *  +===================+
      *  | Output ArUco code |
@@ -218,6 +229,7 @@ int main( int argc, char** argv )
     for( auto& [ id, position ] : detected_aruco_id_position )
         std::cout << id << '\t' << position << std::endl;
 
-/// [output]
+    /// [output]
+    
     return 0;
 }
