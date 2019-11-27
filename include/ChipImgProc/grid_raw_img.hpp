@@ -46,10 +46,10 @@ struct GridRawImg {
         gl_x_.reserve(glx.size());
         gl_y_.reserve(gly.size());
         for(auto&& x : glx) {
-            gl_x_.push_back((GLID)x);
+            gl_x_.push_back(static_cast<GLID>(std::round(x)));
         }
         for(auto&& y : gly) {
-            gl_y_.push_back((GLID)y);
+            gl_y_.push_back(static_cast<GLID>(std::round(y)));
         }
     }
     
