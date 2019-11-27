@@ -106,24 +106,28 @@ constexpr struct RegMatNoRot {
         std::ostream&           out        = nucleona::stream::null_out
     ) const {
         auto& score_sum = score_matrix;
-        auto max_points = make_fixed_capacity_set<cv::Point>(
-            20, chipimgproc::utils::PosCompByScore(score_sum)
-        );
         cv::Point max_loc;
-        float max_score = 0;
-        for(int y = 0; y < score_sum.rows; y ++ ) {
-            for(int x = 0; x < score_sum.cols; x ++ ) {
-                auto& score = score_sum(y, x);
-                max_points.emplace(cv::Point(x, y));
-            }
-        }
-        for(auto&& p : max_points) {
-            max_loc.x += p.x;
-            max_loc.y += p.y;
-            max_score += score_sum(p.y, p.x);
-        }
-        max_loc.x /= max_points.size();
-        max_loc.y /= max_points.size();
+        cv::minMaxLoc(score_sum, nullptr, nullptr, nullptr, &max_loc);
+
+        // auto max_points = make_fixed_capacity_set<cv::Point>(
+        //     20, chipimgproc::utils::PosCompByScore(score_sum)
+        // );
+        // cv::Point max_loc;
+        // float max_score = 0;
+        // for(int y = 0; y < score_sum.rows; y ++ ) {
+        //     for(int x = 0; x < score_sum.cols; x ++ ) {
+        //         auto& score = score_sum(y, x);
+        //         max_points.emplace(cv::Point(x, y));
+        //     }
+        // }
+        // for(auto&& p : max_points) {
+        //     max_loc.x += p.x;
+        //     max_loc.y += p.y;
+        //     max_score += score_sum(p.y, p.x);
+        // }
+        // max_loc.x /= max_points.size();
+        // max_loc.y /= max_points.size();
+
 
         std::vector<MKRegion> mk_regs;
         for( int i = 0; i < mk_layout.mk_map.rows; i ++ ) {
