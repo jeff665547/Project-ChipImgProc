@@ -99,8 +99,8 @@ struct AutoMinCV
                 auto y_basic_margin = basic_margin_rate * t.height;
                 t.x += x_basic_margin;
                 t.y += y_basic_margin;
-                t.width -= x_basic_margin;
-                t.height -= y_basic_margin;
+                t.width -= x_basic_margin * 2;
+                t.height -= y_basic_margin * 2;
                 int windows_width  = std::round(t.width  * seg_rate);
                 int windows_height = std::round(t.height * seg_rate);
                 auto min_cv_data = find_min_cv(
