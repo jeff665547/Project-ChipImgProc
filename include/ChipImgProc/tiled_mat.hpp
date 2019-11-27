@@ -110,8 +110,8 @@ struct TiledMat
         auto color = 65536/2;
         for (auto tile: tiles_)
         {
-            tile.width  += 1;
-            tile.height += 1;
+            // tile.width  += 1;
+            // tile.height += 1;
             cv::rectangle(debug_img, tile, color);
         }
         for(auto l : gl_x_) {
@@ -260,12 +260,12 @@ struct TiledMat
         tm.cali_img_ = rot_cali_img;
         tm.tiles_ = grid_res.tiles;
         tm.gl_x_.reserve(grid_res.gl_x.size());
-        for(auto v : grid_res.gl_x ) {
-            tm.gl_x_.push_back((GLID)v);
+        for(auto&& v : grid_res.gl_x ) {
+            tm.gl_x_.push_back(static_cast<GLID>(std::round(v)));
         }
         tm.gl_y_.reserve(grid_res.gl_y.size());
-        for(auto v : grid_res.gl_y ) {
-            tm.gl_y_.push_back((GLID)v);
+        for(auto&& v : grid_res.gl_y ) {
+            tm.gl_y_.push_back(static_cast<GLID>(std::round(v)));
         }
 
         for(auto& mk_des : mk_layout.mks ) {
