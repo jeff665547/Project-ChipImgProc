@@ -129,16 +129,16 @@ class Detector {
         auto length = margin_size_ * 2;
         length += a_bit_width_ * side_bits_length;
 
-        cv::resize(templ_, templ_, cv::Size(length, length));
-        cv::resize(mask_ , mask_ , cv::Size(length, length));
-        if(pyramid_level_ > 0) {
-            cv::pyrDown(templ_, small_templ_);
-            cv::pyrDown(mask_ , small_mask_ );
-        }
-        for (auto i = 1; i < pyramid_level_; ++i) {
-            cv::pyrDown(small_templ_, small_templ_);
-            cv::pyrDown(small_mask_ , small_mask_ );
-        }
+        auto large_size = cv::Size(length, length);
+        auto small_size = large_size;
+        for (auto i = 0; i < this->pyramid_level_; ++i)
+            small_size = (small_size + cv::Size(1, 1)) / 2;
+        cv::resize(frame_template, this->templ_      , large_size);
+        cv::resize(frame_mask    , this->mask_       , large_size);
+        cv::resize(frame_template, this->small_templ_, small_size);
+        cv::resize(frame_mask    , this->small_mask_ , small_size);
+        for (auto&& pixel: this->small_mask_)
+            if (pixel > 0) pixel = 255;
 
         marker_img_dict_.reset(
             dict, ids, a_bit_width, 
@@ -197,14 +197,16 @@ class Detector {
           , small_image.cols - small_templ_.cols + 1
         );
         cv::matchTemplate(small_image, small_templ_, scores, cv::TM_CCORR_NORMED, small_mask_);
+        const double fx = static_cast<double>(image.cols) / small_image.cols;
+        const double fy = static_cast<double>(image.rows) / small_image.rows;
         for (auto k = 0; k < nms_count_; ++k) {
 
             // coarse alignment + non-maximum suppression
             cv::Point loc;
             cv::minMaxLoc(scores, nullptr, nullptr, nullptr, &loc);
-            cv::circle(scores, loc + offset, nms_radius_ / scale, cv::Scalar(0.0), -1);
-            loc.x = std::round(scale * loc.x);
-            loc.y = std::round(scale * loc.y);
+            cv::circle(scores, loc, nms_radius_ / scale, cv::Scalar(0.0), -1);
+            loc.x = std::round(fx * loc.x);
+            loc.y = std::round(fy * loc.y);
             if (loc.x > image.cols - templ_.cols)
                 loc.x = image.cols - templ_.cols;
             if (loc.y > image.rows - templ_.rows)
@@ -280,7 +282,7 @@ class Detector {
                         // }
 
                         // std::cerr << static_cast<int32_t>(norm(bw(region), cv::NORM_L1)) << " ";
-                        uint64_t bit = norm(bw(region), cv::NORM_L1) > cell_size_.area() * 0.5;
+                        uint64_t bit = norm(bw(region), cv::NORM_L1) > cell_size_.area() * 0.2;
                         code |= bit << shift++;
 
                         // GUI verbose

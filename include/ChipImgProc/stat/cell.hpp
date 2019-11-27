@@ -38,31 +38,33 @@ struct Cell
         res.mean    = mean(0);
         res.stddev  = stddev(0);
         res.cv      = res.stddev / res.mean;
+        res.bg      = 0; 
         res.num     = mat.cols * mat.rows;
         return res;
     }
 
     /**
-     * @brief Mean of pixel values.
-     * 
+     * @brief mean of pixel values.
      */
     FLOAT mean;
 
     /**
-     * @brief Standard deviation of pixel values.
-     * 
+     * @brief standard deviation of pixel values
      */
     FLOAT stddev;
     
     /**
-     * @brief Coefficient of variation of pixel values.
-     * 
+     * @brief coefficient of variation of pixel values
      */
     FLOAT cv;
 
     /**
-     * @brief Pixel numbers.
-     * 
+     * @brief background estimate
+     */
+    FLOAT bg;
+
+    /**
+     * @brief number of pixel values
      */
     std::uint32_t num;
 };

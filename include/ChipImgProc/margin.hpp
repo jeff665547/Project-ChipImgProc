@@ -11,6 +11,7 @@
 #include <ChipImgProc/margin/auto_min_cv.hpp>
 #include <ChipImgProc/margin/mid_seg.hpp>
 #include <ChipImgProc/margin/only_stat.hpp>
+#include <ChipImgProc/margin/sig_est.hpp>
 #include <ChipImgProc/margin/param.hpp>
 #include <ChipImgProc/margin/result.hpp>
 
@@ -127,6 +128,15 @@ struct Margin {
             margin::OnlyStat<FLOAT> only_stat;
             auto tmp = only_stat(
                 *param.tiled_mat,
+                param.v_result
+            );
+            res.stat_mats = tmp;
+        } else if (method == "sig_est") {
+            margin::SigEst<FLOAT> func;
+            auto tmp = func(
+                *param.tiled_mat,
+                param.seg_rate,
+                param.replace_tile,
                 param.v_result
             );
             res.stat_mats = tmp;

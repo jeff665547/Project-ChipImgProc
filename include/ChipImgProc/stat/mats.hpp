@@ -43,6 +43,7 @@ struct Mats
     : mean  (rows, cols)
     , stddev(rows, cols)
     , cv    (rows, cols)
+    , bg    (rows, cols)
     , num   (rows, cols)
     {}
 
@@ -56,32 +57,34 @@ struct Mats
         mean   = mean   (r);
         stddev = stddev (r);
         cv     = cv     (r);
+        bg     = bg     (r);
         num    = num    (r);
     }
 
     /**
      * @brief a matrix of mean values.
-     * 
      */
-    cv::Mat_<FLOAT>         mean    ;
+    cv::Mat_<FLOAT> mean;
 
     /**
      * @brief a matrix of standard deviations
-     * 
      */
-    cv::Mat_<FLOAT>         stddev  ;
+    cv::Mat_<FLOAT> stddev;
 
     /**
      * @brief a matrix of coefficients of variation
-     * 
      */
-    cv::Mat_<FLOAT>         cv      ;
+    cv::Mat_<FLOAT> cv;
 
     /**
-     * @brief a matrix of pixel numbers calculated per cell
-     * 
+     * @brief a matrix of background estimates
      */
-    cv::Mat_<std::uint32_t> num     ;
+    cv::Mat_<FLOAT> bg;
+
+    /**
+     * @brief a matrix of pixel numbers for a cell summarization
+     */
+    cv::Mat_<std::uint32_t> num;
 };
 
 }
