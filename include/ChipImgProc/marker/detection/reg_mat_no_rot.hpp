@@ -11,6 +11,7 @@
 #include <Nucleona/stream/null_buffer.hpp>
 #include <ChipImgProc/utils/pos_comp_by_score.hpp>
 #include <ChipImgProc/algo/fixed_capacity_set.hpp>
+#include <stdexcept>
 namespace chipimgproc::marker::detection {
 
 /**
@@ -38,6 +39,9 @@ constexpr struct RegMatNoRot {
         const std::vector<cv::Point>&       ignore_mk_regs = {},
         std::ostream&                       out            = nucleona::stream::null_out
     ) const {
+
+        src_u8 = cv::max(1, src_u8);
+
         auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
         auto mk_x_num = mk_layout.mk_map.cols;
         auto mk_y_num = mk_layout.mk_map.rows;
@@ -52,7 +56,7 @@ constexpr struct RegMatNoRot {
             scan_rect_height - mk_height + 1,
             scan_rect_width - mk_width + 1
         );
-        score_sum = 0;
+        score_sum = 0.0;
         for(int i = 0; i < mk_layout.mk_map.rows; i ++ ) {
             for(int j = 0; j < mk_layout.mk_map.cols; j ++ ) {
                 auto& mk_des = mk_layout.get_marker_des(i, j);
@@ -73,6 +77,7 @@ constexpr struct RegMatNoRot {
                     scan_target_mat.rows - mk_pat.rows + 1,
                     scan_target_mat.cols - mk_pat.cols + 1
                 );
+                // cv::Mat_<float> score = cv::Mat_<float>::zeros(tmp.size());
                 if( unit == MatUnit::PX) {
                     auto& mk_mask = mk_des.get_best_mk_mask(unit);
                     // chipimgproc::algo::scaled_match_template.max(
@@ -80,6 +85,19 @@ constexpr struct RegMatNoRot {
                     //     CV_TM_CCORR_NORMED, 2, mk_mask
                     // );
                     cv::matchTemplate(scan_target_mat, mk_pat, score, cv::TM_CCORR_NORMED, mk_mask);
+                    // cv::Mat_<uint8_t> nan = (tmp != tmp);
+                    // tmp.copyTo(score, 255 - nan);
+                    
+                    cv::Mat mask = (score != score);
+                    if (cv::countNonZero(mask) > 0)
+                    {
+                        // cv::imwrite("scan_target_mat.tiff", scan_target_mat);
+                        // cv::imwrite("mk_pat.tiff", mk_pat);
+                        // cv::imwrite("mk_mask.tiff", mk_mask);
+                        // std::cerr << "#Nan = " << cv::countNonZero(mask) << "\n";
+                        throw std::runtime_error("score matrix contains Nan");
+                    }
+
                 } else if (unit == MatUnit::CELL) {
                     cv::matchTemplate(scan_target_mat, mk_pat, score, cv::TM_CCORR_NORMED);
                 }
