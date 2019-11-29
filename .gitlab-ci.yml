@@ -24,6 +24,7 @@ Win_CI:
     only:
         - v0.5.x
         - v0.6.x
+        - gridding-fix
     tags:
         - WIN
 
@@ -54,5 +55,6 @@ CentOS_CI:
     only:
         - v0.5.x
         - v0.6.x
+        - gridding-fix
     tags:
         - CENTOS
