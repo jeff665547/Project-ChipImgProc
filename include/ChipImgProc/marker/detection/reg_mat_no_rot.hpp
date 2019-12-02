@@ -43,13 +43,13 @@ constexpr struct RegMatNoRot {
         src_u8 = cv::max(1, src_u8);
 
         auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(unit);
-        auto mk_x_num = mk_layout.mk_map.cols;
-        auto mk_y_num = mk_layout.mk_map.rows;
+        auto mk_x_num  = mk_layout.mk_map.cols;
+        auto mk_y_num  = mk_layout.mk_map.rows;
         auto mk_height = mk_layout.get_marker_height(unit);
-        auto mk_width = mk_layout.get_marker_width(unit);
-        auto mk_layout_width = (mk_x_num - 1) *  mk_invl_x + mk_width;
+        auto mk_width  = mk_layout.get_marker_width (unit);
+        auto mk_layout_width  = (mk_x_num - 1) * mk_invl_x + mk_width;
         auto mk_layout_height = (mk_y_num - 1) * mk_invl_y + mk_height;
-        auto scan_rect_width  = src_u8.cols - mk_layout_width + mk_width;
+        auto scan_rect_width  = src_u8.cols - mk_layout_width  + mk_width;
         auto scan_rect_height = src_u8.rows - mk_layout_height + mk_height;
 
         cv::Mat_<float> score_sum(
@@ -124,8 +124,17 @@ constexpr struct RegMatNoRot {
         std::ostream&           out        = nucleona::stream::null_out
     ) const {
         auto& score_sum = score_matrix;
+        auto border_px = mk_layout.get_border_px();
+        cv::Mat_<std::uint8_t> mask(score_sum.size());
+        mask = 0;
+        mask(cv::Rect(
+            border_px
+          , border_px
+          , mask.cols - 2 * border_px
+          , mask.rows - 2 * border_px
+        )) = 255;
         cv::Point max_loc;
-        cv::minMaxLoc(score_sum, nullptr, nullptr, nullptr, &max_loc);
+        cv::minMaxLoc(score_sum, nullptr, nullptr, nullptr, &max_loc, mask);
 
         // auto max_points = make_fixed_capacity_set<cv::Point>(
         //     20, chipimgproc::utils::PosCompByScore(score_sum)

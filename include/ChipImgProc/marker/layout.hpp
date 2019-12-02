@@ -246,8 +246,8 @@ friend struct MakeSinglePatternRegMatLayout;
         int rows, int cols, 
         const cv::Point& min_p, 
         std::uint32_t invl_x_cl, std::uint32_t invl_y_cl,
-        std::uint32_t invl_x_px, std::uint32_t invl_y_px
-
+        std::uint32_t invl_x_px, std::uint32_t invl_y_px,
+        std::uint32_t border_px
     ) {
         dist_form = reg_mat;
         mk_map = decltype(mk_map)(rows, cols);
@@ -268,6 +268,7 @@ friend struct MakeSinglePatternRegMatLayout;
 
         mk_invl_x_px = invl_x_px;
         mk_invl_y_px = invl_y_px;
+        this->border_px = border_px;
     }
     /**
      * @brief Set the marker layout to single marker pattern.
@@ -404,6 +405,14 @@ friend struct MakeSinglePatternRegMatLayout;
         }
         return res;
     }
+    
+    /**
+     * @brief Get the space between cells in pixel level
+     */
+    auto get_border_px(void) const {
+        return this->border_px;
+    }
+
     /**
      * @brief Pattern number type, multi or single.
      */
@@ -440,12 +449,18 @@ friend struct MakeSinglePatternRegMatLayout;
      * @brief marker interval in pixel level along the the Y direction
      */
     std::uint32_t           mk_invl_y_px              ; // used in reg_mat
+
+    /**
+     * @brief space between cells in pixel level
+     */
+    std::uint32_t           border_px;
     
 private:
     void reset_mk_pat(
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px,
         const std::vector<cv::Mat_<std::uint8_t>>& candi_pats_px_mask,
-        std::uint32_t invl_x_px, std::uint32_t invl_y_px
+        std::uint32_t invl_x_px, std::uint32_t invl_y_px,
+        std::uint32_t border_px = 0
     ) {
         auto& min_p = mks.at(0).pos_cl_;
         if(dist_form == reg_mat) {
@@ -460,6 +475,7 @@ private:
             }
             mk_invl_x_px = invl_x_px;
             mk_invl_y_px = invl_y_px;
+            this->border_px = border_px;
         } else {
             throw std::runtime_error("dist_form: random not yet support");
         }
@@ -532,11 +548,13 @@ constexpr class MakeSinglePatternRegMatLayout
         }
         std::uint32_t invl_x_px = std::round(invl_x_cl * (cell_c_um + border_um) * um2px_r); // can get this value from micron to pixel
         std::uint32_t invl_y_px = std::round(invl_y_cl * (cell_r_um + border_um) * um2px_r);
+        std::uint32_t border_px = std::ceil(border_um * um2px_r);
         return std::make_tuple(
             candi_mk_pats_px,
             candi_mk_pats_px_mask,
             invl_x_px,
-            invl_y_px
+            invl_y_px, 
+            border_px
         );
 
     }
@@ -568,7 +586,7 @@ public:
         std::uint32_t invl_y_cl,
         float um2px_r
     ) const {
-        auto [candi_mk_pats_px, candi_mk_pats_px_mask, invl_x_px, invl_y_px] = 
+        auto [candi_mk_pats_px, candi_mk_pats_px_mask, invl_x_px, invl_y_px, border_px] = 
             to_px_domain({mks_cl}, {masks_cl}, cell_r_um, cell_c_um, border_um, 
                 invl_x_cl, invl_y_cl, um2px_r
             );
@@ -576,7 +594,8 @@ public:
         mk_layout.set_reg_mat_dist(
             rows, cols, {0,0},
             invl_x_cl, invl_y_cl,
-            invl_x_px, invl_y_px
+            invl_x_px, invl_y_px,
+            border_px
         );
         mk_layout.set_single_mk_pat(
             {mks_cl},
@@ -611,14 +630,15 @@ public:
         float um2px_r,
         marker::Layout& mk_layout
     ) const {
-        auto [candi_mk_pats_px, candi_mk_pats_px_mask, invl_x_px, invl_y_px] = 
+        auto [candi_mk_pats_px, candi_mk_pats_px_mask, invl_x_px, invl_y_px, border_px] = 
             to_px_domain(mks_cl, masks_cl, cell_r_um, cell_c_um, border_um, 
                 invl_x_cl, invl_y_cl, um2px_r
             );
         mk_layout.reset_mk_pat(
             candi_mk_pats_px,
             candi_mk_pats_px_mask,
-            invl_x_px, invl_y_px
+            invl_x_px, invl_y_px,
+            border_px
         );
     }
     /**
