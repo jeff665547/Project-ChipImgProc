@@ -120,6 +120,13 @@ public:
         // find left top and right botton  mk region
         MKRegion* left_top = &(mk_regs.front());
         MKRegion* right_bottom = &(mk_regs.front());
+        
+        // for (auto&& mk_r: mk_regs) {
+        //     std::cerr
+        //     << "(" << mk_r.x << ", " << mk_r.y << ") "
+        //     << "(" << mk_r.x + mk_r.width << ", " << mk_r.y + mk_r.height << ")\n";
+        // }
+
         for(auto&& mk_r : mk_regs) {
             if(
                 mk_r.x_i <= left_top->x_i && 

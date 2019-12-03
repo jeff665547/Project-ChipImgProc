@@ -77,13 +77,15 @@ struct SingleGeneral {
         std::uint32_t invl_y_cl = 37,
         std::uint32_t invl_x_px = 1091, // can get this value from micron to pixel
         std::uint32_t invl_y_px = 1091,
-        const cv::Point& min_p = {0, 0}
+        const cv::Point& min_p = {0, 0},
+        std::uint32_t border_px = 0     // WARN!!!
     ) {
         marker_layout_.set_reg_mat_dist(
             rows,  cols,
             min_p,
             invl_x_cl, invl_y_cl,
-            invl_x_px, invl_y_px
+            invl_x_px, invl_y_px,
+            border_px
         );
         marker_layout_.set_single_mk_pat( 
             candi_pats_cl, 
