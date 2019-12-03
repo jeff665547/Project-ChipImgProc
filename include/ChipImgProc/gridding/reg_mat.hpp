@@ -115,11 +115,18 @@ public:
     ) const {
         Result result;
         auto [mk_invl_x, mk_invl_y] = mk_layout.get_marker_invl(MatUnit::CELL);
-        int fov_w_cl = ( mk_invl_x * (mk_layout.mk_map.cols - 1) ) + mk_layout.get_marker_width_cl();
-        int fov_h_cl = ( mk_invl_y * (mk_layout.mk_map.rows - 1) ) + mk_layout.get_marker_height_cl();
+        int fov_w_cl = mk_invl_x * (mk_layout.mk_map.cols - 1); // + mk_layout.get_marker_width_cl();
+        int fov_h_cl = mk_invl_y * (mk_layout.mk_map.rows - 1); // + mk_layout.get_marker_height_cl();
         // find left top and right botton  mk region
         MKRegion* left_top = &(mk_regs.front());
         MKRegion* right_bottom = &(mk_regs.front());
+        
+        // for (auto&& mk_r: mk_regs) {
+        //     std::cerr
+        //     << "(" << mk_r.x << ", " << mk_r.y << ") "
+        //     << "(" << mk_r.x + mk_r.width << ", " << mk_r.y + mk_r.height << ")\n";
+        // }
+
         for(auto&& mk_r : mk_regs) {
             if(
                 mk_r.x_i <= left_top->x_i && 
@@ -134,22 +141,51 @@ public:
                 right_bottom = &mk_r;
             }
         }
+
+        double x0 = left_top->x + 0.5 * (left_top->width - 1.0);
+        double x1 = right_bottom->x + 0.5 * (right_bottom->width - 1.0);
+        int c0 = mk_layout.get_marker_width_cl() / 2 * -1;
+        int c1 = mk_layout.get_marker_width_cl() / 2 + fov_w_cl;
         std::vector<double> x_grid_anchor;
-        std::vector<double> y_grid_anchor; 
-        auto fov_h_px = right_bottom->y + right_bottom->height - left_top->y;
-        auto fov_w_px = right_bottom->x + right_bottom->width - left_top->x;
-
-        chipimgproc::log.trace("FOV height: {}px", fov_h_px);
-        chipimgproc::log.trace("FOV width : {}px", fov_w_px);
-
-        double cl_h_px = fov_h_px / (double)fov_h_cl;
-        double cl_w_px = fov_w_px / (double)fov_w_cl;
-        for(int i = 0; i < fov_h_cl + 1; i ++ ) {
-            y_grid_anchor.push_back(left_top->y + (i * cl_h_px));
+        for (auto c = c0; c <= c1; ++c) {
+            double a = static_cast<double>(c) / fov_w_cl;
+            x_grid_anchor.emplace_back(x0 * (1 - a) + x1 * a + 0.5);
         }
-        for(int j = 0; j < fov_w_cl + 1; j ++ ) {
-            x_grid_anchor.push_back(left_top->x + (j * cl_w_px));
+        // std::cout << "x anchors: " << x0 << ", " << x1 << ", " << c0 << ", " << c1 << '\n';
+        // std::cout << "[ " << x_grid_anchor[0];
+        // for (int i = 1; i < x_grid_anchor.size(); ++i)
+        //     std::cout << ", " << x_grid_anchor[i];
+        // std::cout << std::endl;
+
+        double y0 = left_top->y + 0.5 * (left_top->height - 1.0);
+        double y1 = right_bottom->y + 0.5 * (right_bottom->height - 1.0);
+        int r0 = mk_layout.get_marker_height_cl() / 2 * -1;
+        int r1 = mk_layout.get_marker_height_cl() / 2 + fov_h_cl;
+        std::vector<double> y_grid_anchor;
+        for (auto r = r0; r <= r1; ++r) {
+            double a = static_cast<double>(r) / fov_h_cl;
+            y_grid_anchor.emplace_back(y0 * (1 - a) + y1 * a + 0.5);
         }
+        // std::cout << "y anchors: " << y0 << ", " << y1 << ", " << r0 << ", " << r1 << '\n';
+        // std::cout << "[ " << y_grid_anchor[0];
+        // for (int i = 1; i < y_grid_anchor.size(); ++i)
+        //     std::cout << ", " << y_grid_anchor[i];
+        // std::cout << std::endl;
+
+        // auto fov_h_px = right_bottom->y + right_bottom->height - left_top->y;
+        // auto fov_w_px = right_bottom->x + right_bottom->width - left_top->x;
+        // 
+        // chipimgproc::log.trace("FOV height: {}px", fov_h_px);
+        // chipimgproc::log.trace("FOV width : {}px", fov_w_px);
+        // 
+        // double cl_h_px = fov_h_px / (double)fov_h_cl;
+        // double cl_w_px = fov_w_px / (double)fov_w_cl;
+        // for(int i = 0; i < fov_h_cl + 1; i ++ ) {
+        //     y_grid_anchor.push_back(left_top->y + (i * cl_h_px));
+        // }
+        // for(int j = 0; j < fov_w_cl + 1; j ++ ) {
+        //     x_grid_anchor.push_back(left_top->x + (j * cl_w_px));
+        // }
 
         result.feature_rows = y_grid_anchor.size() - 1;
         result.feature_cols = x_grid_anchor.size() - 1;

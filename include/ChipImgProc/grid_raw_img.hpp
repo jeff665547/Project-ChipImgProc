@@ -7,6 +7,7 @@
 #pragma once
 #include <ChipImgProc/utils.h>
 #include <Nucleona/range.hpp>
+#include <iostream>
 namespace chipimgproc{
 /**
  * @brief Type for storing rotated grid raw image.
@@ -46,10 +47,10 @@ struct GridRawImg {
         gl_x_.reserve(glx.size());
         gl_y_.reserve(gly.size());
         for(auto&& x : glx) {
-            gl_x_.push_back((GLID)x);
+            gl_x_.push_back(static_cast<GLID>(std::round(x)));
         }
         for(auto&& y : gly) {
-            gl_y_.push_back((GLID)y);
+            gl_y_.push_back(static_cast<GLID>(std::round(y)));
         }
     }
     
@@ -134,7 +135,20 @@ struct GridRawImg {
             gl_x_.at(r.x + r.width ) - gl_x_.at(r.x),
             gl_y_.at(r.y + r.height) - gl_y_.at(r.y)
         );
-        auto img = img_(raw_rect);
+        // std::cerr
+        // << "r = "
+        // << r.x << ", "
+        // << r.y << ", "
+        // << r.width  << ", "
+        // << r.height << "\n";
+        // std::cerr
+        // << "raw_rect = "
+        // << raw_rect.x << ", "
+        // << raw_rect.y << ", "
+        // << raw_rect.width << ", "
+        // << raw_rect.height << "\n";
+        auto img = img_(raw_rect); //
+        // std::cerr << __FILE__ << ":" << __LINE__ << "\n";
         std::vector<GLID> gl_x(
             gl_x_.begin() + r.x, 
             gl_x_.begin() + r.x + r.width + 1

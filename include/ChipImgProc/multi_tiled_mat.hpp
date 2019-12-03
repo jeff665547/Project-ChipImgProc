@@ -204,6 +204,7 @@ struct MultiTiledMat
                 dst_tile.mean       = stat.mean     (r, c) ;
                 dst_tile.stddev     = stat.stddev   (r, c) ;
                 dst_tile.cv         = stat.cv       (r, c) ;
+                dst_tile.bg         = stat.bg       (r, c) ;
                 dst_tile.num        = stat.num      (r, c) ;
                 this->tiles_.at(px).push_back(dst_tile);
             });
