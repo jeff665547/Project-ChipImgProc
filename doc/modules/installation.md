@@ -152,6 +152,7 @@ project(ChipImgProc-example)
 
 hunter_add_package(ChipImgProc)
 find_package(ChipImgProc CONFIG REQUIRED)
+set(CMAKE_CXX_STANDARD 17)
 add_executable(foo foo.cpp)
 target_link_libraries(foo PUBLIC ChipImgProc::ChipImgProc)
 ```
