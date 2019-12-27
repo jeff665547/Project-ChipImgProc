@@ -152,6 +152,7 @@ project(ChipImgProc-example)
 
 hunter_add_package(ChipImgProc)
 find_package(ChipImgProc CONFIG REQUIRED)
+set(CMAKE_CXX_STANDARD 17)
 add_executable(foo foo.cpp)
 target_link_libraries(foo PUBLIC ChipImgProc::ChipImgProc)
 ```
@@ -184,22 +185,22 @@ Example/
   @code
   Example\\> mkdir build
   Example\\> cd build
-  build\\> cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
-  build\\> cmake --build . --target install
+  build\\> cmake .. -G "MinGW Makefiles" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+  build\\> cmake --build .
   @endcode
 * MSVC + Windows
   @code
   Example\\> mkdir build
   Example\\> cd build
-  build\\> cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="..\stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
-  build\\> cmake --build . --target install --config Release
+  build\\> cmake .. -G "Visual Studio 15 2017 Win64" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
+  build\\> cmake --build . --config Release
   @endcode
 * Linux + GCC
   @code
   Example$ mkdir build
   Example$ cd build
   build$ cmake .. -DCMAKE_INSTALL_PREFIX="../stage" -DINSTALL_DEPS=ON -DCMAKE_BUILD_TYPE="Release"
-  build$ cmake --build . --target install
+  build$ cmake --build .
   @endcode
 
 Manually Build (g++/MinGW) {#manually-build-gcc}
