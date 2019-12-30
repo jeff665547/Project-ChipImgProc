@@ -22,9 +22,8 @@ Win_CI:
         - cmake --build . --target install
         - ctest --verbose
     only:
-        - v0.5.x
         - v0.6.x
-        - gridding-fix
+        - v0.7.x
     tags:
         - WIN
 
@@ -53,7 +52,7 @@ CentOS_CI:
         - cmake --build . --target install
         - ctest --verbose
     only:
-        - v0.5.x
         - v0.6.x
+        - v0.7.x
     tags:
         - CENTOS
