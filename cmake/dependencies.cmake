@@ -61,6 +61,10 @@ if(ENABLE_LOG)
     )
 endif()
 
+# fitpackpp
+hunter_add_package(fitpackpp)
+find_package(fitpackpp CONFIG REQUIRED)
+
 # threads
 find_package(Threads REQUIRED)
 

@@ -33,3 +33,8 @@ hunter_config(
     range-v3
     VERSION "0.5.0"
 )
+hunter_config(
+    fitpackpp
+    VERSION ${HUNTER_fitpackpp_VERSION}
+    KEEP_PACKAGE_SOURCES
+)
