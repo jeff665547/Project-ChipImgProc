@@ -33,6 +33,9 @@ namespace chipimgproc::aruco {
  *  @snippet ChipImgProc/aruco_test.cpp usage
  */
 class Detector2 {
+  private:
+    // TODO: add debug information
+
   public:
     Detector2()
       : dictionary_(nullptr)
@@ -147,7 +150,6 @@ class Detector2 {
         cv::Mat_<float> match2(2 * s + 1, 2 * s + 1);
 
         // search all possible marker locations
-        std::cerr << "fine all possible marker locations\n";
         auto best_score = 0.0;
         std::vector<cv::Rect> selections;
         std::vector<cv::Vec2f> new_anchors;
@@ -198,11 +200,11 @@ class Detector2 {
             }
         }
 
-        if (new_templ.empty())
+        if (new_templ.empty())   
             throw std::runtime_error("new template not found");
 
         // recognize aruco marks with new template
-        std::cerr << "recognize aruco marks with new template\n";
+        // std::cerr << "recognize aruco marks with new template\n";;
         using K = std::tuple<bool, double>;
         using V = std::tuple<std::int32_t, double, cv::Point2f>;
         std::map<K, V, std::greater<K>> candidates;
