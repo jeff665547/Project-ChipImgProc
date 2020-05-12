@@ -101,7 +101,7 @@ class Detector2 {
             }
         }
         this->anchors_.emplace_back((s[0] - 1) * 0.5, (s[1] - 1) * 0.5);
-        this->ext_width_ = std::ceil(ext_width);
+        this->ext_width_ = std::round(a * ext_width);
 
         marker_img_dict_.reset(
             dictionary
