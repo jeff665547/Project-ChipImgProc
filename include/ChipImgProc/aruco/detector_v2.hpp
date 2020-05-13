@@ -186,7 +186,7 @@ class Detector2 {
                 cv::invertAffineTransform(wmatx, wmatx);
                 cv::transform(anchors_, anchors, wmatx);
             }
-            catch (const cv::Exception& e) {
+            catch (...) {
                 continue;
             }
 
@@ -219,7 +219,7 @@ class Detector2 {
             try {
                 score = cv::findTransformECC(view, new_templ, wmatx, model, criteria_, mask_);
             }
-            catch (const cv::Exception& e) {
+            catch (...) {
                 continue;
             }
 
