@@ -219,7 +219,7 @@ class Detector {
             try{
                 // cv::imwrite("view.tiff", view);
                 score = cv::findTransformECC(view, templ_, warp_mat, cv::MOTION_EUCLIDEAN, criteria, mask_);
-            } catch(const cv::Exception& e) {
+            } catch(...) {
                 logger << "ECC convergence failure. skip this one\n";
                 continue;
             }

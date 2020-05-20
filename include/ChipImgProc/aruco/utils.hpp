@@ -110,6 +110,22 @@ struct Utils {
         }
         return res;
     }
+
+    static void resize(
+        cv::InputArray src
+      , cv::OutputArray dst
+      , double fx
+      , double fy = 0
+      , std::int32_t interplation = cv::INTER_AREA
+    ) {
+        if (fy == 0) fy = fx;
+        float w0 = src.getMat().cols, h0 = src.getMat().rows;
+        float w1 = std::round(w0 * fx), h1 = std::round(h0 * fy);
+        float x0 = (w0 - 1) * 0.5, x1 = (w1 - 1) * 0.5;
+        float y0 = (h0 - 1) * 0.5, y1 = (h1 - 1) * 0.5;
+        cv::Matx23f M(fx, 0, x1 - x0 * fx, 0, fy, y1 - y0 * fy);
+        cv::warpAffine(src, dst, M, cv::Size(w1, h1), interplation);
+    }
 };
 
 }
