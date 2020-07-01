@@ -28,6 +28,23 @@ constexpr struct LocationMarkCreator {
         chipimgproc::aruco::Utils::resize(mask, mask, scale, scale, cv::INTER_NEAREST);
 
         return std::make_tuple(templ, mask);
+
+    }
+    auto operator()(
+        const double outer_width, 
+        const double inner_width, 
+        const double padding, 
+        const double margin
+    ) const {
+        using matrix_t = cv::Mat_<std::uint8_t>;
+        // multiply 1000 for real number precision
+        return operator()(
+            (std::int32_t)std::round(outer_width * 100),
+            (std::int32_t)std::round(inner_width * 100),
+            (std::int32_t)std::round(padding * 100),
+            (std::int32_t)std::round(margin * 100),
+            0.01
+        );
     }
 }
 create_location_marker;

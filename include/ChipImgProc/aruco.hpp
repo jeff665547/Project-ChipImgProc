@@ -74,8 +74,7 @@
  *  @snippet ChipImgProc/marker/detection/aruco_reg_mat_test.cpp usage
  */
 #pragma once
-#include "aruco/detector.hpp"
-#include "aruco/detector_v2.hpp"
 #include "aruco/dictionary.hpp"
 #include "aruco/utils.hpp"
 #include "aruco/location_mark_creator.hpp"
+#include "aruco/marker_map.hpp"

@@ -1,11 +1,12 @@
 /// [usage]
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
-#include <ChipImgProc/marker/detection/aruco_reg_mat.hpp>
-#include "../../make_layout.hpp"
+#include <ChipImgProc/marker/detection/aruco_random.hpp>
 #include <ChipImgProc/marker/view.hpp>
+#include <string>
 
 TEST(aruco_reg_mat, basic_test) {
+    using namespace std::string_literals;
     // In this using case, we are going to recognize the ArUco marker from the image.
     // The input is a Banff FOV image and the output is the ArUco marker regions (a vector of cv::Rect)
 
@@ -36,13 +37,6 @@ TEST(aruco_reg_mat, basic_test) {
         15, 16, 17, 18, 19, 02, 20,
         00, 01, 10, 11, 12, 13, 14
     };
-    nlohmann::json aruco_ids_map;
-    for(std::size_t y = 0; y < 7; y ++) {
-        for(std::size_t x = 0; x < 7; x ++) {
-            auto key = aruco_ids_in_image.at((y * 7) + x);
-            aruco_ids_map[std::to_string(key)] = {x, y};
-        }
-    }
 
     // aruco_points is a marker id -> marker point table
     // marker point is the marker sequencial point, not the absolute location on image
@@ -61,17 +55,6 @@ TEST(aruco_reg_mat, basic_test) {
         }
     }
 
-    // Make marker layout
-    // To make Banff marker layout, we need many parameters depend on chip specification
-    // Currently we hard code these parameters to make example works
-    // The detail Banff layout making process can be found in unit_test/ChipImgProc/make_layout.hpp
-    
-    // The path "banff_rc/pat_CY3.tsv" is the probe channel marker pattern, 
-    // which is not used in this example we just randomly choose a pattern to make it works
-    
-    // The magic number 2.68 is the micron to pixel rate, which depend on image and reader.
-    // Currently we hard code this parameter for example.
-    auto layout = make_banff_layout("banff_rc/pat_CY3.tsv", 2.68);
 
     // Create the detector
     // Set the detector parameter.
@@ -80,33 +63,34 @@ TEST(aruco_reg_mat, basic_test) {
     auto [templ, mask] = chipimgproc::aruco::create_location_marker(
         50, 40, 3, 5, 2.68
     );
-    auto reg_mat = chipimgproc::marker::detection::make_aruco_reg_mat(
+    auto detector(chipimgproc::marker::detection::make_aruco_random(
         db_path.string(), 
         "DICT_6X6_250",
-        aruco_ids_map,
         templ, mask,
         30 * 2.68, 
         2, 
         9, 
         50 * 2.68, 
         0.75
-    );
+    ));
+
 
     // Call the detector
     // Now we detect markers in pixel domain, so the matrix unit we use PX
-    auto mk_regs = reg_mat(
+    auto mk_regs = detector(
         static_cast<cv::Mat_<std::uint8_t>&>(img0), 
-        layout, chipimgproc::MatUnit::PX, 
-        std::cout
+        aruco_ids_in_image
     );
 
     // Print the marker region location
     // Each output row is 
     // (marker location)[marker height/width](marker point id)
-    for(auto mk_r : mk_regs) {
-        mk_r.info(std::cout);
+    std::vector<cv::Point> pos;
+    for(auto [mid, score, loc] : mk_regs) {
+        std::cout << loc << std::endl;
+        pos.push_back(loc);
     }
-    cv::imwrite("view.tiff", chipimgproc::marker::view(img0, mk_regs));
+    cv::imwrite("view.tiff", chipimgproc::marker::view(img0, pos, 0));
     // Due to the image quality variant, it may not detect all markers
     // For image gridding process, it should detect 2 marker in deferent column and row at least.
 }

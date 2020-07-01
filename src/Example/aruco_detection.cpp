@@ -1,6 +1,8 @@
 #include <nlohmann/json.hpp>
 #include <ChipImgProc/aruco.hpp>
 #include <boost/program_options.hpp>
+#include <ChipImgProc/marker/detection/aruco_random.hpp>
+#include <iostream>
 
 /*
  *  This example code will help you to build the Image-ArUco detection app. 
@@ -43,17 +45,12 @@ int main( int argc, char** argv )
     std::string image_path;                 //  The path of raw chip image
     std::string aruco_database_path;        //  The path of ArUco database
 
-    std::string marker_frame_template_path; //  The path of marker frame template image
-    std::string marker_frame_mask_path;     //  The path of marker frame mask image
-
     boost::program_options::variables_map op;
     boost::program_options::options_description options( "Options" );
 
     options.add_options()( "help,h" , "Print this help messages" )
         ( "image,i"    , boost::program_options::value< std::string >( &image_path                 )->required(),"Image path of raw chip image" )
         ( "json,j"     , boost::program_options::value< std::string >( &aruco_database_path        )->required(),"Json path of ArUco database" )
-        ( "template,t" , boost::program_options::value< std::string >( &marker_frame_template_path )->required(),"Image path of marker frame template" )
-        ( "mask,m"     , boost::program_options::value< std::string >( &marker_frame_mask_path     )->required(),"Image path of marker frame mask" )
         ;
     try {
         boost::program_options::store( boost::program_options::parse_command_line( argc, argv, options ), op );
@@ -104,6 +101,13 @@ int main( int argc, char** argv )
         15, 16, 17, 18, 19, 02, 20,
         00, 01, 10, 11, 12, 13, 14
     };
+    nlohmann::json aruco_ids_map;
+    for(std::size_t y = 0; y < 7; y ++) {
+        for(std::size_t x = 0; x < 7; x ++) {
+            auto key = aruco_ids.at((y * 7) + x);
+            aruco_ids_map[std::to_string(key)] = {x, y};
+        }
+    }
 
     /*
      *  The coordinate is mapping start at top-left between the raw chip image and the vector of ArUco ID
@@ -136,9 +140,10 @@ int main( int argc, char** argv )
      *  +============================+
      */
 
-    //  Load marker frame images of both template and mask
-    auto marker_frame_template = cv::imread( marker_frame_template_path, cv::IMREAD_GRAYSCALE );
-    auto marker_frame_mask     = cv::imread( marker_frame_mask_path,     cv::IMREAD_GRAYSCALE );
+    // create marker border template
+    auto [templ, mask] = chipimgproc::aruco::create_location_marker(
+        50, 40, 3, 5, 2.68
+    );
 
     /// [data_preparation]
     /// [aruco_detection]
@@ -150,25 +155,19 @@ int main( int argc, char** argv )
      */
 
     // Declare the ArUco marker detector 
-    chipimgproc::aruco::Detector detector;
-    detector.reset(
-        aruco_dict_6x6_250,     //  ArUco database
-        3,                      //  Pyramid level
-        1,                      //  Border width
-        1,                      //  Fringe width
-        13.4,                   //  Bits width
-        8.04,                   //  Margin size
-        marker_frame_template,  //  marker frame template
-        marker_frame_mask,      //  Marker frame mask
-        9,                      //  Number of marker counts
-        268,                    //  Number of radius
-        5,                      //  Cell size
-        aruco_ids,              //  VArUco IDs
-        std::cout               //  Logger
+    auto detector = chipimgproc::marker::detection::make_aruco_random(
+        std::move(aruco_dict_6x6_250),     //  ArUco database
+        templ, 
+        mask,
+        30 * 2.68, 
+        2, 
+        9, 
+        50 * 2.68, 
+        0.75
     );
 
     //  Detecting ArUco marker
-    auto detected_aruco_id_position = detector.detect_markers( raw_image, std::cout );
+    auto detected_aruco_id_position = detector(raw_image, aruco_ids);
 /// [aruco_detection]
 
     /* 
@@ -226,7 +225,7 @@ int main( int argc, char** argv )
      */
     
     // Outputing
-    for( auto& [ id, position ] : detected_aruco_id_position )
+    for( auto& [ id, score, position ] : detected_aruco_id_position )
         std::cout << id << '\t' << position << std::endl;
 
     /// [output]

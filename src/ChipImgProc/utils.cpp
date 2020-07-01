@@ -173,14 +173,23 @@ std::string jpg_base64( const cv::Mat& pixels) {
     // std::cout << "content: " << pixels_encode << std::endl;
     return pixels_encode;
 }
-cv::Mat_<float> match_template(cv::Mat img, cv::Mat tpl) {
+cv::Mat_<float> match_template(
+    cv::Mat img, cv::Mat tpl, 
+    cv::TemplateMatchModes mode,
+    cv::InputArray mask
+) {
     cv::Mat_<float> sm(
         img.rows - tpl.rows + 1,
         img.cols - tpl.cols + 1
     );
-    cv::matchTemplate(img, tpl, sm, cv::TM_CCORR_NORMED);
+    cv::matchTemplate(img, tpl, sm, mode, mask);
     return sm;
 }
 
+std::tuple<double, cv::Mat> threshold(cv::Mat src, double thresh, double maxval, int type) {
+    cv::Mat res(src.rows, src.cols, src.type());
+    auto v = cv::threshold(src, res, thresh, maxval, type);
+    return {v, res};
+}
 
 }

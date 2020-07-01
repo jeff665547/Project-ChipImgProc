@@ -133,6 +133,9 @@ cv::Mat_<std::uint8_t> binarize(const cv::Mat_<T>& m, int peek_threshold = 40000
     // cv::normalize(trimmed_m, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
     return bin;
 }
+
+std::tuple<double, cv::Mat> threshold(cv::Mat src, double thresh, double maxval, int type);
+
 template<class T, class SM, class DM>
 void mat_copy ( 
       const SM& sm
@@ -179,5 +182,9 @@ cv::Rect bound_rect( const std::vector<cv::Point>& points );
 
 std::string jpg_base64( const cv::Mat& pixels);
 
-cv::Mat_<float> match_template(cv::Mat img, cv::Mat tpl);
+cv::Mat_<float> match_template(
+    cv::Mat img, cv::Mat tpl, 
+    cv::TemplateMatchModes mode = cv::TM_CCORR_NORMED,
+    cv::InputArray mask = cv::noArray()
+);
 }

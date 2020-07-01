@@ -6,6 +6,9 @@
 #pragma once
 #include <vector>
 #include "utils.hpp"
+#include <Nucleona/range.hpp>
+#include <memory>
+#include <fstream>
 
 namespace chipimgproc::aruco {
 /**
@@ -51,6 +54,18 @@ class Dictionary : public std::vector<std::uint64_t> {
         return dict;
     }
 
+    static Dictionary from_db_and_key( const nlohmann::json& db, const std::string& key) {
+        auto& dict_json = db[key];
+        return aruco::Dictionary::from_json(dict_json);
+    }
+
+    static Dictionary from_db_and_key( const std::string& path, const std::string& key) {
+        std::ifstream fin(path);
+        nlohmann::json db;
+        fin >> db;
+        return from_db_and_key(db, key);
+    }
+
     /**
      * @brief   Get the max number of coding bits
      * @return  The number of coding bits
@@ -89,6 +104,37 @@ class Dictionary : public std::vector<std::uint64_t> {
     }
   
     /**
+     *  @brief       Identify whether the query code is approximately belong to the dictionary, and
+     *               output the index of the closest one.
+     * 
+     *  @param       query  The query code.
+     *                      Set the value to -1 if the search fails.
+     *  @param       candidates   A list of candidate marker IDs.
+     *  @param       maxcor_bits  The max number of correction bits.
+     *  @return      True if the query code is approximately in the dictionary.
+     *               False if the search fails.
+     */
+    template<class Irange>
+    std::tuple<std::int32_t, std::int32_t> identify(
+        const std::uint64_t     query, 
+        Irange&&                candidates, 
+        const std::int32_t      maxcor_bits = -1
+    ) const {
+        std::int32_t index = -1;
+        std::int32_t distance = (maxcor_bits != -1) ? maxcor_bits : maxcor_bits_ ;
+        for (auto i : candidates ) {
+            auto d = Utils::bit_count(query ^ this->at(i));
+            if (distance > d) {
+                distance = d;
+                index = i;
+                if (distance == 0)
+                    break;
+            }
+        }
+        return std::make_tuple(index, distance);
+    }
+
+    /**
      *  @brief       Identify the query code from a given candidate marker ID list.
      *               This function will output the closest candidate 
      *               if the hamming distance between the query and closest one
@@ -102,21 +148,17 @@ class Dictionary : public std::vector<std::uint64_t> {
      *               False if the search fails.
      */
     bool identify(
-        const std::uint64_t query
-      , std::int32_t& index
-      , const std::vector<std::int32_t>& candidates
-      , const std::int32_t maxcor_bits = -1
+        const std::uint64_t                 query,
+        std::int32_t&                       index, 
+        const std::vector<std::int32_t>&    candidates, 
+        const std::int32_t                  maxcor_bits = -1
     ) const {
-        index = -1;
-        std::int32_t distance = (maxcor_bits != -1) ? maxcor_bits : maxcor_bits_ ;
-        for (auto&& i : candidates) {
-            auto d = Utils::bit_count(query ^ this->at(i));
-            if (distance > d) {
-                distance = d, index = i;
-                if (distance == 0)
-                    break;
-            }
-        }
+        auto [id, distance] = identify(
+            query, 
+            candidates,
+            maxcor_bits
+        );
+        index = id;
         return index != -1;
     }
 
@@ -127,29 +169,29 @@ class Dictionary : public std::vector<std::uint64_t> {
      *  @param       query  The query code.
      *  @param[out]  index  The index of the closest code in dictionary.
      *                      Set the value to -1 if the search fails.
+     *  @param       maxcor_bits  The max number of correction bits.
      *  @return      True if the query code is approximately in the dictionary.
      *               False if the search fails.
      */
     bool identify(
-        const std::uint64_t query
-      , std::int32_t& index
+        const std::uint64_t     query, 
+        std::int32_t&           index, 
+        const std::int32_t      maxcor_bits = -1
     ) const {
-        index = -1;
-        std::int32_t distance = maxcor_bits_;
-        for (auto i = 0u; i != this->size(); ++i) {
-            auto d = Utils::bit_count(query ^ (*this)[i]);
-            if (distance > d) {
-                distance = d, index = i;
-                if (distance == 0)
-                    break;
-            }
-        }
+        auto [id, distance] = identify(
+            query, 
+            nucleona::range::irange_0(this->size()),
+            maxcor_bits
+        );
+        index = id;
         return index != -1;
     }
+
 
   private:
     std::int32_t coding_bits_;
     std::int32_t maxcor_bits_;
 };
-
+using DictionaryPtr         = std::shared_ptr<Dictionary>;
+using ConstDictionaryPtr    = std::shared_ptr<const Dictionary>;
 } // namespace
