@@ -21,10 +21,6 @@ TEST(aruco_reg_mat, basic_test) {
     auto img0 = cv::imread(img0_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
     // auto img1 = cv::imread(img1_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 
-    // set path to marker border frame template and mask
-    auto frame_template_path = nucleona::test::data_dir() / "aruco_frame_template.tiff";
-    auto frame_mask_path = nucleona::test::data_dir() / "aruco_frame_mask.tiff";
-
     // Set candidate marker id list.
     // We hard code the Banff ArUco marker ids in this example.
     // Note that this list contains all markers in the Baff chip, not only the FOV

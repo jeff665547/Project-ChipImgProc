@@ -63,4 +63,13 @@ auto make_yz01_layout(const std::string& pat_name, float um2px_r) {
         um2px_r
     );
 }
+auto make_lassen_layout(const std::string& pat_name, float um2px_r) {
+    return make_layout(
+        pat_name, 
+        4, 4, 1, 
+        3, 3, 
+        81, 81, 
+        um2px_r
+    );
+}
 /// [usage]

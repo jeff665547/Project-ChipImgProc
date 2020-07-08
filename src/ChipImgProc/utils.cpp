@@ -25,7 +25,7 @@ int rows(const cv::Mat& m) {
 cv::Mat get_roi( cv::Mat& m, const cv::Rect& r) {
     return m(r);
 }
-const char* depth(const cv::Mat& image)
+std::string depth(const cv::Mat& image)
 {
     switch (image.depth())
     {
@@ -36,8 +36,8 @@ const char* depth(const cv::Mat& image)
         case 4: return "CV_32S";
         case 5: return "CV_32F";
         case 6: return "CV_64F";
+        default: return "Undefined";
     }
-    return "Undefined";
 }
 
 double cmax(const cv::Mat& image)

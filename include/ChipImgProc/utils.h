@@ -6,7 +6,7 @@
 #include <ChipImgProc/histogram.hpp>
 namespace chipimgproc { 
 
-const char* depth(const cv::Mat& image);
+std::string depth(const cv::Mat& image);
 
 template<class OS>
 void info(OS& os, const cv::Mat& image)
@@ -187,4 +187,34 @@ cv::Mat_<float> match_template(
     cv::TemplateMatchModes mode = cv::TM_CCORR_NORMED,
     cv::InputArray mask = cv::noArray()
 );
+
+template<class Func>
+void typed_mat(const cv::Mat& mat, Func&& func) {
+    switch (mat.depth())
+    {
+        case 0: 
+            func(static_cast<const cv::Mat_<std::uint8_t>&>(mat));
+            break;
+        case 1: 
+            func(static_cast<const cv::Mat_<std::int8_t>&>(mat));
+            break;
+        case 2: 
+            func(static_cast<const cv::Mat_<std::uint16_t>&>(mat));
+            break;
+        case 3: 
+            func(static_cast<const cv::Mat_<std::int16_t>&>(mat));
+            break;
+        case 4: 
+            func(static_cast<const cv::Mat_<std::int32_t>&>(mat));
+            break;
+        case 5: 
+            func(static_cast<const cv::Mat_<float>&>(mat));
+            break;
+        case 6: 
+            func(static_cast<const cv::Mat_<double>&>(mat));
+            break;
+        default:  
+            throw std::runtime_error("undefined mat depth");
+    }
+}
 }
