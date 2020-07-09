@@ -8,6 +8,7 @@ target_link_libraries(
     ChipImgProc-utils
     ${CMAKE_THREAD_LIBS_INIT}
     ChipImgProc-logger
+    fmt::fmt
 )
 target_include_directories(${__screw_target} PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
