@@ -76,7 +76,9 @@ constexpr struct MakeMultiWarpedMat {
         double                      yd
     ) const {
         return MultiWarpedMat<ImgPX, true>(
-            mats, st_pts, origin,
+            std::move(mats), 
+            std::move(st_pts), 
+            origin,
             xd, yd
         );
     }
@@ -88,7 +90,7 @@ constexpr struct MakeMultiWarpedMat {
         std::vector<cv::Point2d>&&  st_pts
     ) const {
         return MultiWarpedMat<ImgPX, false>(
-            mats, st_pts
+            std::move(mats), std::move(st_pts)
         );
     }
 
