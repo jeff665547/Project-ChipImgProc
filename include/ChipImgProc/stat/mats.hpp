@@ -8,6 +8,7 @@
 #pragma once
 #include <cstdint>
 #include <ChipImgProc/utils.h>
+#include "make_stat_by_convolution.hpp"
 namespace chipimgproc { namespace stat{
 
 /**
@@ -59,6 +60,25 @@ struct Mats
         cv     = cv     (r);
         bg     = bg     (r);
         num    = num    (r);
+    }
+
+    static Mats<FLOAT> make_by_convolution(cv::Mat mat, int conv_w, int conv_h) {
+        Mats<FLOAT> res;
+        MakeStatByConvolution<FLOAT> maker;
+        auto [mean, sd] = maker(mat, conv_w, conv_h);
+        cv::Mat cv;
+        cv::divide(sd, mean, cv);
+        cv::Mat_<std::uint32_t> nums(mean.size());
+        nums.setTo(conv_w * conv_h);
+        cv::Mat bg(mean.size(), mean.type());
+
+        res.cv      = cv        ;
+        res.mean    = mean      ;
+        res.stddev  = sd        ;
+        res.bg      = bg        ;
+        res.num     = nums      ;
+
+        return res;
     }
 
     /**

@@ -217,4 +217,8 @@ void typed_mat(const cv::Mat& mat, Func&& func) {
             throw std::runtime_error("undefined mat depth");
     }
 }
+template<class T>
+int type_to_depth() {
+    return cv::Mat_<T>().depth();
+}
 }

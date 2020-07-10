@@ -38,6 +38,7 @@ private:
     cv::Point2d origin_ ; // real domain, cell left top
     double      xd_     ;
     double      yd_     ;
+    // mask, stat matrix
 };
 
 }
