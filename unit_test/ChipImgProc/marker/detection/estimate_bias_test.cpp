@@ -9,7 +9,7 @@ TEST(estimate_bias_test, simultaion_shift) {
     auto db_path = nucleona::test::data_dir() / "aruco_db.json";
     auto img_dir = nucleona::test::data_dir() / "aruco-green-pair";
     auto bf_path = img_dir / "0-1-BF.tiff";
-    auto green_path = img_dir / "0-1-green-AM5B-250ms.tiff";
+    auto green_path = img_dir / "0-1-CY3.tiff";
 
     auto bf_img = cv::imread(bf_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
     auto green_img = cv::imread(green_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
@@ -52,7 +52,7 @@ TEST(estimate_bias_test, simultaion_shift) {
         aruco_ids_in_image
     );
     // AM5B marker prepare
-    auto mk_layout = make_lassen_layout("lassen/pat_AM5B.tsv", um2px_r);
+    auto mk_layout = make_banff_layout("banff/pat_CY5.tsv", um2px_r);
     auto& green_templ = mk_layout.get_single_pat_marker_des().get_std_mk(chipimgproc::MatUnit::PX);
     auto& green_mask = mk_layout.get_single_pat_marker_des().get_std_mk_mask(chipimgproc::MatUnit::PX);
     chipimgproc::info(std::cout, green_templ);
@@ -68,7 +68,7 @@ TEST(estimate_bias_test, simultaion_shift) {
     }
 
 
-    auto [bias, score] = chipimgproc::marker::detection::estimate_bias(green_img, green_templ, green_mask, aruco_mk_pos, 0.51108);
+    auto [bias, score] = chipimgproc::marker::detection::estimate_bias(green_img, green_templ, green_mask, aruco_mk_pos, -0.423220);
     EXPECT_LT(std::abs(bias.x + 200), 2);
     EXPECT_LT(std::abs(bias.y + 250), 2);
 }
