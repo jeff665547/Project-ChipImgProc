@@ -192,4 +192,13 @@ std::tuple<double, cv::Mat> threshold(cv::Mat src, double thresh, double maxval,
     return {v, res};
 }
 
+cv::Mat filter2D(cv::Mat mat, cv::Mat kern, int ddepth) {
+    cv::Mat dst(mat.size(), ddepth);
+    cv::filter2D(mat, dst, dst.depth(), kern, 
+        cv::Point(0, 0), 0, cv::BORDER_CONSTANT
+    );
+    dst.resize(mat.rows - kern.rows + 1, mat.cols - kern.cols + 1);
+    return dst;
+}
+
 }

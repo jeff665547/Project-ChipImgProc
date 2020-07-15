@@ -1,10 +1,11 @@
-#include <ChipImgProc/warped_mat.hpp>
+#include <ChipImgProc/warped_mat/basic.hpp>
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/detection/aruco_random.hpp>
 #include <opencv2/calib3d.hpp>
+using namespace chipimgproc::warped_mat;
 using namespace chipimgproc;
-TEST(warped_mat_test, basic_test) {
+TEST(basic_warped_mat_test, basic_test) {
     using namespace std::string_literals;
     int mk_xi_um = 0;
     int mk_yi_um = 0;
@@ -72,16 +73,16 @@ TEST(warped_mat_test, basic_test) {
     }
     auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
 
-    auto warped_mat = make_warped_mat(
+    auto warped_mat = make_basic(
         trans_mat, 
-        static_cast<cv::Mat_<std::uint8_t>>(img0), 
+        {img0}, 
         {0, 0},
         5, 5
     );
     cv::Mat_<std::uint8_t> first_marker(10, 10);
     for(int i = 0; i < 10; i ++) {
         for(int j = 0; j < 10; j ++) {
-            first_marker(i, j) = warped_mat.at_cell(i, j).stat.mean;
+            first_marker(i, j) = cv::mean(warped_mat.at_cell(i, j, 0))[0];
         }
     }
     first_marker = binarize(first_marker);

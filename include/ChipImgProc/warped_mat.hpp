@@ -1,106 +1,78 @@
 #pragma once
-#include <ChipImgProc/utils.h>
-#include "warped_mat/reg_mat_helper.hpp"
-#include <Nucleona/language.hpp>
-#include <fmt/format.h>
-#include <ChipImgProc/stat/cell.hpp>
-#include <iostream>
-
+#include "warped_mat/basic.hpp"
+#include "warped_mat/make_stat_mat.hpp"
+#include "warped_mat/stat_reg_mat_helper.hpp"
+#include "warped_mat/patch.hpp"
 namespace chipimgproc {
-struct WarpedMatPatch {
-    cv::Mat             patch;
-    stat::Cell<double>  stat;
-};
-template<class ImgPX = std::uint16_t, bool is_reg_mat = true>
+
+constexpr auto make_basic_warped_mat = warped_mat::make_basic;
+
+template<bool is_reg_mat = true>
+using BasicWarpedMat = warped_mat::Basic<is_reg_mat>;
+
+template<bool is_reg_mat>
 struct WarpedMat 
-: public wraped_mat::RegMatHelper<
-    WarpedMat<ImgPX, is_reg_mat>,
+: public warped_mat::StatRegMatHelper<
+    WarpedMat<is_reg_mat>,
     is_reg_mat
-> {
-    using Base = wraped_mat::RegMatHelper<
-        WarpedMat<ImgPX, is_reg_mat>,
+>
+{
+    constexpr static bool support_reg_mat = is_reg_mat;
+
+    using Base = warped_mat::StatRegMatHelper<
+        WarpedMat<is_reg_mat>,
         is_reg_mat
     >;
 
     template<class... RegMatArgs>
     WarpedMat(
-        cv::Mat         warp_mat,
-        cv::Mat_<ImgPX> raw_image,
-        RegMatArgs&&... reg_mat_args
-    ) 
-    : warp_mat_     (warp_mat)
-    , raw_image_    (raw_image)
-    , Base          (FWD(reg_mat_args)...)
+        cv::Mat             warp_mat,
+        cv::Mat             raw_image,
+        RegMatArgs&&...     reg_mat_args
+    )
+    : Base              (FWD(reg_mat_args)...)
+    , basic_warped_mat_ (
+        warp_mat, 
+        { raw_image }
+    )
     {}
-    auto at_real(
-        double r, 
-        double c, 
-        cv::Size patch_size = cv::Size(5, 5)
-    ) const {
-        auto px_point = point_transform(c, r);
-        auto safe_padding_x = patch_size.width * 2;
-        auto safe_padding_y = patch_size.height * 2;
-        if(!is_include_impl(px_point, patch_size)) {
-            throw std::runtime_error(point_out_of_boundary(r, c, px_point));
-        }
-        cv::Mat res(patch_size, raw_image_.type());
-        cv::getRectSubPix(raw_image_, patch_size, px_point, res);
-        auto stat = stat::Cell<double>::make(res);
-        return WarpedMatPatch {
-            res, 
-            std::move(stat)
-        };
+
+    auto at_real(double r, double c, cv::Size patch_size = cv::Size(5, 5)) const {
+        auto pxs = basic_warped_mat_.at_real(r, c, 0, patch_size);
+        return warped_mat::Patch(pxs);
     }
 private:
-    auto is_include_impl(cv::Point2d px_point, cv::Size patch_size) const {
-        auto safe_padding_x = patch_size.width * 2;
-        auto safe_padding_y = patch_size.height * 2;
-        if(px_point.x < safe_padding_x) return false;
-        if(px_point.y < safe_padding_y) return false;
-        if(px_point.x >= (raw_image_.cols - safe_padding_x)) return false;
-        if(px_point.y >= (raw_image_.rows - safe_padding_y)) return false;
-        return true;
-    }
-    cv::Point2d point_transform(double x, double y) const {
-        std::vector<cv::Vec2d> src(1);
-        std::vector<cv::Vec2d> dst(1);
-        src[0][0] = x;
-        src[0][1] = y;
-        cv::transform(src, dst, warp_mat_);
-        return cv::Point2d(dst.at(0)[0], dst.at(0)[1]);
-    }
-    static std::string point_out_of_boundary(double r, double c, const cv::Point2d& px) {
-        return fmt::format(
-            "point out of boundary, real: ({}, {}), pixel: ({}, {})",
-            c, r, px.x, px.y
-        );
-    }
-    cv::Mat             warp_mat_   ;
-    cv::Mat_<ImgPX>     raw_image_  ;
+    warped_mat::Basic<false>  basic_warped_mat_   ;
 };
+
 constexpr struct MakeWarpedMat {
-    template<class ImgPX>
+    using CellMasks = ObjMat<cv::Mat, std::uint32_t>;
     auto operator()(
-        cv::Mat             warp_mat,
-        cv::Mat_<ImgPX>     raw_image,
-        cv::Point2d         origin,
-        double              xd, 
-        double              yd
+        cv::Mat                 warp_mat,
+        cv::Mat                 raw_image,
+        stat::Mats<double>&&    stat_mats,
+        CellMasks         &&    cell_mask,
+        cv::Point2d             origin,
+        double                  xd, 
+        double                  yd
     ) const {
-        return WarpedMat<ImgPX, true>(
-            warp_mat, raw_image, origin,
+        return WarpedMat<true>(
+            warp_mat, raw_image, 
+            std::move(stat_mats), 
+            std::move(cell_mask),
+            origin,
             xd, yd
         );
     }
-    template<class ImgPX>
     auto operator()(
-        cv::Mat             warp_mat,
-        cv::Mat_<ImgPX>     raw_image
+        cv::Mat                warp_mat,
+        cv::Mat                raw_images
     ) const {
-        return WarpedMat<ImgPX, false>(
-            warp_mat, raw_image
+        return WarpedMat<false>(
+            warp_mat, raw_images
         );
     }
 
 } make_warped_mat;
+
 }

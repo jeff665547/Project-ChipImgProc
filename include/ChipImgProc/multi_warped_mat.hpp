@@ -1,17 +1,24 @@
 #pragma once
-#include "warped_mat.hpp"
+#include "warped_mat/patch.hpp"
+#include "warped_mat/reg_mat_helper.hpp"
+#include <stdexcept>
+#include "multi_warped_mat/mincv_reducer.hpp"
 namespace chipimgproc {
 
-template<class ImgPX = std::uint16_t, bool is_reg_mat = true>
+template<
+    class FOV, 
+    bool is_reg_mat = true,
+    template<class _FOV> class ReducerTpl = multi_warped_mat::MinCVReducer
+>
 struct MultiWarpedMat 
-: public wraped_mat::RegMatHelper<
-    MultiWarpedMat<ImgPX, is_reg_mat>,
+: public warped_mat::RegMatHelper<
+    MultiWarpedMat<FOV, is_reg_mat>,
     is_reg_mat
 >
 {
-    using FOV = WarpedMat<ImgPX, is_reg_mat>;
-    using Base = wraped_mat::RegMatHelper<
-        MultiWarpedMat<ImgPX, is_reg_mat>,
+    using Reducer = ReducerTpl<FOV>;
+    using Base = warped_mat::RegMatHelper<
+        MultiWarpedMat<FOV, is_reg_mat>,
         is_reg_mat
     >;
 
@@ -30,70 +37,96 @@ struct MultiWarpedMat
                 "stitching point number must match matrix number"
             );
         }
+
+        for(auto&& st_pt : st_pts_) {
+            auto bias = st_pt - Base::origin();
+            int st_cl_x = std::round(bias.x / Base::xd());
+            int st_cl_y = std::round(bias.y / Base::yd());
+            st_cl_pts_.emplace_back(
+                st_cl_x, st_cl_y
+            );
+        }
     }
-    auto at_real(double r, double c, cv::Size patch_size) const {
-        std::vector<WarpedMatPatch> patches;
+private:
+    template<class Func>
+    auto at_each_fov(Func&& access) const {
+        using CellType = decltype(access(std::size_t()));
+        std::vector<CellType> patches;
         for(std::size_t i = 0; i < mats_.size(); i ++) {
-            auto& fov = mats_[i];
-            auto& stp = st_pts_[i];
-            auto fov_r = r - stp.y;
-            auto fov_c = c - stp.x;
             try {
-                patches.emplace_back(
-                    fov.at_real(fov_r, fov_c, patch_size)
-                );
+                patches.emplace_back(access(i));
             } catch(...) {}
         }
         if(patches.empty()) {
-            throw std::runtime_error(
-                fmt::format("point out of boundary, real: ({}, {})", c, r)
-            );
+            throw std::out_of_range("point out of boundary");
         }
-        std::size_t min_cv_i = 0;
-        for(std::size_t i = 1; i < patches.size(); i ++) {
-            auto& ph = patches.at(i);
-            if(ph.stat.cv < patches.at(min_cv_i).stat.cv) {
-                min_cv_i = i;
-            }
+        return reducer_(patches);
+    }
+public:
+    auto at_real(double r, double c, cv::Size patch_size) const {
+        try {
+            return at_each_fov([&](std::size_t fov_i){
+                auto& fov = mats_.at(fov_i);
+                auto& stp = st_pts_.at(fov_i);
+                auto fov_r = r - stp.y;
+                auto fov_c = c - stp.x;
+                return fov.at_real(fov_r, fov_c, patch_size);
+            });
+        } catch(const std::out_of_range& e) {
+            throw std::out_of_range(fmt::format("at_real({},{},[{},{}])", 
+                r, c, patch_size.width, patch_size.height
+            ));
         }
-        return patches.at(min_cv_i);
+    }
+    template<class... Args>
+    auto at_cell(std::int32_t r, std::int32_t c, Args&&... args) const {
+        try {
+            return at_each_fov([&](std::size_t fov_i){
+                auto& fov = mats_.at(fov_i);
+                auto& stp = st_cl_pts_.at(fov_i);
+                auto fov_r = r - stp.y;
+                auto fov_c = c - stp.x;
+                return fov.at_cell(fov_r, fov_c, FWD(args)...);
+            });
+        } catch(const std::out_of_range& e) {
+            throw std::out_of_range(fmt::format("at_cell({},{},...)", 
+                r, c
+            ));
+        }
     }
 private:
     std::vector<FOV>            mats_       ;
     std::vector<cv::Point2d>    st_pts_     ;
+    std::vector<cv::Point>      st_cl_pts_  ;
+    Reducer                     reducer_    ;
 
 };
 
 constexpr struct MakeMultiWarpedMat {
-    template<class ImgPX>
+    template<class FOV>
     auto operator()(
-        std::vector<
-            WarpedMat<ImgPX, true>
-        >&&                         mats,
+        std::vector<FOV>&&          mats,
         std::vector<cv::Point2d>&&  st_pts,
         cv::Point2d                 origin,
         double                      xd, 
         double                      yd
     ) const {
-        return MultiWarpedMat<ImgPX, true>(
+        return MultiWarpedMat<FOV>(
             std::move(mats), 
             std::move(st_pts), 
             origin,
             xd, yd
         );
     }
-    template<class ImgPX>
+    template<class FOV>
     auto operator()(
-        std::vector<
-            WarpedMat<ImgPX, false>
-        >&&                         mats,
+        std::vector<FOV>&&          mats,
         std::vector<cv::Point2d>&&  st_pts
     ) const {
-        return MultiWarpedMat<ImgPX, false>(
+        return MultiWarpedMat<FOV, false>(
             std::move(mats), std::move(st_pts)
         );
     }
-
 } make_multi_warped_mat;
 
 }

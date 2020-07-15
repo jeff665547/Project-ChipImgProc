@@ -78,7 +78,7 @@ TEST(multi_warped_mat_test, basic_test) {
         0.75
     ));
     aruco::MarkerMap mk_map(aruco_ids_map);
-    std::vector<WarpedMat<std::uint8_t, true>> warped_mats;
+    std::vector<BasicWarpedMat<true>> warped_mats;
     for(auto&& [img_p, st_p, mk_b] : ranges::view::zip(img_paths, stitch_point, mk_bias)) {
         auto img = ::imread(img_p);
         auto mk_regs = detector(
@@ -98,9 +98,9 @@ TEST(multi_warped_mat_test, basic_test) {
         }
         auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
 
-        auto warped_mat = make_warped_mat(
+        auto warped_mat = make_basic_warped_mat(
             trans_mat, 
-            static_cast<cv::Mat_<std::uint8_t>>(img), 
+            {img}, 
             {0, 0},
             5, 5
         );
@@ -114,7 +114,7 @@ TEST(multi_warped_mat_test, basic_test) {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i, j + 162).stat.mean;
+                first_marker(i, j) = multi_warped_mat.at_cell(i, j + 162).mean;
             }
         }
         first_marker = binarize(first_marker);
@@ -137,7 +137,7 @@ TEST(multi_warped_mat_test, basic_test) {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i, j + 324).stat.mean;
+                first_marker(i, j) = multi_warped_mat.at_cell(i, j + 324).mean;
             }
         }
         first_marker = binarize(first_marker);
@@ -160,7 +160,7 @@ TEST(multi_warped_mat_test, basic_test) {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i + 162, j + 162).stat.mean;
+                first_marker(i, j) = multi_warped_mat.at_cell(i + 162, j + 162).mean;
             }
         }
         first_marker = binarize(first_marker);

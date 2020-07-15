@@ -8,7 +8,7 @@
 #pragma once
 #include <cstdint>
 #include <ChipImgProc/utils.h>
-#include "make_stat_by_convolution.hpp"
+#include "cell.hpp"
 namespace chipimgproc { namespace stat{
 
 /**
@@ -41,11 +41,11 @@ struct Mats
      * @param cols Matrix column.
      */
     Mats(int rows, int cols)
-    : mean  (rows, cols)
-    , stddev(rows, cols)
-    , cv    (rows, cols)
-    , bg    (rows, cols)
-    , num   (rows, cols)
+    : mean  (cv::Mat_<FLOAT>::zeros(rows, cols))
+    , stddev(cv::Mat_<FLOAT>::zeros(rows, cols))
+    , cv    (cv::Mat_<FLOAT>::zeros(rows, cols))
+    , bg    (cv::Mat_<FLOAT>::zeros(rows, cols))
+    , num   (cv::Mat_<std::uint32_t>::zeros(rows, cols))
     {}
 
     /**
@@ -62,22 +62,13 @@ struct Mats
         num    = num    (r);
     }
 
-    static Mats<FLOAT> make_by_convolution(cv::Mat mat, int conv_w, int conv_h) {
-        Mats<FLOAT> res;
-        MakeStatByConvolution<FLOAT> maker;
-        auto [mean, sd] = maker(mat, conv_w, conv_h);
-        cv::Mat cv;
-        cv::divide(sd, mean, cv);
-        cv::Mat_<std::uint32_t> nums(mean.size());
-        nums.setTo(conv_w * conv_h);
-        cv::Mat bg(mean.size(), mean.type());
-
-        res.cv      = cv        ;
-        res.mean    = mean      ;
-        res.stddev  = sd        ;
-        res.bg      = bg        ;
-        res.num     = nums      ;
-
+    Cell<FLOAT> operator()(int r, int c) const {
+        Cell<FLOAT> res;
+        res.mean    = mean      (r, c);
+        res.stddev  = stddev    (r, c);
+        res.cv      = cv        (r, c);
+        res.bg      = bg        (r, c);
+        res.num     = num       (r, c);
         return res;
     }
 

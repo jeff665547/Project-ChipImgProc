@@ -221,4 +221,7 @@ template<class T>
 int type_to_depth() {
     return cv::Mat_<T>().depth();
 }
+
+cv::Mat filter2D(cv::Mat mat, cv::Mat kern, int ddepth = CV_64F);
+
 }
