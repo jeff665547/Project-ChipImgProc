@@ -6,6 +6,8 @@
 #include <Nucleona/algo/split.hpp>
 #include <Nucleona/stream/null_buffer.hpp>
 #include <Nucleona/tuple.hpp>
+#include "txt_to_img.hpp"
+#include <fstream>
 namespace chipimgproc{ namespace marker{
 
 struct Loader {
@@ -76,6 +78,20 @@ struct Loader {
         return nucleona::make_tuple(
             res.clone(),
             mask.clone()
+        );
+    }
+    static auto from_file_to_img(
+        const std::string& path,
+        double cell_r,
+        double cell_c,
+        double sp
+    ) {
+        std::ifstream marker_in(path);
+        auto [templ, mask] = Loader::from_txt(marker_in);
+        return txt_to_img(templ, mask,
+            cell_r,
+            cell_c,
+            sp
         );
     }
 };

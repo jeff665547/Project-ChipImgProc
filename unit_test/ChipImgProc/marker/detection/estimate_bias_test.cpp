@@ -52,7 +52,7 @@ TEST(estimate_bias_test, simultaion_shift) {
         aruco_ids_in_image
     );
     // AM5B marker prepare
-    auto mk_layout = make_banff_layout("banff/pat_CY5.tsv", um2px_r);
+    auto mk_layout = make_banff_layout("banff_rc/pat_CY5.tsv", um2px_r);
     auto& green_templ = mk_layout.get_single_pat_marker_des().get_std_mk(chipimgproc::MatUnit::PX);
     auto& green_mask = mk_layout.get_single_pat_marker_des().get_std_mk_mask(chipimgproc::MatUnit::PX);
     chipimgproc::info(std::cout, green_templ);
@@ -62,13 +62,15 @@ TEST(estimate_bias_test, simultaion_shift) {
     std::vector<cv::Point2d> aruco_mk_pos;
     for(auto&& [mk_id, score, pos] : aruco_mk) {
         aruco_mk_pos.push_back(cv::Point2d(
-            pos.x + 200,
-            pos.y + 250
+            pos.x, //  + 200,
+            pos.y //  + 250
         ));
     }
 
 
-    auto [bias, score] = chipimgproc::marker::detection::estimate_bias(green_img, green_templ, green_mask, aruco_mk_pos, -0.423220);
-    EXPECT_LT(std::abs(bias.x + 200), 2);
-    EXPECT_LT(std::abs(bias.y + 250), 2);
+    // auto [bias, score] = chipimgproc::marker::detection::estimate_bias(green_img, green_templ, green_mask, aruco_mk_pos, -0.423220);
+    auto [bias, score] = chipimgproc::marker::detection::estimate_bias(green_img, green_templ, green_mask, aruco_mk_pos, -0.42558601126675694);
+    std::cout << bias << std::endl;
+    EXPECT_LT(std::abs(bias.x/* + 200*/), 3);
+    EXPECT_LT(std::abs(bias.y/* + 250*/), 3);
 }

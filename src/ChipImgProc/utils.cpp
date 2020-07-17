@@ -194,11 +194,21 @@ std::tuple<double, cv::Mat> threshold(cv::Mat src, double thresh, double maxval,
 
 cv::Mat filter2D(cv::Mat mat, cv::Mat kern, int ddepth) {
     cv::Mat dst(mat.size(), ddepth);
-    cv::filter2D(mat, dst, dst.depth(), kern, 
-        cv::Point(0, 0), 0, cv::BORDER_CONSTANT
-    );
-    dst.resize(mat.rows - kern.rows + 1, mat.cols - kern.cols + 1);
+    // cv::filter2D(mat, dst, dst.depth(), kern, 
+    //     cv::Point(0, 0), 0, cv::BORDER_CONSTANT
+    // );
+    // cv::Rect roi(0, 0, mat.cols - kern.cols + 1, mat.rows - kern.rows + 1);
+    // cv::Mat tmp = dst(roi);
+    // return tmp;
+    cv::filter2D(mat, dst, dst.depth(), kern);
     return dst;
 }
+
+void ip_convert(cv::Mat& mat, int type, double alpha, double beta) {
+    cv::Mat tmp;
+    mat.convertTo(tmp, type, alpha, beta);
+    mat = tmp;
+}
+
 
 }

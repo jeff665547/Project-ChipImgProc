@@ -11,9 +11,9 @@ struct TxtToImg {
     auto operator()(
         const cv::Mat_<std::uint8_t>& mat,
         const cv::Mat_<std::uint8_t>& mask_cl,
-        float cell_r_px,
-        float cell_c_px,
-        float border_px,
+        double cell_r_px,
+        double cell_c_px,
+        double border_px,
         std::ostream& log = nucleona::stream::null_out
     ) const {
         // auto ext = cell_r_px * 0.2;
@@ -75,5 +75,5 @@ struct TxtToImg {
         );
     }
 };
-
+constexpr TxtToImg txt_to_img;
 }}

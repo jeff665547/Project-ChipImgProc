@@ -49,6 +49,7 @@ struct Basic
         std::vector<cv::Mat> res;
         for(auto&& raw_image : raw_images_) {
             cv::Mat img_roi(patch_size, raw_image.type());
+            // chipimgproc::info(std::cout, raw_image);
             cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
             res.push_back(img_roi);
         }
@@ -64,7 +65,13 @@ struct Basic
         }
         auto& raw_image = raw_images_.at(i);
         cv::Mat img_roi(patch_size, raw_image.type());
+        // chipimgproc::info(std::cout, raw_image);
         cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
+        // cv::Mat map1(1, 1, CV_64FC2);
+        // auto& elem = map1.at<cv::Vec2d>(0, 0);
+        // elem[0] = c;
+        // elem[1] = r;
+        // cv::remap(raw_image, img_roi)
         return img_roi;
     }
 private:
@@ -116,13 +123,9 @@ constexpr struct MakeBasic {
         double                  space_w, 
         double                  space_h 
     ) const {
-        cv::Point2d _origin(
-            origin.x + (space_w / 2),
-            origin.y + (space_h / 2)
-        );
         return Basic<true>(
             warp_mat, raw_images, 
-            _origin,
+            origin,
             cell_w + space_w, 
             cell_h + space_h
         );

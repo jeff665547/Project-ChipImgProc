@@ -10,18 +10,20 @@ constexpr auto make_basic_warped_mat = warped_mat::make_basic;
 template<bool is_reg_mat = true>
 using BasicWarpedMat = warped_mat::Basic<is_reg_mat>;
 
-template<bool is_reg_mat>
+template<bool is_reg_mat = true, class Float = float>
 struct WarpedMat 
 : public warped_mat::StatRegMatHelper<
-    WarpedMat<is_reg_mat>,
-    is_reg_mat
+    WarpedMat<is_reg_mat, Float>,
+    is_reg_mat,
+    Float
 >
 {
     constexpr static bool support_reg_mat = is_reg_mat;
 
     using Base = warped_mat::StatRegMatHelper<
         WarpedMat<is_reg_mat>,
-        is_reg_mat
+        is_reg_mat,
+        Float
     >;
 
     template<class... RegMatArgs>
@@ -47,16 +49,17 @@ private:
 
 constexpr struct MakeWarpedMat {
     using CellMasks = ObjMat<cv::Mat, std::uint32_t>;
+    template<class Float>
     auto operator()(
         cv::Mat                 warp_mat,
         cv::Mat                 raw_image,
-        stat::Mats<double>&&    stat_mats,
-        CellMasks         &&    cell_mask,
+        stat::Mats<Float>&&     stat_mats,
+        CellMasks        &&     cell_mask,
         cv::Point2d             origin,
         double                  xd, 
         double                  yd
     ) const {
-        return WarpedMat<true>(
+        return WarpedMat<true, Float>(
             warp_mat, raw_image, 
             std::move(stat_mats), 
             std::move(cell_mask),
@@ -71,6 +74,55 @@ constexpr struct MakeWarpedMat {
         return WarpedMat<false>(
             warp_mat, raw_images
         );
+    }
+    auto operator()(
+        cv::Mat     warp_mat,
+        cv::Mat     mat,
+        // all micron level below
+        cv::Point   origin, 
+        int clw,    int clh,
+        int clwd,   int clhd,
+        int w,      int h,
+        int swin_w, int swin_h,
+        double um2px_r,
+        int clwn,   int clhn
+    ) const {
+        warped_mat::MakeStatMat<float> make_stat_mat;
+        auto [stat_mats, warped_mask] = make_stat_mat(
+            mat, origin, 
+            clw,    clh,
+            clwd,   clhd,
+            w,      h,
+            swin_w, swin_h,
+            um2px_r,
+            clwn,   clhn,
+            warp_mat
+        );
+        return WarpedMat<true, float>(
+            warp_mat, mat, 
+            std::move(stat_mats), 
+            std::move(warped_mask),
+            origin,
+            clwd, clhd
+        );
+    }
+    auto operator()(
+        cv::Mat     warp_mat,
+        cv::Mat     mat,
+        // all micron level below
+        cv::Point   origin, 
+        int clw,    int clh,
+        int clwd,   int clhd,
+        int w,      int h,
+        double win_r,
+        double um2px_r,
+        int clwn,   int clhn
+    ) const {
+        int swin_w = std::round(clw * win_r);
+        int swin_h = std::round(clh * win_r);
+        if(swin_w < 3 || swin_h < 3) throw std::invalid_argument("win_r too small, unable to generate proper filter");
+        return operator()(warp_mat, mat, origin, clw, clh, clwd, 
+            clhd, w, h, swin_w, swin_h, um2px_r, clwn, clhn);
     }
 
 } make_warped_mat;

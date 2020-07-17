@@ -6,6 +6,8 @@
 #include <ChipImgProc/histogram.hpp>
 namespace chipimgproc { 
 
+const double PI = std::atan(1.0)*4;
+
 std::string depth(const cv::Mat& image);
 
 template<class OS>
@@ -189,6 +191,35 @@ cv::Mat_<float> match_template(
 );
 
 template<class Func>
+void typed_mat(cv::Mat& mat, Func&& func) {
+    switch (mat.depth())
+    {
+        case 0: 
+            func(static_cast<cv::Mat_<std::uint8_t>&>(mat));
+            break;
+        case 1: 
+            func(static_cast<cv::Mat_<std::int8_t>&>(mat));
+            break;
+        case 2: 
+            func(static_cast<cv::Mat_<std::uint16_t>&>(mat));
+            break;
+        case 3: 
+            func(static_cast<cv::Mat_<std::int16_t>&>(mat));
+            break;
+        case 4: 
+            func(static_cast<cv::Mat_<std::int32_t>&>(mat));
+            break;
+        case 5: 
+            func(static_cast<cv::Mat_<float>&>(mat));
+            break;
+        case 6: 
+            func(static_cast<cv::Mat_<double>&>(mat));
+            break;
+        default:  
+            throw std::runtime_error("undefined mat depth");
+    }
+}
+template<class Func>
 void typed_mat(const cv::Mat& mat, Func&& func) {
     switch (mat.depth())
     {
@@ -223,5 +254,7 @@ int type_to_depth() {
 }
 
 cv::Mat filter2D(cv::Mat mat, cv::Mat kern, int ddepth = CV_64F);
+
+void ip_convert(cv::Mat& mat, int type, double alpha = 1, double beta = 0);
 
 }

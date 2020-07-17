@@ -6,20 +6,20 @@
 #include "patch.hpp"
 namespace chipimgproc::warped_mat {
 
-template<class Derived, bool enable>
+template<class Derived, bool enable, class Float>
 struct StatRegMatHelper 
 {};
 
-template<class Derived>
-struct StatRegMatHelper<Derived, true>
-: protected RegMatHelper<Derived, true>
+template<class Derived, class Float>
+struct StatRegMatHelper<Derived, true, Float>
+: public RegMatHelper<Derived, true>
 {
     using Base      = RegMatHelper<Derived, true>;
     using CellMasks = ObjMat<cv::Mat, std::uint32_t>;
 
     StatRegMatHelper(
-        stat::Mats<double>&&    stat_mats,
-        CellMasks         &&    cell_mask,
+        stat::Mats<Float>&&     stat_mats,
+        CellMasks        &&     cell_mask,
         cv::Point2d             origin, 
         double                  xd, 
         double                  yd
@@ -32,12 +32,15 @@ struct StatRegMatHelper<Derived, true>
     auto at_cell(std::int32_t r, std::int32_t c) const {
         auto stat = stat_mats_(r, c);
         auto mask = cell_mask_(r, c);
-        auto pxs  = Base::at_cell(r, c, 0, mask.size());
-        cv::Mat tmp  = pxs & mask;
+        auto pxs  = Base::at_cell(r, c, mask.size());
+        // std::cout << pxs.patch << std::endl;
+        // std::cout << mask << std::endl;
+        // cv::Mat tmp  = pxs.patch.setTo(pxs.patch, mask);
+        cv::Mat tmp = pxs.patch.mul(mask);
         return warped_mat::Patch(std::move(pxs), tmp);
     }
 
-    stat::Mats<double>                  stat_mats_;
+    stat::Mats<Float>                   stat_mats_;
     CellMasks                           cell_mask_;
 };
 

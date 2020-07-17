@@ -66,7 +66,7 @@ protected:
     RndMkId identify(
         const cv::Mat& view, 
         const std::vector<cv::Vec2f>& anchors
-    ) {
+    ) const {
         return {0, 0};
     }
 public:
@@ -74,7 +74,9 @@ public:
         return stempl_;
     }
     template<class... Args>
-    auto operator()(cv::Mat input, Args&&... identify_args) const {
+    std::vector<
+        std::tuple<int, double, cv::Point2f>
+    > operator()(cv::Mat input, Args&&... identify_args) const {
         // convert input to 8U image
         cv::Mat_<uint8_t> image;
         if (input.depth() == CV_8U)

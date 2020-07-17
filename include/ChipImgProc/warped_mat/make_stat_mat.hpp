@@ -16,9 +16,10 @@ struct MakeStatMat {
         cv::Point   origin, 
         int clw,    int clh,
         int clwd,   int clhd,
-        int clwn,   int clhn,
         int w,      int h,
         int swin_w, int swin_h,
+        double      um2px_r,
+        int clwn,   int clhn,
         cv::Mat     warpmat
     ) const {
         /*
@@ -43,15 +44,30 @@ struct MakeStatMat {
 
             7. make warped matrix
         */
-        auto [mean, sd] = make_large_cv_mat(mat, swin_w, swin_h);
-        auto cv = sd / mean;
+        int swin_w_px = std::round(swin_w * um2px_r);
+        int swin_h_px = std::round(swin_h * um2px_r);
+        int clw_px    = std::round(clw * um2px_r);
+        int clh_px    = std::round(clh * um2px_r);
+        auto [mean, sd] = make_large_cv_mat(mat, swin_w_px, swin_h_px);
+        cv::Mat cv = sd / mean;
 
-        auto lmask   = make_large_mask(origin, clw, clh, clwd, clhd,
-            clwn, clhn, w, h, swin_w, swin_h, warpmat
+        auto lmask = make_large_mask(origin, clw, clh, clwd, clhd,
+            w, h, swin_w, swin_h, um2px_r, clwn, clhn, warpmat, mat.size()
         );
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());
         cv::connectedComponents(lmask, mask_cell_label);
-
+        {
+            cv::Mat comp_img;
+            mask_cell_label.convertTo(comp_img, CV_16U);
+            cv::imwrite("components.png", comp_img);
+            cv::imwrite("mask.png", lmask);
+        }
+        // lmask = lmask / 255;
+        // ip_convert(lmask,           CV_32F);
+        ip_convert(mask_cell_label, CV_32F);
+        ip_convert(sd,              CV_32F);
+        ip_convert(mean,            CV_32F);
+        ip_convert(cv,              CV_32F);
         auto warped_agg_mat = make_basic(warpmat, 
             std::vector<cv::Mat>({
                 mask_cell_label,
@@ -63,14 +79,14 @@ struct MakeStatMat {
             origin, clwd, clhd
         );
         ObjMat<cv::Mat, std::uint32_t> warped_mask(clhn, clwn);
-        stat::Mats stat_mats(clhn, clwn);
+        stat::Mats<Float> stat_mats(clhn, clwn);
         for(int i = 0; i < clhn; i ++) {
             for(int j = 0; j < clwn; j ++) {
-                std::int32_t label = warped_agg_mat.at_cell(
+                int label = warped_agg_mat.at_cell(
                     i, j, 0, cv::Size(1, 1)
-                ).at<std::int32_t>(0, 0);
+                ).at<float>(0, 0);
                 auto mats = warped_agg_mat.at_cell(
-                    i, j, cv::Size(clw, clh)
+                    i, j, cv::Size(clw_px, clh_px)
                 );
                 auto& sub_lab     = mats.at(0);
                 auto& sub_mask    = mats.at(1);
@@ -80,15 +96,17 @@ struct MakeStatMat {
                 sub_lab = lab_to_mask(sub_lab, label);
                 cv::Mat sum_mask = sub_mask & sub_lab;
                 
-                cv::Point min_cv_pos;
+                cv::Point min_cv_pos; // pixel
                 double min_cv;
                 cv::minMaxLoc(sub_cv, &min_cv, nullptr, &min_cv_pos, nullptr, sum_mask);
-                stat_mats.mean(i, j)    = sub_mean.at<Float>(min_cv_pos);
+                stat_mats.mean  (i, j)  = sub_mean.at<Float>(min_cv_pos);
                 stat_mats.stddev(i, j)  = sub_sd.at<Float>(min_cv_pos);
-                stat_mats.cv(i, j)      = min_cv;
-                stat_mats.bg(i, j)      = 0;
-                stat_mats.num(i, j)     = clh * clw;
-                warped_mask(i, j) = sum_mask;
+                stat_mats.cv    (i, j)  = min_cv;
+                stat_mats.bg    (i, j)  = 0;
+                stat_mats.num   (i, j)  = clh * clw;
+
+                ip_convert(sum_mask, CV_32F, 1.0 / 255);
+                warped_mask     (i, j)  = sum_mask;
             }
         }
         return nucleona::make_tuple(std::move(stat_mats), std::move(warped_mask));

@@ -27,7 +27,7 @@ struct RegMatHelper<Derived, true> {
         return derived()->at_real(cent_r, cent_c, patch_size);
     }
 
-    auto at_cell(
+    auto at_cell( // optional compile of this function, not all derived type support i indexing.
         std::int32_t r, 
         std::int32_t c, 
         std::int32_t i,
