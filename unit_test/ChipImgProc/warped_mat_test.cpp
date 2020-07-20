@@ -130,22 +130,27 @@ TEST(warped_mat_test, basic_test) {
     cv::Mat_<std::uint8_t> first_marker(10, 10);
     for(int i = 0; i < 10; i ++) {
         for(int j = 0; j < 10; j ++) {
-            first_marker(i, j) = warped_mat.at_cell(i, j).mean;
+            // first_marker(i, j) = cv::mean(warped_mat.at_cell(i, j).patch)[0] / 64;
+            first_marker(i, j) = warped_mat.at_cell(i, j).mean / 64;
         }
     }
-    // first_marker = binarize(first_marker);
-    // cv::imwrite("test.png", first_marker);
-    // std::vector<int> ans ({
-    //     1, 0, 0, 1, 0, 0
-    //   , 1, 1, 1, 1, 1, 0
-    //   , 1, 0, 1, 1, 0, 1
-    //   , 1, 1, 1, 0, 0, 0
-    //   , 1, 0, 1, 1, 0, 0
-    //   , 0, 1, 0, 1, 0, 0
-    // });
-    // for(int i = 2; i < 8; i ++) {
-    //     for(int j = 2; j < 8; j ++) {
-    //         EXPECT_EQ(ans[((i-2) * 6) + (j - 2)] * 255, first_marker(i, j));
-    //     }
-    // }
+    first_marker = binarize(first_marker);
+    cv::imwrite("test.png", first_marker);
+    std::vector<int> ans ({
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
+      0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    });
+    for(int i = 0; i < 10; i ++) {
+        for(int j = 0; j < 10; j ++) {
+            EXPECT_EQ(ans[(i * 10) + j] * 255, first_marker(i, j));
+        }
+    }
 }
