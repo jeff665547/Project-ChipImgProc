@@ -71,6 +71,8 @@ struct Mats
         res.num     = num       (r, c);
         return res;
     }
+    int rows() const { return mean.rows; }
+    int cols() const { return mean.cols; }
 
     /**
      * @brief a matrix of mean values.

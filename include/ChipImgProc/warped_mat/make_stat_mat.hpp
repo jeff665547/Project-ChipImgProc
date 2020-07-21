@@ -76,7 +76,7 @@ struct MakeStatMat {
                 sd,
                 mean
             }),
-            origin, clwd, clhd
+            origin, clwd, clhd, w, h
         );
         ObjMat<cv::Mat, std::uint32_t> warped_mask(clhn, clwn);
         stat::Mats<Float> stat_mats(clhn, clwn);

@@ -15,15 +15,23 @@ struct ObjMat {
         index_ = build_index(r, c);
     }
     decltype(auto) operator()(int r, int c) {
+        index_range_check(r, c);
         return obj_.at(index_(r, c));
     }
     decltype(auto) operator()(int r, int c) const {
+        index_range_check(r, c);
         return obj_.at(index_(r, c));
     }
     const std::vector<T>& values() const {
         return obj_;
     }
 private:
+    void index_range_check(int r, int c) const {
+        if(r < 0) throw std::out_of_range("ObjMat(): r < 0");
+        if(c < 0) throw std::out_of_range("ObjMat(): c < 0");
+        if(r >= index_.rows) throw std::out_of_range("ObjMat(): r >= index_.rows");
+        if(c >= index_.cols) throw std::out_of_range("ObjMat(): c >= index_.cols");
+    }
     static cv::Mat_<ID> build_index(int r, int c) {
         cv::Mat_<ID> index(r, c);
         ID n = 0;

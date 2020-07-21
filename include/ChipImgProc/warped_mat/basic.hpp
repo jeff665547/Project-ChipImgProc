@@ -23,11 +23,15 @@ struct Basic
     Basic(
         cv::Mat                 warp_mat,
         std::vector<cv::Mat>    raw_images,
+        double                  max_x,
+        double                  max_y,
         RegMatArgs&&...         reg_mat_args
     ) 
-    : Base          (FWD(reg_mat_args)...)
+    : Base          (FWD(reg_mat_args)..., max_x, max_y)
     , warp_mat_     (warp_mat)
     , raw_images_   (raw_images)
+    , max_x_        (max_x)
+    , max_y_        (max_y)
     {
         if(raw_images_.size() < 1) throw std::runtime_error("must provide at least 1 raw image");
         auto imsize = raw_images_[0].size();
@@ -42,8 +46,11 @@ struct Basic
         double c, 
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
+        if(!is_include_real_impl(r, c)) {
+            throw std::runtime_error(point_out_of_boundary(r, c));
+        }
         auto px_point = point_transform(c, r);
-        if(!is_include_impl(px_point, patch_size)) {
+        if(!is_include_pixel_impl(px_point, patch_size)) {
             throw std::runtime_error(point_out_of_boundary(r, c, px_point));
         }
         std::vector<cv::Mat> res;
@@ -59,8 +66,11 @@ struct Basic
         double r, double c, int i, 
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
+        if(!is_include_real_impl(r, c)) {
+            throw std::runtime_error(point_out_of_boundary(r, c));
+        }
         auto px_point = point_transform(c, r);
-        if(!is_include_impl(px_point, patch_size)) {
+        if(!is_include_pixel_impl(px_point, patch_size)) {
             throw std::runtime_error(point_out_of_boundary(r, c, px_point));
         }
         auto& raw_image = raw_images_.at(i);
@@ -75,7 +85,12 @@ struct Basic
         return img_roi;
     }
 private:
-    auto is_include_impl(cv::Point2d px_point, cv::Size patch_size) const {
+    auto is_include_real_impl(double r, double c) const {
+        if(c >= max_x_) return false;
+        if(r >= max_y_) return false;
+        return true;
+    }
+    auto is_include_pixel_impl(cv::Point2d px_point, cv::Size patch_size) const {
         auto safe_padding_x = patch_size.width * 2;
         auto safe_padding_y = patch_size.height * 2;
         if(px_point.x < safe_padding_x) return false;
@@ -98,8 +113,17 @@ private:
             c, r, px.x, px.y
         );
     }
+    static std::string point_out_of_boundary(double r, double c) {
+        return fmt::format(
+            "point out of boundary, real: ({}, {})",
+            c, r
+        );
+    }
     cv::Mat                 warp_mat_    ;
     std::vector<cv::Mat>    raw_images_  ;
+protected:
+    double                  max_x_       ;
+    double                  max_y_       ;
 };
 constexpr struct MakeBasic {
     auto operator()(
@@ -107,11 +131,13 @@ constexpr struct MakeBasic {
         std::vector<cv::Mat>    raw_images,
         cv::Point2d             origin,
         double                  xd, 
-        double                  yd
+        double                  yd,
+        double                  max_x,
+        double                  max_y 
     ) const {
         return Basic<true>(
-            warp_mat, raw_images, origin,
-            xd, yd
+            warp_mat, raw_images, max_x, max_y, 
+            origin, xd, yd
         );
     }
     auto operator()(
@@ -121,10 +147,13 @@ constexpr struct MakeBasic {
         double                  cell_w, 
         double                  cell_h,
         double                  space_w, 
-        double                  space_h 
+        double                  space_h, 
+        double                  max_x,
+        double                  max_y
     ) const {
         return Basic<true>(
             warp_mat, raw_images, 
+            max_x, max_y,
             origin,
             cell_w + space_w, 
             cell_h + space_h
@@ -132,10 +161,14 @@ constexpr struct MakeBasic {
     }
     auto operator()(
         cv::Mat                warp_mat,
-        std::vector<cv::Mat>   raw_images
+        std::vector<cv::Mat>   raw_images, 
+        double                 max_x = std::numeric_limits<double>::max(),
+        double                 max_y = std::numeric_limits<double>::max()
+ 
     ) const {
         return Basic<false>(
-            warp_mat, raw_images
+            warp_mat, raw_images,
+            max_x, max_y
         );
     }
 

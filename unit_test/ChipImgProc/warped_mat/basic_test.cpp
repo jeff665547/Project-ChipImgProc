@@ -77,8 +77,11 @@ TEST(basic_warped_mat_test, basic_test) {
         trans_mat, 
         {img0}, 
         {0, 0},
-        5, 5
+        5, 5,
+        860, 860
     );
+    EXPECT_EQ(warped_mat.rows(), 172);
+    EXPECT_EQ(warped_mat.cols(), 172);
     cv::Mat_<std::uint8_t> first_marker(10, 10);
     for(int i = 0; i < 10; i ++) {
         for(int j = 0; j < 10; j ++) {

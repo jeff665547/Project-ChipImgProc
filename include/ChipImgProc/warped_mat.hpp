@@ -30,12 +30,15 @@ struct WarpedMat
     WarpedMat(
         cv::Mat             warp_mat,
         cv::Mat             raw_image,
+        double              max_x,
+        double              max_y,
         RegMatArgs&&...     reg_mat_args
     )
-    : Base              (FWD(reg_mat_args)...)
+    : Base              (FWD(reg_mat_args)..., max_x, max_y)
     , basic_warped_mat_ (
         warp_mat, 
-        { raw_image }
+        { raw_image },
+        max_x, max_y
     )
     {}
 
@@ -43,6 +46,9 @@ struct WarpedMat
         auto pxs = basic_warped_mat_.at_real(r, c, 0, patch_size);
         return warped_mat::Patch(pxs);
     }
+    // ~WarpedMat() {
+    //     std::cout << "WarpedMat destruct" << std::endl;
+    // }
 private:
     warped_mat::Basic<false>  basic_warped_mat_   ;
 };
@@ -53,6 +59,8 @@ constexpr struct MakeWarpedMat {
     auto operator()(
         cv::Mat                 warp_mat,
         cv::Mat                 raw_image,
+        double                  x_max, 
+        double                  y_max,
         stat::Mats<Float>&&     stat_mats,
         CellMasks        &&     cell_mask,
         cv::Point2d             origin,
@@ -61,6 +69,7 @@ constexpr struct MakeWarpedMat {
     ) const {
         return WarpedMat<true, Float>(
             warp_mat, raw_image, 
+            x_max, y_max,
             std::move(stat_mats), 
             std::move(cell_mask),
             origin,
@@ -69,10 +78,12 @@ constexpr struct MakeWarpedMat {
     }
     auto operator()(
         cv::Mat                warp_mat,
-        cv::Mat                raw_images
+        cv::Mat                raw_images,
+        double                 max_x = std::numeric_limits<double>::max(),
+        double                 max_y = std::numeric_limits<double>::max()
     ) const {
         return WarpedMat<false>(
-            warp_mat, raw_images
+            warp_mat, raw_images, max_x, max_y
         );
     }
     auto operator()(
@@ -100,6 +111,7 @@ constexpr struct MakeWarpedMat {
         );
         return WarpedMat<true, float>(
             warp_mat, mat, 
+            w, h,
             std::move(stat_mats), 
             std::move(warped_mask),
             origin,
