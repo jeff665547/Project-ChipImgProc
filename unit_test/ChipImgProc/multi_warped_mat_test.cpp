@@ -14,8 +14,8 @@ TEST(multi_warped_mat_test, with_basic_test) {
     const double um2px_r = 2.4145;
     const int rescale = 1;
     const double rescaled_um2px_r = um2px_r / rescale;
-    int mk_xi_um    = 0   * rescale;
-    int mk_yi_um    = 0   * rescale;
+    double mk_xi_um = -0.5          ;
+    double mk_yi_um = -0.5          ;
     int mk_w_d_um   = 405 * rescale;
     int mk_h_d_um   = 405 * rescale;
     int mk_w_um     = 50  * rescale;
@@ -121,7 +121,7 @@ TEST(multi_warped_mat_test, with_basic_test) {
         auto warped_mat = make_basic_warped_mat(
             trans_mat, 
             {img}, 
-            {0, 0},
+            {mk_xi_um, mk_yi_um},
             5, 5,
             860, 860
         );
@@ -208,8 +208,8 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
     const double um2px_r = 2.4145;
     const int rescale = 2;
     const double rescaled_um2px_r = um2px_r / rescale;
-    int mk_xi_um    = 0   * rescale;
-    int mk_yi_um    = 0   * rescale;
+    double mk_xi_um = -0.5         ;
+    double mk_yi_um = -0.5         ;
     int mk_w_d_um   = 405 * rescale;
     int mk_h_d_um   = 405 * rescale;
     int mk_w_um     = 50  * rescale;
@@ -363,7 +363,7 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
         std::cout << probe_trans_mat << std::endl;
         auto warped_mat = make_warped_mat(
             probe_trans_mat, pb_img, 
-            {0, 0},
+            {mk_xi_um, mk_yi_um},
             cl_w_um, cl_h_um,
             cl_wd_um, cl_hd_um,
             cl_wn * cl_wd_um,

@@ -13,7 +13,7 @@ template<class Float>
 struct MakeStatMat {
     auto operator()(
         cv::Mat     mat,
-        cv::Point   origin, 
+        cv::Point2d origin, 
         int clw,    int clh,
         int clwd,   int clhd,
         int w,      int h,
@@ -51,7 +51,12 @@ struct MakeStatMat {
         auto [mean, sd] = make_large_cv_mat(mat, swin_w_px, swin_h_px);
         cv::Mat cv = sd / mean;
 
-        auto lmask = make_large_mask(origin, clw, clh, clwd, clhd,
+        auto lmask = make_large_mask(
+            {
+                static_cast<int>(std::round(origin.x + 0.5)), 
+                static_cast<int>(std::round(origin.y + 0.5))
+            },
+            clw, clh, clwd, clhd,
             w, h, swin_w, swin_h, um2px_r, clwn, clhn, warpmat, mat.size()
         );
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());

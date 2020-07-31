@@ -90,7 +90,7 @@ constexpr struct MakeWarpedMat {
         cv::Mat     warp_mat,
         cv::Mat     mat,
         // all micron level below
-        cv::Point   origin, 
+        cv::Point2d origin, 
         int clw,    int clh,
         int clwd,   int clhd,
         int w,      int h,
@@ -122,7 +122,7 @@ constexpr struct MakeWarpedMat {
         cv::Mat     warp_mat,
         cv::Mat     mat,
         // all micron level below
-        cv::Point   origin, 
+        cv::Point2d origin, 
         int clw,    int clh,
         int clwd,   int clhd,
         int w,      int h,
