@@ -16,6 +16,7 @@ template<class Derived>
 struct RegMatHelper<Derived, true> {
     using This = RegMatHelper<Derived, true>;
     
+    RegMatHelper() = default;
     RegMatHelper(
         cv::Point2d origin, double xd, double yd, 
         double x_max, double y_max

@@ -26,6 +26,8 @@ struct WarpedMat
         Float
     >;
 
+    WarpedMat() = default;
+
     template<class... RegMatArgs>
     WarpedMat(
         cv::Mat             warp_mat,

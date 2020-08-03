@@ -17,6 +17,8 @@ struct MultiRegMatHelper<Derived, true>
     using Base = warped_mat::RegMatHelper<Derived, true>;
     using This = MultiRegMatHelper<Derived, true>;
 
+    MultiRegMatHelper() = default;
+
     MultiRegMatHelper(
         cv::Point2d origin, 
         double xd, double yd,

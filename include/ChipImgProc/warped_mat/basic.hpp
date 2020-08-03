@@ -19,6 +19,8 @@ struct Basic
         is_reg_mat
     >;
 
+    Basic() = default;
+
     template<class... RegMatArgs>
     Basic(
         cv::Mat                 warp_mat,

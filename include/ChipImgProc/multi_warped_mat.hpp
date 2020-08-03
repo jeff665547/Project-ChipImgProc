@@ -25,6 +25,8 @@ struct MultiWarpedMat
     >;
     friend Base;
 
+    MultiWarpedMat() = default;
+
     template<class... RegMatArgs>
     MultiWarpedMat(
         std::vector<FOV>&&          mats,
