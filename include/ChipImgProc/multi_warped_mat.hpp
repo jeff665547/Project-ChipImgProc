@@ -44,9 +44,6 @@ struct MultiWarpedMat
         }
         Base::init();
     }
-    // ~MultiWarpedMat() {
-    //     std::cout << "MultiWarpedMat destruct" << std::endl;
-    // }
 protected:
     template<class Func>
     auto at_each_fov(Func&& access) const {
@@ -55,7 +52,8 @@ protected:
         for(std::size_t i = 0; i < mats_.size(); i ++) {
             try {
                 patches.emplace_back(access(i));
-            } catch(...) {}
+            } catch(...) {
+            }
         }
         if(patches.empty()) {
             throw std::out_of_range("point out of boundary");

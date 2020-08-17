@@ -3,10 +3,10 @@
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/detection/aruco_random.hpp>
-#include <opencv2/calib3d.hpp>
 #include <range/v3/view.hpp>
 #include <ChipImgProc/marker/detection/estimate_bias.hpp>
 #include <ChipImgProc/marker/loader.hpp>
+#include <ChipImgProc/warped_mat/estimate_transform_mat.hpp>
 using namespace chipimgproc;
 
 TEST(warped_mat_test, basic_test) {
@@ -14,8 +14,8 @@ TEST(warped_mat_test, basic_test) {
     const double um2px_r = 2.4145;
     const int rescale = 2;
     const double rescaled_um2px_r = um2px_r / rescale;
-    double mk_xi_um = -0.5         ;
-    double mk_yi_um = -0.5         ;
+    double mk_xi_um = 0            ;
+    double mk_yi_um = 0            ;
     int mk_w_d_um   = 405 * rescale;
     int mk_h_d_um   = 405 * rescale;
     int mk_w_um     = 50  * rescale;
@@ -91,7 +91,7 @@ TEST(warped_mat_test, basic_test) {
         auto mk_y_um = (mkpid.y * mk_h_d_um) + mk_yi_um + (mk_h_um / 2);
         um_pos.emplace_back(mk_x_um, mk_y_um);
     }
-    auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
+    auto trans_mat = warped_mat::estimate_transform_mat(um_pos, px_pos);
     std::cout << trans_mat << std::endl;
     
     // probe channel process
@@ -153,4 +153,5 @@ TEST(warped_mat_test, basic_test) {
             EXPECT_EQ(ans[(i * 10) + j] * 255, first_marker(i, j));
         }
     }
+
 }

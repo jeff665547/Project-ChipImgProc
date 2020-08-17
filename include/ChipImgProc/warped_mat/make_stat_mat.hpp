@@ -53,11 +53,12 @@ struct MakeStatMat {
 
         auto lmask = make_large_mask(
             {
-                static_cast<int>(std::round(origin.x + 0.5)), 
-                static_cast<int>(std::round(origin.y + 0.5))
+                static_cast<int>(std::round(origin.x)), 
+                static_cast<int>(std::round(origin.y))
             },
             clw, clh, clwd, clhd,
-            w, h, swin_w, swin_h, um2px_r, clwn, clhn, warpmat, mat.size()
+            w, h, swin_w, swin_h, um2px_r, 
+            clwn, clhn, warpmat, mat.size()
         );
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());
         cv::connectedComponents(lmask, mask_cell_label);
@@ -88,24 +89,24 @@ struct MakeStatMat {
         for(int i = 0; i < clhn; i ++) {
             for(int j = 0; j < clwn; j ++) {
                 int label = warped_agg_mat.at_cell(
-                    i, j, 0, cv::Size(1, 1)
-                ).at<float>(0, 0);
-                auto mats = warped_agg_mat.at_cell(
+                    i, j, cv::Size(1, 1)
+                ).patch.at<float>(0, 0);
+                auto mats = warped_agg_mat.at_cell_all(
                     i, j, cv::Size(clw_px, clh_px)
                 );
-                auto& sub_lab     = mats.at(0);
-                auto& sub_mask    = mats.at(1);
-                auto& sub_cv      = mats.at(2);
-                auto& sub_sd      = mats.at(3);
-                auto& sub_mean    = mats.at(4);
+                auto& sub_lab     = mats.at(0).patch;
+                auto& sub_mask    = mats.at(1).patch;
+                auto& sub_cv      = mats.at(2).patch;
+                auto& sub_sd      = mats.at(3).patch;
+                auto& sub_mean    = mats.at(4).patch;
                 sub_lab = lab_to_mask(sub_lab, label);
                 cv::Mat sum_mask = sub_mask & sub_lab;
                 
                 cv::Point min_cv_pos; // pixel
                 double min_cv;
                 cv::minMaxLoc(sub_cv, &min_cv, nullptr, &min_cv_pos, nullptr, sum_mask);
-                stat_mats.mean  (i, j)  = sub_mean.at<Float>(min_cv_pos);
-                stat_mats.stddev(i, j)  = sub_sd.at<Float>(min_cv_pos);
+                stat_mats.mean  (i, j)  = sub_mean.template at<Float>(min_cv_pos);
+                stat_mats.stddev(i, j)  = sub_sd.template at<Float>(min_cv_pos);
                 stat_mats.cv    (i, j)  = min_cv;
                 stat_mats.bg    (i, j)  = 0;
                 stat_mats.num   (i, j)  = clh * clw;

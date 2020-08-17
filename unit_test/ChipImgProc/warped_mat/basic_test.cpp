@@ -2,9 +2,37 @@
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/detection/aruco_random.hpp>
-#include <opencv2/calib3d.hpp>
+#include <ChipImgProc/warped_mat/estimate_transform_mat.hpp>
+#include <Nucleona/range.hpp>
 using namespace chipimgproc::warped_mat;
 using namespace chipimgproc;
+TEST(assumption_test, warped_mat_check) {
+    const auto s = 13;
+    cv::Mat img = cv::Mat_<std::uint8_t>::zeros(10 * s, 10 * s);
+    std::vector<cv::Point2d> logical_p({
+        {   0,  0},
+        {   0, 10},
+        {   5,  5},
+        {  10,  0},
+        {  10, 10}
+    });
+    std::vector<cv::Point2d> image_p;
+    for(auto&& p : logical_p) {
+        image_p.emplace_back(
+            p.x * s, p.y * s
+        );
+    }
+    auto trans_mat = warped_mat::estimate_transform_mat(logical_p, image_p);
+    auto warped_mat = make_basic(
+        trans_mat, {img}
+    );
+    // auto p0 = warped_mat.at_real(0, 0);
+    // EXPECT_DOUBLE_EQ(p0.img_p.x, -0.5);
+    // EXPECT_DOUBLE_EQ(p0.img_p.y, -0.5);
+    auto p1 = warped_mat.at_real(5, 5);
+    EXPECT_DOUBLE_EQ(p1.img_p.x, 64.5);
+    EXPECT_DOUBLE_EQ(p1.img_p.y, 64.5);
+}
 TEST(basic_warped_mat_test, basic_test) {
     using namespace std::string_literals;
     int mk_xi_um = 0;
@@ -62,16 +90,19 @@ TEST(basic_warped_mat_test, basic_test) {
 
     // prepare um domain anchors
     aruco::MarkerMap mk_map(aruco_ids_map);
-    std::vector<cv::Point2d> px_pos;
-    std::vector<cv::Point2d> um_pos;
-    for(auto [mid, score, loc] : mk_regs) {
-        px_pos.push_back(loc);
-        auto mkpid = mk_map.get_sub(mid);
-        auto mk_x_um = ((mkpid.x - 2) * mk_w_d_um) + mk_xi_um + (mk_w_um / 2);
-        auto mk_y_um = (mkpid.y * mk_h_d_um) + mk_yi_um + (mk_h_um / 2);
-        um_pos.emplace_back(mk_x_um, mk_y_um);
-    }
-    auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
+    auto trans_mat = warped_mat::estimate_transform_mat(
+        ranges::view::transform(mk_regs, [&](auto&& mkr){
+            auto&& [mid, score, loc] = mkr;
+            auto mkpid = mk_map.get_sub(mid);
+            auto mk_x_um = ((mkpid.x - 2) * mk_w_d_um) + mk_xi_um + (mk_w_um / 2);
+            auto mk_y_um = (mkpid.y * mk_h_d_um) + mk_yi_um + (mk_h_um / 2);
+            return cv::Point2d(mk_x_um, mk_y_um);
+        }),
+        ranges::view::transform(mk_regs, [&](auto& mkr){
+            auto&& [mid, score, loc] = mkr;
+            return cv::Point2d(loc.x, loc.y);
+        })
+    );
 
     auto warped_mat = make_basic(
         trans_mat, 
@@ -85,7 +116,9 @@ TEST(basic_warped_mat_test, basic_test) {
     cv::Mat_<std::uint8_t> first_marker(10, 10);
     for(int i = 0; i < 10; i ++) {
         for(int j = 0; j < 10; j ++) {
-            first_marker(i, j) = cv::mean(warped_mat.at_cell(i, j, 0))[0];
+            first_marker(i, j) = cv::mean(warped_mat.at_cell(i, j).patch)[0];
+            std::cout << warped_mat.at_cell(i, j).real_p << std::endl;
+            std::cout << warped_mat.at_cell(i, j).img_p << std::endl;
         }
     }
     first_marker = binarize(first_marker);

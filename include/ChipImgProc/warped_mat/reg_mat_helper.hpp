@@ -55,6 +55,17 @@ struct RegMatHelper<Derived, true> {
         auto [ cent_c, cent_r ] = real_cell_cent(r, c);
         return derived()->at_real(cent_r, cent_c, i, patch_size);
     }
+
+    auto at_cell_all(
+        std::int32_t r, 
+        std::int32_t c, 
+        cv::Size patch_size = cv::Size(5, 5)
+    ) const {
+        if(r >= rows()) throw std::out_of_range("RegMatHelper: r >= rows()");
+        if(c >= cols()) throw std::out_of_range("RegMatHelper: c >= cols()");
+        auto [ cent_c, cent_r ] = real_cell_cent(r, c);
+        return derived()->at_real_all(cent_r, cent_c, patch_size);
+    }
     int rows() const { return cl_y_n_; }
     int cols() const { return cl_x_n_; }
 

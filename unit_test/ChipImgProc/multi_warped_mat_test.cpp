@@ -3,10 +3,10 @@
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/detection/aruco_random.hpp>
-#include <opencv2/calib3d.hpp>
 #include <range/v3/view.hpp>
 #include <ChipImgProc/marker/loader.hpp>
 #include <ChipImgProc/marker/detection/estimate_bias.hpp>
+#include <ChipImgProc/warped_mat/estimate_transform_mat.hpp>
 using namespace chipimgproc;
 
 TEST(multi_warped_mat_test, with_basic_test) {
@@ -14,8 +14,8 @@ TEST(multi_warped_mat_test, with_basic_test) {
     const double um2px_r = 2.4145;
     const int rescale = 1;
     const double rescaled_um2px_r = um2px_r / rescale;
-    double mk_xi_um = -0.5          ;
-    double mk_yi_um = -0.5          ;
+    double mk_xi_um = 0            ;
+    double mk_yi_um = 0            ;
     int mk_w_d_um   = 405 * rescale;
     int mk_h_d_um   = 405 * rescale;
     int mk_w_um     = 50  * rescale;
@@ -116,7 +116,8 @@ TEST(multi_warped_mat_test, with_basic_test) {
             auto mk_y_um = (mkpid.y * mk_h_d_um) + mk_yi_um + (mk_h_um / 2) - st_p.y;
             um_pos.emplace_back(mk_x_um, mk_y_um);
         }
-        auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
+       //  auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
+        auto trans_mat = warped_mat::estimate_transform_mat(um_pos, px_pos);
 
         auto warped_mat = make_basic_warped_mat(
             trans_mat, 
@@ -131,6 +132,38 @@ TEST(multi_warped_mat_test, with_basic_test) {
         std::move(warped_mats),  std::move(stitch_point),
         {0, 0}, 5, 5, 2480, 2480
     );
+    // {
+    //     auto src = ::imread(img_paths[0]);
+    //     cv::Mat_<std::uint8_t> first_marker(10, 10);
+    //     for(int i = 0; i < 10; i ++) {
+    //         for(int j = 0; j < 10; j ++) {
+    //             auto&& cell = multi_warped_mat.at_cell(i, j);
+    //             first_marker(i, j) = cell.mean;
+    //             cv::drawMarker(src, cv::Point(
+    //                 std::round(cell.img_p.x),
+    //                 std::round(cell.img_p.y)
+    //             ), cv::Scalar(0, 0, 0), cv::MARKER_CROSS);
+    //         }
+    //     }
+    //     std::cout << first_marker << '\n';
+    //     first_marker = std::get<1>(threshold(first_marker, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU));
+    //     cv::imwrite("testx.png", first_marker);
+    //     cv::imwrite("testy.png", src);
+
+    //     // std::vector<int> ans ({
+    //     //     1, 0, 0, 1, 0, 0
+    //     //   , 1, 1, 1, 1, 1, 0
+    //     //   , 1, 0, 1, 1, 0, 1
+    //     //   , 1, 1, 1, 0, 0, 0
+    //     //   , 1, 0, 1, 1, 0, 0
+    //     //   , 0, 1, 0, 1, 0, 0
+    //     // });
+    //     // for(int i = 2; i < 8; i ++) {
+    //     //     for(int j = 2; j < 8; j ++) {
+    //     //         EXPECT_EQ(ans[((i-2) * 6) + (j - 2)] * 255, first_marker(i, j));
+    //     //     }
+    //     // }
+    // }
     {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
         for(int i = 0; i < 10; i ++) {
@@ -138,7 +171,8 @@ TEST(multi_warped_mat_test, with_basic_test) {
                 first_marker(i, j) = multi_warped_mat.at_cell(i, j + 162).mean;
             }
         }
-        first_marker = binarize(first_marker);
+        // first_marker = binarize(first_marker);
+        first_marker = std::get<1>(threshold(first_marker, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU));
         cv::imwrite("test0.png", first_marker);
         std::vector<int> ans ({
             1, 0, 0, 1, 0, 0
@@ -161,7 +195,8 @@ TEST(multi_warped_mat_test, with_basic_test) {
                 first_marker(i, j) = multi_warped_mat.at_cell(i, j + 324).mean;
             }
         }
-        first_marker = binarize(first_marker);
+        // first_marker = binarize(first_marker);
+        first_marker = std::get<1>(threshold(first_marker, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU));
         cv::imwrite("test1.png", first_marker);
         std::vector<int> ans ({
             1, 0, 0, 1, 1, 0
@@ -208,8 +243,8 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
     const double um2px_r = 2.4145;
     const int rescale = 2;
     const double rescaled_um2px_r = um2px_r / rescale;
-    double mk_xi_um = -0.5         ;
-    double mk_yi_um = -0.5         ;
+    double mk_xi_um = 0            ;
+    double mk_yi_um = 0            ;
     int mk_w_d_um   = 405 * rescale;
     int mk_h_d_um   = 405 * rescale;
     int mk_w_um     = 50  * rescale;
@@ -340,7 +375,8 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
             auto mk_y_um = (mkpid.y * mk_h_d_um) + mk_yi_um + (mk_h_um / 2) - st_p.y;
             um_pos.emplace_back(mk_x_um, mk_y_um);
         }
-        auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
+       //  auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
+        auto trans_mat = warped_mat::estimate_transform_mat(um_pos, px_pos);
 
         // probe channel process
         auto [pb_templ, pb_mask] = marker::Loader::from_file_to_img(
@@ -388,7 +424,8 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
                 first_marker(i, j) = multi_warped_mat.at_cell(i, j + 162).mean / 64;
             }
         }
-        first_marker = binarize(first_marker);
+        // first_marker = binarize(first_marker);
+        first_marker = std::get<1>(threshold(first_marker, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU));
         cv::imwrite("test0.png", first_marker);
         std::vector<int> ans ({
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -439,10 +476,13 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i + 162, j + 162).mean / 64;
+                auto&& cell = multi_warped_mat.at_cell(i + 162, j + 162);
+                first_marker(i, j) = cell.mean / 64;
+                std::cout << cell.real_p << std::endl;
             }
         }
-        first_marker = binarize(first_marker);
+        // first_marker = binarize(first_marker);
+        first_marker = std::get<1>(threshold(first_marker, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU));
         cv::imwrite("test2.png", first_marker);
         std::vector<int> ans ({
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

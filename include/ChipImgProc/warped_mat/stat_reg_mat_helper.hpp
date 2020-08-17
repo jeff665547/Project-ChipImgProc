@@ -44,9 +44,14 @@ struct StatRegMatHelper<Derived, true, Float>
         auto stat = stat_mats_(r, c);
         auto mask = cell_mask_(r, c);
         auto pxs  = Base::at_cell(r, c, mask.size());
+        auto img_p = pxs.img_p;
+        auto real_p = pxs.img_p;
         // cv::Mat tmp  = pxs.patch.setTo(pxs.patch, mask);
         cv::Mat tmp = pxs.patch.mul(mask);
-        return warped_mat::Patch(std::move(pxs), tmp);
+        return warped_mat::Patch(
+            std::move(pxs), std::move(tmp), 
+            std::move(img_p), std::move(real_p)
+        );
         // return warped_mat::Patch(std::move(pxs), pxs.patch);
     }
 

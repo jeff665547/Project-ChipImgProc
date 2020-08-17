@@ -5,6 +5,8 @@
 #include <fmt/format.h>
 #include <ChipImgProc/stat/cell.hpp>
 #include <iostream>
+#include "patch.hpp"
+#include <Nucleona/tuple.hpp>
 
 namespace chipimgproc::warped_mat {
 
@@ -43,7 +45,7 @@ struct Basic
             }
         }
     }
-    std::vector<cv::Mat> at_real(
+    std::vector<RawPatch> at_real_all(
         double r, 
         double c, 
         cv::Size patch_size = cv::Size(5, 5)
@@ -51,63 +53,71 @@ struct Basic
         if(!is_include_real_impl(r, c)) {
             throw std::runtime_error(point_out_of_boundary(r, c));
         }
-        auto px_point = point_transform(c, r);
+        auto [btr, px_point] = point_transform(c, r);
         if(!is_include_pixel_impl(px_point, patch_size)) {
             throw std::runtime_error(point_out_of_boundary(r, c, px_point));
         }
-        std::vector<cv::Mat> res;
+        std::vector<RawPatch> res;
         for(auto&& raw_image : raw_images_) {
             cv::Mat img_roi(patch_size, raw_image.type());
-            // chipimgproc::info(std::cout, raw_image);
             cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
-            res.push_back(img_roi);
+            res.push_back(RawPatch{img_roi, px_point, cv::Point2d(c, r)});
         }
         return res;
     }
-    cv::Mat at_real(
+    RawPatch at_real(
         double r, double c, int i, 
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
         if(!is_include_real_impl(r, c)) {
             throw std::runtime_error(point_out_of_boundary(r, c));
         }
-        auto px_point = point_transform(c, r);
+        auto [btr, px_point] = point_transform(c, r);
         if(!is_include_pixel_impl(px_point, patch_size)) {
             throw std::runtime_error(point_out_of_boundary(r, c, px_point));
         }
         auto& raw_image = raw_images_.at(i);
         cv::Mat img_roi(patch_size, raw_image.type());
-        // chipimgproc::info(std::cout, raw_image);
         cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
-        // cv::Mat map1(1, 1, CV_64FC2);
-        // auto& elem = map1.at<cv::Vec2d>(0, 0);
-        // elem[0] = c;
-        // elem[1] = r;
-        // cv::remap(raw_image, img_roi)
-        return img_roi;
+        return {img_roi, px_point, cv::Point2d(c, r)};
+    }
+    RawPatch at_real(
+        double r, double c,
+        cv::Size patch_size = cv::Size(5, 5)
+    ) const {
+        return at_real(r, c, 0, patch_size);
     }
 private:
-    auto is_include_real_impl(double r, double c) const {
+    bool is_include_real_impl(double r, double c) const {
         if(c >= max_x_) return false;
         if(r >= max_y_) return false;
         return true;
     }
-    auto is_include_pixel_impl(cv::Point2d px_point, cv::Size patch_size) const {
+    bool is_include_pixel_impl(cv::Point2d px_point, cv::Size patch_size) const {
         auto safe_padding_x = patch_size.width * 2;
         auto safe_padding_y = patch_size.height * 2;
         if(px_point.x < safe_padding_x) return false;
         if(px_point.y < safe_padding_y) return false;
         if(px_point.x >= (raw_images_[0].cols - safe_padding_x)) return false;
         if(px_point.y >= (raw_images_[0].rows - safe_padding_y)) return false;
+        // if(px_point.x < -0.5) return false;
+        // if(px_point.y < -0.5) return false;
+        // if(px_point.x >= raw_images_[0].cols) return false;
+        // if(px_point.y >= raw_images_[0].rows) return false;
         return true;
     }
-    cv::Point2d point_transform(double x, double y) const {
+    std::tuple<cv::Point2d, cv::Point2d> point_transform(double x, double y) const {
         std::vector<cv::Vec2d> src(1);
         std::vector<cv::Vec2d> dst(1);
+        x -= 0.5;
+        y -= 0.5;
         src[0][0] = x;
         src[0][1] = y;
         cv::transform(src, dst, warp_mat_);
-        return cv::Point2d(dst.at(0)[0], dst.at(0)[1]);
+        return nucleona::make_tuple(
+            cv::Point2d(x, y),
+            cv::Point2d(dst.at(0)[0], dst.at(0)[1])
+        );
     }
     static std::string point_out_of_boundary(double r, double c, const cv::Point2d& px) {
         return fmt::format(
