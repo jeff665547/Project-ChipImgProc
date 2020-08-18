@@ -14,7 +14,7 @@ struct Patch
     Patch(
         stat::Cell<double>&& cell, 
         cv::Mat           && pxs, 
-        cv::Point         && img_p, 
+        cv::Point2d       && img_p, 
         cv::Point2d       && real_p
     )
     : RawPatch {pxs, std::move(img_p), std::move(real_p)}
@@ -23,7 +23,7 @@ struct Patch
 
     Patch(
         cv::Mat              pxs, 
-        cv::Point         && img_p, 
+        cv::Point2d       && img_p, 
         cv::Point2d       && real_p
     )
     : RawPatch {pxs, std::move(img_p), std::move(real_p)}
