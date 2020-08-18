@@ -13,14 +13,16 @@ template<class Float>
 struct MakeStatMat {
     auto operator()(
         cv::Mat     mat,
-        cv::Point2d origin, 
-        int clw,    int clh,
-        int clwd,   int clhd,
-        int w,      int h,
-        int swin_w, int swin_h,
-        double      um2px_r,
-        int clwn,   int clhn,
-        cv::Mat     warpmat
+        cv::Point2d     origin, 
+        int clw,        int clh,
+        int clwd,       int clhd,
+        int w,          int h,
+        int swin_w,     int swin_h,
+        double          um2px_r,
+        int clwn,       int clhn,
+        cv::Mat         warpmat,
+        ViewerCallback  v_comp = {},
+        ViewerCallback  v_mask = {}
     ) const {
         /*
             1.1 generate large cv matrix
@@ -65,8 +67,12 @@ struct MakeStatMat {
         {
             cv::Mat comp_img;
             mask_cell_label.convertTo(comp_img, CV_16U);
-            cv::imwrite("components.png", comp_img);
-            cv::imwrite("mask.png", lmask);
+            if(v_comp) {
+                v_comp(comp_img);
+            }
+            if(v_mask) {
+                v_mask(lmask);
+            }
         }
         // lmask = lmask / 255;
         // ip_convert(lmask,           CV_32F);
