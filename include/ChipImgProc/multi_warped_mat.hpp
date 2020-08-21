@@ -76,10 +76,10 @@ public:
             ));
         }
     }
-    std::vector<const cv::Mat> warp_mats() const {
-        std::vector<const cv::Mat> res;
+    std::vector<cv::Mat> warp_mats() const {
+        std::vector<cv::Mat> res;
         for(auto&& m : mats_) {
-            res.push_back(m.warp_mat());
+            res.push_back(m.warp_mat().clone());
         }
         return res;
     }
