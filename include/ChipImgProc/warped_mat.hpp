@@ -48,6 +48,9 @@ struct WarpedMat
         auto pxs = basic_warped_mat_.at_real(r, c, 0, patch_size);
         return warped_mat::Patch(std::move(pxs));
     }
+    const cv::Mat& warp_mat() const {
+        return basic_warped_mat_.warp_mat();
+    }
 private:
     warped_mat::Basic<false>  basic_warped_mat_   ;
 };

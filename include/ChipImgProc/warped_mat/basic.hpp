@@ -87,6 +87,9 @@ struct Basic
     ) const {
         return at_real(r, c, 0, patch_size);
     }
+    const cv::Mat& warp_mat() const {
+        return warp_mat_;
+    }
 private:
     bool is_include_real_impl(double r, double c) const {
         if(c >= max_x_) return false;
