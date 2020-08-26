@@ -19,7 +19,7 @@ TEST(assumption_test, warped_mat_check) {
     std::vector<cv::Point2d> image_p;
     for(auto&& p : logical_p) {
         image_p.emplace_back(
-            p.x * s, p.y * s
+            p.x * s - 0.5, p.y * s - 0.5
         );
     }
     auto trans_mat = warped_mat::estimate_transform_mat(logical_p, image_p);

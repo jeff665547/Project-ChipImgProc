@@ -361,14 +361,14 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
             ] = cv::Point(x, y);
         }
     }
-    // auto [templ, mask] = aruco::create_location_marker(
-    //     50, 40, 3, 5, um2px_r
-    // );
-    auto [templ, mask] = load_templ_marker(
-        "D:/git/centrillion/Summit.Grid/lib/Summit.Spec/resource/banff/pat_white.tif",
-        "D:/git/centrillion/Summit.Grid/lib/Summit.Spec/resource/banff/pat_white_mask.tif",
-        60, 60, um2px_r
+    auto [templ, mask] = aruco::create_location_marker(
+        50, 40, 3, 5, um2px_r
     );
+    // auto [templ, mask] = load_templ_marker(
+    //     "D:/git/centrillion/Summit.Grid/lib/Summit.Spec/resource/banff/pat_white.tif",
+    //     "D:/git/centrillion/Summit.Grid/lib/Summit.Spec/resource/banff/pat_white_mask.tif",
+    //     60, 60, um2px_r
+    // );
     std::cout << templ.rows << ' ' << templ.cols << '\n';
     std::cout << mask.rows << ' ' << mask.cols << '\n';
 
