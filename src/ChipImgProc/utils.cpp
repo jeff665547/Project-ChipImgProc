@@ -210,5 +210,25 @@ void ip_convert(cv::Mat& mat, int type, double alpha, double beta) {
     mat = tmp;
 }
 
+cv::Mat affine_resize(cv::Mat src, double fx, double fy, int interplation) {
+    if(fy == 0) fy = fx;
+    auto w0 = src.cols;
+    auto h0 = src.rows;
+    auto w1 = std::round(w0 * fx);
+    auto h1 = std::round(h0 * fy);
+    auto x0 = (w0 - 1) * 0.5;
+    auto y0 = (h0 - 1) * 0.5;
+    auto x1 = (w1 - 1) * 0.5;
+    auto y1 = (h1 - 1) * 0.5;
+    double arr[6] = {
+        fx, 0,  x1 - x0 * fx, 
+        0,  fy, y1 - y0 * fy
+    };
+    cv::Mat M(2, 3, CV_64F, arr);
+    cv::Mat res;
+    cv::warpAffine(src, res, M, cv::Size(w1, h1), interplation);
+    return res;
+}
+
 
 }

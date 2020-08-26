@@ -64,6 +64,8 @@ MAT imresize(MAT&& src, const cv::Size& dsize)
     return std::forward<MAT>(src);
 }
 
+cv::Mat affine_resize(cv::Mat src, double fx, double fy = 0, int interplation = cv::INTER_AREA);
+
 template <class MAT>
 MAT imrotate(MAT&& src, const double angle, const double scale = 1)
 {

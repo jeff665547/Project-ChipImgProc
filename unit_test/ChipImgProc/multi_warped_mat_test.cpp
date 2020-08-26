@@ -237,7 +237,32 @@ TEST(multi_warped_mat_test, with_basic_test) {
 
     }
 }
-
+auto resize(cv::Mat src, double fx, double fy = 0, int interplation = cv::INTER_AREA) {
+    return affine_resize(src, fx, fy, interplation);
+}
+auto load_templ_marker(
+    const std::string& tpath,
+    const std::string& mpath,
+    int width,
+    int height,
+    double scale
+) {
+    auto flags = cv::IMREAD_GRAYSCALE | cv::IMREAD_ANYDEPTH;
+    auto templ = cv::imread(tpath, flags);
+    auto mask = cv::imread(mpath, flags);
+    auto size_w = scale * width / templ.cols;
+    auto size_h = scale * height / templ.rows;
+    // cv::Mat rtempl(size, templ.type());
+    // cv::Mat rmask(size, mask.type());
+    // cv::resize(templ, rtempl, size, 0.0, 0.0, cv::INTER_AREA);
+    // cv::resize(mask,  rmask,  size, 0.0, 0.0, cv::INTER_NEAREST);
+    auto rtempl = resize(templ, size_w, size_h, cv::INTER_AREA);
+    auto rmask = resize(mask, size_w, size_h, cv::INTER_NEAREST);
+    return nucleona::make_tuple(
+        std::move(rtempl),
+        std::move(rmask)
+    );
+}
 TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
     using namespace std::string_literals;
     const double um2px_r = 2.4145;
@@ -336,9 +361,16 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
             ] = cv::Point(x, y);
         }
     }
-    auto [templ, mask] = aruco::create_location_marker(
-        50, 40, 3, 5, um2px_r
+    // auto [templ, mask] = aruco::create_location_marker(
+    //     50, 40, 3, 5, um2px_r
+    // );
+    auto [templ, mask] = load_templ_marker(
+        "D:/git/centrillion/Summit.Grid/lib/Summit.Spec/resource/banff/pat_white.tif",
+        "D:/git/centrillion/Summit.Grid/lib/Summit.Spec/resource/banff/pat_white_mask.tif",
+        60, 60, um2px_r
     );
+    std::cout << templ.rows << ' ' << templ.cols << '\n';
+    std::cout << mask.rows << ' ' << mask.cols << '\n';
 
     // prepare pixel domain anchors
     auto detector(marker::detection::make_aruco_random(
@@ -369,6 +401,7 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
         std::vector<cv::Point2d> px_pos;
         std::vector<cv::Point2d> um_pos;
         for(auto [mid, score, loc] : mk_regs) {
+            if(mid < 0) continue;
             px_pos.push_back(loc);
             auto mkpid = mk_map.get_sub(mid);
             auto mk_x_um = (mkpid.x * mk_w_d_um) + mk_xi_um + (mk_w_um / 2) - st_p.x;
@@ -377,6 +410,7 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
         }
        //  auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
         auto trans_mat = warped_mat::estimate_transform_mat(um_pos, px_pos);
+        std::cout << trans_mat << std::endl;
 
         // probe channel process
         auto [pb_templ, pb_mask] = marker::Loader::from_file_to_img(

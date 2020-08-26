@@ -19,9 +19,12 @@ struct EstimateTransformMat {
                 src[i].x - 0.5, src[i].y - 0.5
             );
             _dst.emplace_back(
-                dst[i].x - 0.5, dst[i].y - 0.5
+                dst[i].x, dst[i].y
+                // dst[i].x - 0.5, dst[i].y - 0.5 // FIXME: unsure -0.5 problem need to be solved or not
             );
         }
+        // std::cout << _src << '\n';
+        // std::cout << _dst << '\n';
         return cv::estimateAffine2D(_src, _dst);
     }
 };

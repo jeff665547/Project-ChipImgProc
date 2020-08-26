@@ -39,7 +39,7 @@ protected:
     , nms_count_        (nms_count)
     , nms_radius_       (nms_radius)
     , criteria_         (
-        cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 300, 1e-3
+        cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 300, 1e-5
     )
     , anchors_          ()
     , s_                (1 << pyramid_level)
@@ -73,9 +73,12 @@ public:
     const auto& stempl() {
         return stempl_;
     }
+    void set_term_criteria(cv::TermCriteria tc) {
+        criteria_ = tc;
+    }
     template<class... Args>
     std::vector<
-        std::tuple<int, double, cv::Point2f>
+        std::tuple<int, double, cv::Point2d>
     > operator()(cv::Mat input, Args&&... identify_args) const {
         // convert input to 8U image
         cv::Mat_<uint8_t> image;
@@ -94,8 +97,8 @@ public:
         for (auto i = 0; i < this->pyramid_level_; ++i)
             cv::pyrDown(simage, simage);
         {
-            auto tmp = simage(cv::Rect(1, 1, simage.cols - 1, simage.rows - 1));
-            auto simage = tmp;
+            auto tmp = simage(cv::Rect(1, 1, simage.cols - 2, simage.rows - 2));
+            simage = tmp;
         }
 
         // search all possible marker locations
@@ -166,17 +169,20 @@ public:
         }
 
         // identify marker locations with new template
-        std::vector<std::tuple<int, double, cv::Point2f>> results;
+        std::vector<std::tuple<int, double, cv::Point2d>> results;
         auto h = new_templ.rows;
         auto w = new_templ.cols;
         for(auto&& [x, y] : locations) {
-
+    
             // subpixel-level search
             auto view = image(cv::Rect(x, y, w, h));
             cv::Matx23f wmatx = cv::Matx23f::eye();
             double score = 0.0;
-            cv::Point2f center;
+            cv::Point2d center;
             try {
+                // cv::imwrite("view.tiff", view);
+                // cv::imwrite("new_templ.tiff", new_templ);
+                // cv::imwrite("mask.tiff", mask_);
                 score = cv::findTransformECC(
                     view, new_templ, wmatx, 
                     cv::MOTION_TRANSLATION, criteria_, mask_
@@ -186,7 +192,7 @@ public:
             } catch(...) {
                 continue;
             }
-
+            // cv::imwrite("view.png", view);
             // decoding
             auto [index, distance] = derived()->identify(
                 view, 
