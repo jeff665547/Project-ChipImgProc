@@ -408,7 +408,7 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
             auto mk_y_um = (mkpid.y * mk_h_d_um) + mk_yi_um + (mk_h_um / 2) - st_p.y;
             um_pos.emplace_back(mk_x_um, mk_y_um);
         }
-       //  auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
+        //  auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
         auto trans_mat = warped_mat::estimate_transform_mat(um_pos, px_pos);
         std::cout << trans_mat << std::endl;
 
@@ -419,7 +419,9 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
             cl_w_um * rescaled_um2px_r,
             sp_w_um * rescaled_um2px_r
         );
-        auto [bias, score] = marker::detection::estimate_bias(pb_img, pb_templ, pb_mask, px_pos, trans_mat);
+        auto [bias, score] = marker::detection::estimate_bias(
+            pb_img, pb_templ, pb_mask, um_pos, trans_mat
+        );
         auto probe_trans_mat = trans_mat.clone();
         {
             auto _bias = bias;
@@ -428,6 +430,7 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
                 mat(1, 2) += _bias.y;
             });
         }
+        std::cout << probe_trans_mat << '\n';
         chipimgproc::ip_convert(pb_img, CV_32F);
         std::cout << trans_mat << std::endl;
         std::cout << probe_trans_mat << std::endl;

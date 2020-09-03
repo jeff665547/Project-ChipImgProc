@@ -260,3 +260,4 @@ cv::Mat filter2D(cv::Mat mat, cv::Mat kern, int ddepth = CV_64F);
 void ip_convert(cv::Mat& mat, int type, double alpha = 1, double beta = 0);
 
 }
+#include "utils/kron.h"

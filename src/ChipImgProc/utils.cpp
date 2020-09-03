@@ -232,3 +232,5 @@ cv::Mat affine_resize(cv::Mat src, double fx, double fy, int interplation) {
 
 
 }
+
+#include <ChipImgProc/utils/kron_impl.hpp>

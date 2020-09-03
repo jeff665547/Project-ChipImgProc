@@ -16,62 +16,31 @@ struct TxtToImg {
         double border_px,
         std::ostream& log = nucleona::stream::null_out
     ) const {
-        // auto ext = cell_r_px * 0.2;
-        // cell_r_px += ext;
-        // cell_c_px += ext;
-        // border_px -= ext;
         log << "mask_cl: " << std::endl;
         log << mask_cl << std::endl;
         cell_r_px *= 16;
         cell_c_px *= 16;
         border_px *= 16;
 
-        auto r_cell_bd = cell_r_px + border_px;
-        auto c_cell_bd = cell_c_px + border_px;
-        auto img_row = 
-            // border_px + 
-            r_cell_bd * mat.rows
-            - border_px;
-        auto img_col = 
-            // border_px + 
-            c_cell_bd * mat.cols
-            - border_px;
+        int patch_r = std::round(cell_r_px);
+        int patch_c = std::round(cell_c_px);
+        int margin_px = std::round(border_px / 2);
 
-        cv::Mat_<std::uint8_t> img = cv::Mat_<std::uint8_t>::zeros(
-            (int)std::round(img_row), 
-            (int)std::round(img_col)
+        cv::Mat_<std::uint8_t> patch = cv::Mat_<std::uint8_t>::ones(patch_r, patch_c) * 255;
+        cv::Mat_<std::uint8_t> block = cv::Mat_<std::uint8_t>::ones(patch_r + border_px, patch_c + border_px);
+        cv::copyMakeBorder(
+            patch, patch, 
+            margin_px, margin_px, 
+            margin_px, margin_px, 
+            cv::BORDER_CONSTANT, 0
         );
-        cv::Mat_<std::uint8_t> mask = cv::Mat_<std::uint8_t>::zeros(
-            (int)std::round(img_row), 
-            (int)std::round(img_col)
-        );
-        int i = 0;
-        for( auto r = 0; r < img.rows; r += r_cell_bd ) {
-            int j = 0;
-            for( auto c = 0; c < img.cols; c += c_cell_bd ) {
-                cv::Rect cell(
-                    (int)std::round(c), 
-                    (int)std::round(r), 
-                    (int)std::round(cell_c_px), 
-                    (int)std::round(cell_r_px)
-                );
-                cv::rectangle(img, cell, mat(i,j), cv::FILLED);
-                cv::rectangle(mask, cell, mask_cl(i, j), cv::FILLED);
-                j ++;
-            }
-            i ++;
-        }
-        cv::Mat img_tmp; 
-        cv::Mat mask_tmp;
-        for( int i = 0; i < 4; i ++ ) {
-            cv::pyrDown(img, img_tmp);
-            cv::pyrDown(mask, mask_tmp);
-            img = img_tmp.clone();
-            mask = mask_tmp.clone();
-        }
+        cv::Mat templ = chipimgproc::kron(mat,     patch);
+        cv::Mat mask  = chipimgproc::kron(mask_cl, block);
+        templ = affine_resize(templ, 0.0625, 0.0625, cv::INTER_AREA);
+        mask = affine_resize(mask, 0.0625, 0.0625, cv::INTER_NEAREST);
         return nucleona::make_tuple(
-            img_tmp.clone(), 
-            mask_tmp.clone()
+            std::move(templ), 
+            std::move(mask)
         );
     }
 };

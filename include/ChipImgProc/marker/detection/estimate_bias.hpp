@@ -1,6 +1,7 @@
 #include <ChipImgProc/utils.h>
 #include <algorithm>
 #include <ChipImgProc/rotation/from_warp_mat.hpp>
+#include <iostream>
 namespace chipimgproc::marker::detection {
 
 struct EstimateBias {
@@ -32,8 +33,8 @@ public:
         auto h = templ.rows;
         auto w = templ.cols;
         auto templ_center = cv::Point2d(
-            (h - 1) / 2.0, 
-            (w - 1) / 2.0
+            (w - 1) / 2.0,
+            (h - 1) / 2.0
         );
         auto rot_mat = cv::getRotationMatrix2D(templ_center, angle, 1.0);
         templ = warp_affine_u8(templ, rot_mat, {w, h});
@@ -108,13 +109,19 @@ public:
         const cv::Mat&  _image,
         cv::Mat         templ,
         cv::Mat         mask,
-        const Hints&    hints,
+        Hints           hints_rum,
         cv::Mat         warp_mat
     ) const {
+        for(auto& h : hints_rum) {
+            h.x -= 0.5;
+            h.y -= 0.5;
+        }
+        std::vector<cv::Point2d> hints_dst(hints_rum.size());
+        cv::transform(hints_rum, hints_dst, warp_mat);
         auto angle = rotation::from_warp_mat(warp_mat);
         return this->operator()(
             _image, templ, mask,
-            hints, -angle
+            hints_dst, -angle
         );
     }
 };

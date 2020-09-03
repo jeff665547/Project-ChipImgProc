@@ -25,7 +25,7 @@ struct EstimateTransformMat {
         }
         // std::cout << _src << '\n';
         // std::cout << _dst << '\n';
-        return cv::estimateAffine2D(_src, _dst);
+        return cv::estimateAffinePartial2D(_src, _dst);
     }
 };
 
