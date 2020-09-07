@@ -415,9 +415,10 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
         // probe channel process
         auto [pb_templ, pb_mask] = marker::Loader::from_file_to_img(
             pb_mk_path.string(), 
-            cl_h_um * rescaled_um2px_r,
-            cl_w_um * rescaled_um2px_r,
-            sp_w_um * rescaled_um2px_r
+            cl_h_um / rescale,
+            cl_w_um / rescale,
+            sp_w_um / rescale,  
+            um2px_r
         );
         auto [bias, score] = marker::detection::estimate_bias(
             pb_img, pb_templ, pb_mask, um_pos, trans_mat

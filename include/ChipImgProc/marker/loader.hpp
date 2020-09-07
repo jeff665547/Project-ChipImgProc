@@ -84,14 +84,17 @@ struct Loader {
         const std::string& path,
         double cell_r,
         double cell_c,
-        double sp
+        double sp,
+        double scale = 1.0,
+        double usamp = 8.0
     ) {
         std::ifstream marker_in(path);
         auto [templ, mask] = Loader::from_txt(marker_in);
-        return txt_to_img(templ, mask,
-            cell_r,
-            cell_c,
-            sp
+        return txt_to_img(
+            templ, 
+            mask,
+            cell_r, cell_c,
+            sp, scale, usamp
         );
     }
 };
