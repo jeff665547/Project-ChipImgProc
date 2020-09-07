@@ -60,17 +60,18 @@ TEST(estimate_bias_test, simultaion_shift) {
 
     // simulate bias between aruco and probe channel
     std::vector<cv::Point2d> aruco_mk_pos;
-    for(auto&& [mk_id, score, pos] : aruco_mk) {
+    for(auto&& [mid, score, pos] : aruco_mk) {
         aruco_mk_pos.push_back(cv::Point2d(
-            pos.x, //  + 200,
-            pos.y //  + 250
+            pos.x + 200,
+            pos.y + 250
         ));
     }
 
 
-    // auto [bias, score] = chipimgproc::marker::detection::estimate_bias(green_img, green_templ, green_mask, aruco_mk_pos, -0.423220);
-    auto [bias, score] = chipimgproc::marker::detection::estimate_bias(green_img, green_templ, green_mask, aruco_mk_pos, -0.42558601126675694);
+    auto [bias, score] = chipimgproc::marker::detection::estimate_bias(
+        green_img, green_templ, green_mask, aruco_mk_pos, 0.42558601126675694
+    );
     std::cout << bias << std::endl;
-    EXPECT_LT(std::abs(bias.x/* + 200*/), 3);
-    EXPECT_LT(std::abs(bias.y/* + 250*/), 3);
+    EXPECT_LT(std::abs(bias.x + 200), 3);
+    EXPECT_LT(std::abs(bias.y + 250), 3);
 }

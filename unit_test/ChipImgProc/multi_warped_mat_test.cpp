@@ -410,7 +410,6 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
         }
         //  auto trans_mat = cv::estimateAffinePartial2D(um_pos, px_pos);
         auto trans_mat = warped_mat::estimate_transform_mat(um_pos, px_pos);
-        std::cout << trans_mat << std::endl;
 
         // probe channel process
         auto [pb_templ, pb_mask] = marker::Loader::from_file_to_img(
@@ -431,7 +430,6 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
                 mat(1, 2) += _bias.y;
             });
         }
-        std::cout << probe_trans_mat << '\n';
         chipimgproc::ip_convert(pb_img, CV_32F);
         std::cout << trans_mat << std::endl;
         std::cout << probe_trans_mat << std::endl;
