@@ -29,7 +29,10 @@ struct TxtToImg {
         int margin_px = std::round(border / 2);
 
         cv::Mat_<std::uint8_t> patch = cv::Mat_<std::uint8_t>::ones(patch_r, patch_c) * 255;
-        cv::Mat_<std::uint8_t> block = cv::Mat_<std::uint8_t>::ones(patch_r + border, patch_c + border);
+        cv::Mat_<std::uint8_t> block = cv::Mat_<std::uint8_t>::ones(
+            patch_r + margin_px * 2, 
+            patch_c + margin_px * 2
+        );
         cv::copyMakeBorder(
             patch, patch, 
             margin_px, margin_px, 
