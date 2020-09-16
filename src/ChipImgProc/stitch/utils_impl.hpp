@@ -1,4 +1,5 @@
 #include <ChipImgProc/utils.h>
+#include <ChipImgProc/logger.hpp>
 #include <iostream>
 #include <vector>
 namespace chipimgproc{ namespace stitch{
@@ -73,9 +74,9 @@ cv::Mat add(
                 auto& img_j = imgs.at(j);
                 cv::Rect inter(roi & aroi);
                 cv::Mat overlap;
-                std::cout << "roi: " << roi <<std::endl;
-                std::cout << "aroi: " << aroi <<std::endl;
-                std::cout << "inter: " << inter <<std::endl;
+                chipimgproc::log.trace("roi: {}", roi);
+                chipimgproc::log.trace("aroi: {}", aroi);
+                chipimgproc::log.trace("inter: {}", inter);
                 if(inter.area() > 0 ) {
                     cv::addWeighted(
                         img_i(cv::Rect(
