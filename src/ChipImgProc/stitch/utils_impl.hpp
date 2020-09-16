@@ -74,9 +74,9 @@ cv::Mat add(
                 auto& img_j = imgs.at(j);
                 cv::Rect inter(roi & aroi);
                 cv::Mat overlap;
-                chipimgproc::log.trace("roi: {}", roi);
-                chipimgproc::log.trace("aroi: {}", aroi);
-                chipimgproc::log.trace("inter: {}", inter);
+                chipimgproc::log.trace("roi: [{},{},{},{}]", roi.x, roi.y, roi.width, roi.height);
+                chipimgproc::log.trace("aroi: [{},{},{},{}]", aroi.x, aroi.y, aroi.width, aroi.height);
+                chipimgproc::log.trace("inter: [{},{},{},{}]", inter.x, inter.y, inter.width, inter.height);
                 if(inter.area() > 0 ) {
                     cv::addWeighted(
                         img_i(cv::Rect(
