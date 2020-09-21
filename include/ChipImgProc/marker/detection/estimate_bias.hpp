@@ -84,6 +84,8 @@ public:
         }
         cv::Point max_score_p;
         cv::minMaxLoc(scores, nullptr, nullptr, nullptr, &max_score_p);
+
+        // Sub-pixel position bias estimated by Gaussian function
         auto patch = scores(cv::Rect(
             max_score_p.x - 1,
             max_score_p.y - 1,
