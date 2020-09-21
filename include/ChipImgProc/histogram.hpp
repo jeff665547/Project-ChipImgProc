@@ -22,19 +22,22 @@ constexpr struct Histogram {
         for(std::size_t i = 0; i < res.size(); i ++ ) {
             res.at(i).first = bin_size * i + bin_size / 2 + lbound;
         }
-        auto idx = [&](auto v) {
-            if(v >= lbound && v < ubound)
-                return (std::size_t)std::floor((v - lbound) / bin_size);
-            else 
-                throw std::out_of_range("index failed");
+        auto idx = [&](auto v, std::size_t& res) {
+            if(v >= lbound && v < ubound) {
+                res = (std::size_t)std::floor((v - lbound) / bin_size);
+                return true;
+            }
+            else {
+                return false;
+            } 
         };
         for(auto&& v : mat) {
             std::size_t id;
-            try {
-                id = idx(v);
+            if(idx(v, id)) {
                 res.at(id).second += 1;
-            } catch(const std::out_of_range& e) {
-                if(boundary_check) throw;
+            } else {
+                if(boundary_check) 
+                throw std::out_of_range("index failed");
             }
         }
         // res[0].second = 0;
