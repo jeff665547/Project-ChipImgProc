@@ -6,7 +6,7 @@
 #include "patch.hpp"
 namespace chipimgproc::warped_mat {
 
-template<class Derived, bool enable, class Float>
+template<class Derived, bool enable, class Float, class AtResult>
 struct StatRegMatHelper 
 {
     template<class... Args>
@@ -14,11 +14,11 @@ struct StatRegMatHelper
     {}
 };
 
-template<class Derived, class Float>
-struct StatRegMatHelper<Derived, true, Float>
-: public RegMatHelper<Derived, true>
+template<class Derived, class Float, class AtResult>
+struct StatRegMatHelper<Derived, true, Float, AtResult>
+: public RegMatHelper<Derived, true, AtResult>
 {
-    using Base      = RegMatHelper<Derived, true>;
+    using Base      = RegMatHelper<Derived, true, AtResult>;
     using CellMasks = ObjMat<cv::Mat, std::uint32_t>;
 
     StatRegMatHelper() = default;
@@ -36,23 +36,25 @@ struct StatRegMatHelper<Derived, true, Float>
     , cell_mask_        (std::move(cell_mask))
     {}
 
-    auto at_cell(std::int32_t r, std::int32_t c) const {
+    bool at_cell(AtResult& res, std::int32_t r, std::int32_t c) const {
         if(r < 0 || r >= stat_mats_.rows()) 
-            throw std::out_of_range("StatRegMatHelper: r < 0 || r >= rows");
+            return false;
         if(c < 0 || c >= stat_mats_.cols()) 
-            throw std::out_of_range("StatRegMatHelper: c < 0 || c >= cols");
+            return false;
         auto stat = stat_mats_(r, c);
         auto mask = cell_mask_(r, c);
-        auto pxs  = Base::at_cell(r, c, mask.size());
+        auto pxs = Derived::make_at_result();
+        if(!Base::at_cell(pxs, r, c, mask.size())) {
+            return false;
+        }
         auto img_p = pxs.img_p;
         auto real_p = pxs.real_p;
-        // cv::Mat tmp  = pxs.patch.setTo(pxs.patch, mask);
         cv::Mat tmp = pxs.patch.mul(mask);
-        return warped_mat::Patch(
+        res = AtResult(
             std::move(pxs), std::move(tmp), 
             std::move(img_p), std::move(real_p)
         );
-        // return warped_mat::Patch(std::move(pxs), pxs.patch);
+        return true;
     }
 
     stat::Mats<Float>                   stat_mats_;

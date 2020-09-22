@@ -1,5 +1,4 @@
 #include <ChipImgProc/warped_mat.hpp>
-#include <ChipImgProc/multi_warped_mat.hpp>
 #include <Nucleona/app/cli/gtest.hpp>
 #include <Nucleona/test/data_dir.hpp>
 #include <ChipImgProc/marker/detection/aruco_random.hpp>
@@ -129,10 +128,12 @@ TEST(warped_mat_test, basic_test) {
         cl_wn, cl_hn
     );
     cv::Mat_<std::uint8_t> first_marker(10, 10);
+    auto cell = warped_mat.make_at_result();
     for(int i = 0; i < 10; i ++) {
         for(int j = 0; j < 10; j ++) {
             // first_marker(i, j) = cv::mean(warped_mat.at_cell(i, j).patch)[0] / 64;
-            first_marker(i, j) = warped_mat.at_cell(i, j).mean / 64;
+            EXPECT_TRUE(warped_mat.at_cell(cell, i, j));
+            first_marker(i, j) = cell.mean / 64;
         }
     }
     first_marker = binarize(first_marker);

@@ -59,7 +59,7 @@ struct RegMatHelper<Derived, true, AtResult> {
     }
 
     bool at_cell_all(
-        AtResult& res,
+        std::vector<AtResult>& res,
         std::int32_t r, 
         std::int32_t c, 
         cv::Size patch_size = cv::Size(5, 5)

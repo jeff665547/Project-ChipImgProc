@@ -92,14 +92,25 @@ struct MakeStatMat {
         );
         ObjMat<cv::Mat, std::uint32_t> warped_mask(clhn, clwn);
         stat::Mats<Float> stat_mats(clhn, clwn);
+        auto cell = warped_agg_mat.make_at_result();
+        std::vector<decltype(cell)> mats;
         for(int i = 0; i < clhn; i ++) {
             for(int j = 0; j < clwn; j ++) {
-                int label = warped_agg_mat.at_cell(
-                    i, j, cv::Size(1, 1)
-                ).patch.at<float>(0, 0);
-                auto mats = warped_agg_mat.at_cell_all(
-                    i, j, cv::Size(clw_px, clh_px)
-                );
+                if(!warped_agg_mat.at_cell(
+                    cell, i, j, cv::Size(1, 1)
+                )) {
+                    throw std::out_of_range(
+                        fmt::format("invalid cell index ({},{})", i, j)
+                    );
+                }
+                if(!warped_agg_mat.at_cell_all(
+                    mats, i, j, cv::Size(clw_px, clh_px)
+                )) {
+                    throw std::out_of_range(
+                        fmt::format("invalid cell index ({},{})", i, j)
+                    );
+                }
+                auto label = cell.patch.at<float>(0, 0);
                 auto& sub_lab     = mats.at(0).patch;
                 auto& sub_mask    = mats.at(1).patch;
                 auto& sub_cv      = mats.at(2).patch;

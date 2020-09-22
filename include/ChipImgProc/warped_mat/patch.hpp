@@ -11,6 +11,7 @@ struct Patch
 : public RawPatch
 , public stat::Cell<double>{
     using sCell = stat::Cell<double>;
+    Patch() = default;
     Patch(
         stat::Cell<double>&& cell, 
         cv::Mat           && pxs, 

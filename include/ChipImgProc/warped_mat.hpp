@@ -15,7 +15,8 @@ struct WarpedMat
 : public warped_mat::StatRegMatHelper<
     WarpedMat<is_reg_mat, Float>,
     is_reg_mat,
-    Float
+    Float,
+    warped_mat::Patch
 >
 {
     constexpr static bool support_reg_mat = is_reg_mat;
@@ -23,7 +24,8 @@ struct WarpedMat
     using Base = warped_mat::StatRegMatHelper<
         WarpedMat<is_reg_mat>,
         is_reg_mat,
-        Float
+        Float,
+        warped_mat::Patch
     >;
 
     WarpedMat() = default;
@@ -44,12 +46,19 @@ struct WarpedMat
     )
     {}
 
-    auto at_real(double r, double c, cv::Size patch_size = cv::Size(5, 5)) const {
-        auto pxs = basic_warped_mat_.at_real(r, c, 0, patch_size);
-        return warped_mat::Patch(std::move(pxs));
+    bool at_real(warped_mat::Patch& res, double r, double c, cv::Size patch_size = cv::Size(5, 5)) const {
+        auto basic_patch = basic_warped_mat_.make_at_result();
+        if(!basic_warped_mat_.at_real(basic_patch, r, c, 0, patch_size)) {
+            return false;
+        }
+        res = warped_mat::Patch(std::move(basic_patch));
+        return true;
     }
     const cv::Mat& warp_mat() const {
         return basic_warped_mat_.warp_mat();
+    }
+    static warped_mat::Patch make_at_result() {
+        return warped_mat::Patch{};
     }
 private:
     warped_mat::Basic<false>  basic_warped_mat_   ;
