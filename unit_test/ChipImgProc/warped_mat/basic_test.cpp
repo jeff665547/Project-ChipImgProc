@@ -29,7 +29,8 @@ TEST(assumption_test, warped_mat_check) {
     // auto p0 = warped_mat.at_real(0, 0);
     // EXPECT_DOUBLE_EQ(p0.img_p.x, -0.5);
     // EXPECT_DOUBLE_EQ(p0.img_p.y, -0.5);
-    auto p1 = warped_mat.at_real(5, 5);
+    auto p1 = warped_mat.make_at_result();
+    EXPECT_TRUE(warped_mat.at_real(p1, 5, 5));
     EXPECT_DOUBLE_EQ(p1.img_p.x, 64.5);
     EXPECT_DOUBLE_EQ(p1.img_p.y, 64.5);
 }
@@ -114,11 +115,13 @@ TEST(basic_warped_mat_test, basic_test) {
     EXPECT_EQ(warped_mat.rows(), 172);
     EXPECT_EQ(warped_mat.cols(), 172);
     cv::Mat_<std::uint8_t> first_marker(10, 10);
+    auto cell = warped_mat.make_at_result();
     for(int i = 0; i < 10; i ++) {
         for(int j = 0; j < 10; j ++) {
-            first_marker(i, j) = cv::mean(warped_mat.at_cell(i, j).patch)[0];
-            std::cout << warped_mat.at_cell(i, j).real_p << std::endl;
-            std::cout << warped_mat.at_cell(i, j).img_p << std::endl;
+            EXPECT_TRUE(warped_mat.at_cell(cell, i, j));
+            first_marker(i, j) = cv::mean(cell.patch)[0];
+            std::cout << cell.real_p << std::endl;
+            std::cout << cell.img_p << std::endl;
         }
     }
     first_marker = binarize(first_marker);

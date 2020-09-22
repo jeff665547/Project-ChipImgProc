@@ -14,11 +14,13 @@ template<bool is_reg_mat = true>
 struct Basic 
 : public warped_mat::RegMatHelper<
     Basic<is_reg_mat>,
-    is_reg_mat
+    is_reg_mat,
+    RawPatch
 > {
     using Base = warped_mat::RegMatHelper<
         Basic<is_reg_mat>,
-        is_reg_mat
+        is_reg_mat,
+        RawPatch
     >;
 
     Basic() = default;
@@ -45,50 +47,56 @@ struct Basic
             }
         }
     }
-    std::vector<RawPatch> at_real_all(
+    bool at_real_all(
+        std::vector<RawPatch>& res,
         double r, 
         double c, 
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
         if(!is_include_real_impl(r, c)) {
-            throw std::runtime_error(point_out_of_boundary(r, c));
+            return false;
         }
         auto [btr, px_point] = point_transform(c, r);
         if(!is_include_pixel_impl(px_point, patch_size)) {
-            throw std::runtime_error(point_out_of_boundary(r, c, px_point));
+            return false;
         }
-        std::vector<RawPatch> res;
         for(auto&& raw_image : raw_images_) {
             cv::Mat img_roi(patch_size, raw_image.type());
             cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
             res.push_back(RawPatch{img_roi, px_point, cv::Point2d(c, r)});
         }
-        return res;
+        return true;
     }
-    RawPatch at_real(
+    bool at_real(
+        RawPatch& res,
         double r, double c, int i, 
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
         if(!is_include_real_impl(r, c)) {
-            throw std::runtime_error(point_out_of_boundary(r, c));
+            return false;
         }
         auto [btr, px_point] = point_transform(c, r);
         if(!is_include_pixel_impl(px_point, patch_size)) {
-            throw std::runtime_error(point_out_of_boundary(r, c, px_point));
+            return false;
         }
         auto& raw_image = raw_images_.at(i);
         cv::Mat img_roi(patch_size, raw_image.type());
         cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
-        return {img_roi, px_point, cv::Point2d(c, r)};
+        res = RawPatch {img_roi, px_point, cv::Point2d(c, r)};
+        return true;
     }
-    RawPatch at_real(
+    bool at_real(
+        RawPatch& res,
         double r, double c,
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
-        return at_real(r, c, 0, patch_size);
+        return at_real(res, r, c, 0, patch_size);
     }
     const cv::Mat& warp_mat() const {
         return warp_mat_;
+    }
+    static RawPatch make_at_result() {
+        return RawPatch{};
     }
 private:
     bool is_include_real_impl(double r, double c) const {

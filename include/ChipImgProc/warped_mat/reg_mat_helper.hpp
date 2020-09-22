@@ -2,19 +2,19 @@
 #include <ChipImgProc/utils.h>
 namespace chipimgproc::warped_mat {
 
-template<class Derived, bool enable>
+template<class Derived, bool enable, class AtResult>
 struct RegMatHelper {};
 
-template<class Derived>
-struct RegMatHelper<Derived, false> {
+template<class Derived, class AtResult>
+struct RegMatHelper<Derived, false, AtResult> {
     template<class... Args>
     RegMatHelper(Args&&... args){}
 
 };
 
-template<class Derived>
-struct RegMatHelper<Derived, true> {
-    using This = RegMatHelper<Derived, true>;
+template<class Derived, class AtResult>
+struct RegMatHelper<Derived, true, AtResult> {
+    using This = RegMatHelper<Derived, true, AtResult>;
     
     RegMatHelper() = default;
     RegMatHelper(
@@ -33,38 +33,41 @@ struct RegMatHelper<Derived, true> {
             throw std::invalid_argument("RegMatHelper: y_max must be assigned");
     }
 
-    auto at_cell(
+    bool at_cell(
+        AtResult& res,
         std::int32_t r, 
         std::int32_t c, 
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
-        if(r >= rows()) throw std::out_of_range("RegMatHelper: r >= rows()");
-        if(c >= cols()) throw std::out_of_range("RegMatHelper: c >= cols()");
+        if(r >= rows()) return false;
+        if(c >= cols()) return false;
         auto [ cent_c, cent_r ] = real_cell_cent(r, c);
-        return derived()->at_real(cent_r, cent_c, patch_size);
+        return derived()->at_real(res, cent_r, cent_c, patch_size);
     }
 
-    auto at_cell( // optional compile of this function, not all derived type support i indexing.
+    bool at_cell( // optional compile of this function, not all derived type support i indexing.
+        AtResult& res,
         std::int32_t r, 
         std::int32_t c, 
         std::int32_t i,
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
-        if(r >= rows()) throw std::out_of_range("RegMatHelper: r >= rows()");
-        if(c >= cols()) throw std::out_of_range("RegMatHelper: c >= cols()");
+        if(r >= rows()) return false;
+        if(c >= cols()) return false;
         auto [ cent_c, cent_r ] = real_cell_cent(r, c);
-        return derived()->at_real(cent_r, cent_c, i, patch_size);
+        return derived()->at_real(res, cent_r, cent_c, i, patch_size);
     }
 
-    auto at_cell_all(
+    bool at_cell_all(
+        AtResult& res,
         std::int32_t r, 
         std::int32_t c, 
         cv::Size patch_size = cv::Size(5, 5)
     ) const {
-        if(r >= rows()) throw std::out_of_range("RegMatHelper: r >= rows()");
-        if(c >= cols()) throw std::out_of_range("RegMatHelper: c >= cols()");
+        if(r >= rows()) return false;
+        if(c >= cols()) return false;
         auto [ cent_c, cent_r ] = real_cell_cent(r, c);
-        return derived()->at_real_all(cent_r, cent_c, patch_size);
+        return derived()->at_real_all(res, cent_r, cent_c, patch_size);
     }
     int rows() const { return cl_y_n_; }
     int cols() const { return cl_x_n_; }
