@@ -1,21 +1,22 @@
 #pragma once
 #include <ChipImgProc/warped_mat/reg_mat_helper.hpp>
+#include <ChipImgProc/warped_mat/patch.hpp>
 
 namespace chipimgproc::multi_warped_mat {
 
-template<class Derived, bool enable>
+template<class Derived, bool enable, class FOVAtResult>
 struct MultiRegMatHelper 
-: public warped_mat::RegMatHelper<Derived, enable>
+: public warped_mat::RegMatHelper<Derived, enable, FOVAtResult>
 {
     void init() {}
 };
 
-template<class Derived>
-struct MultiRegMatHelper<Derived, true> 
-: public warped_mat::RegMatHelper<Derived, true>
+template<class Derived, class FOVAtResult>
+struct MultiRegMatHelper<Derived, true, FOVAtResult> 
+: public warped_mat::RegMatHelper<Derived, true, FOVAtResult>
 {
-    using Base = warped_mat::RegMatHelper<Derived, true>;
-    using This = MultiRegMatHelper<Derived, true>;
+    using Base = warped_mat::RegMatHelper<Derived, true, FOVAtResult>;
+    using This = MultiRegMatHelper<Derived, true, FOVAtResult>;
 
     MultiRegMatHelper() = default;
 
@@ -27,20 +28,14 @@ struct MultiRegMatHelper<Derived, true>
     : Base(origin, xd, yd, x_max, y_max)
     {}
     template<class... Args>
-    auto at_cell(std::int32_t r, std::int32_t c, Args&&... args) const {
-        try {
-            return derived()->at_each_fov([&](std::size_t fov_i){
-                auto& fov = derived()->mats_.at(fov_i);
-                auto& stp = st_cl_pts_.at(fov_i);
-                auto fov_r = r - stp.y;
-                auto fov_c = c - stp.x;
-                return fov.at_cell(fov_r, fov_c, FWD(args)...);
-            });
-        } catch(const std::out_of_range& e) {
-            throw std::out_of_range(fmt::format("at_cell({},{},...)", 
-                r, c
-            ));
-        }
+    bool at_cell(warped_mat::Patch& res, std::int32_t r, std::int32_t c, Args&&... args) const {
+        return derived()->at_each_fov(res, [&](FOVAtResult& tmp, std::size_t fov_i){
+            auto& fov = derived()->mats_.at(fov_i);
+            auto& stp = st_cl_pts_.at(fov_i);
+            auto fov_r = r - stp.y;
+            auto fov_c = c - stp.x;
+            return fov.at_cell(tmp, fov_r, fov_c, FWD(args)...);
+        });
     }
 protected:
     void init() {

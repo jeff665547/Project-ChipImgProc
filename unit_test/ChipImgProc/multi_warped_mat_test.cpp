@@ -29,12 +29,6 @@ TEST(multi_warped_mat_test, with_basic_test) {
     int cl_wn       = 172;
     int cl_hn       = 172;
     double win_r    = 0.6;
-    // int mk_xi_um = 0;
-    // int mk_yi_um = 0;
-    // int mk_w_d_um = 405;
-    // int mk_h_d_um = 405;
-    // int mk_w_um = 50;
-    // int mk_h_um = 50;
     auto db_path = nucleona::test::data_dir() / "aruco_db.json";
     std::vector<boost::filesystem::path> img_paths({
         nucleona::test::data_dir() / "aruco-green-pair" / "0-0-BF.tiff",
@@ -132,43 +126,13 @@ TEST(multi_warped_mat_test, with_basic_test) {
         std::move(warped_mats),  std::move(stitch_point),
         {0, 0}, 5, 5, 2480, 2480
     );
-    // {
-    //     auto src = ::imread(img_paths[0]);
-    //     cv::Mat_<std::uint8_t> first_marker(10, 10);
-    //     for(int i = 0; i < 10; i ++) {
-    //         for(int j = 0; j < 10; j ++) {
-    //             auto&& cell = multi_warped_mat.at_cell(i, j);
-    //             first_marker(i, j) = cell.mean;
-    //             cv::drawMarker(src, cv::Point(
-    //                 std::round(cell.img_p.x),
-    //                 std::round(cell.img_p.y)
-    //             ), cv::Scalar(0, 0, 0), cv::MARKER_CROSS);
-    //         }
-    //     }
-    //     std::cout << first_marker << '\n';
-    //     first_marker = std::get<1>(threshold(first_marker, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU));
-    //     cv::imwrite("testx.png", first_marker);
-    //     cv::imwrite("testy.png", src);
-
-    //     // std::vector<int> ans ({
-    //     //     1, 0, 0, 1, 0, 0
-    //     //   , 1, 1, 1, 1, 1, 0
-    //     //   , 1, 0, 1, 1, 0, 1
-    //     //   , 1, 1, 1, 0, 0, 0
-    //     //   , 1, 0, 1, 1, 0, 0
-    //     //   , 0, 1, 0, 1, 0, 0
-    //     // });
-    //     // for(int i = 2; i < 8; i ++) {
-    //     //     for(int j = 2; j < 8; j ++) {
-    //     //         EXPECT_EQ(ans[((i-2) * 6) + (j - 2)] * 255, first_marker(i, j));
-    //     //     }
-    //     // }
-    // }
     {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
+        auto cell = multi_warped_mat.make_at_result();
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i, j + 162).mean;
+                EXPECT_TRUE(multi_warped_mat.at_cell(cell, i, j + 162));
+                first_marker(i, j) = cell.mean;
             }
         }
         // first_marker = binarize(first_marker);
@@ -190,9 +154,11 @@ TEST(multi_warped_mat_test, with_basic_test) {
     }
     {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
+        auto cell = multi_warped_mat.make_at_result();
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i, j + 324).mean;
+                EXPECT_TRUE(multi_warped_mat.at_cell(cell, i, j + 324));
+                first_marker(i, j) = cell.mean;
             }
         }
         // first_marker = binarize(first_marker);
@@ -214,9 +180,11 @@ TEST(multi_warped_mat_test, with_basic_test) {
     }
     {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
+        auto cell = multi_warped_mat.make_at_result();
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i + 162, j + 162).mean;
+                EXPECT_TRUE(multi_warped_mat.at_cell(cell, i + 162, j + 162));
+                first_marker(i, j) = cell.mean;
             }
         }
         first_marker = binarize(first_marker);
@@ -252,10 +220,6 @@ auto load_templ_marker(
     auto mask = cv::imread(mpath, flags);
     auto size_w = scale * width / templ.cols;
     auto size_h = scale * height / templ.rows;
-    // cv::Mat rtempl(size, templ.type());
-    // cv::Mat rmask(size, mask.type());
-    // cv::resize(templ, rtempl, size, 0.0, 0.0, cv::INTER_AREA);
-    // cv::resize(mask,  rmask,  size, 0.0, 0.0, cv::INTER_NEAREST);
     auto rtempl = resize(templ, size_w, size_h, cv::INTER_AREA);
     auto rmask = resize(mask, size_w, size_h, cv::INTER_NEAREST);
     return nucleona::make_tuple(
@@ -289,12 +253,6 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
     int mk_wd_cl    = 10;
     int mk_hd_cl    = 10;
     double win_r    = 0.6;
-    // int mk_xi_um = 0;
-    // int mk_yi_um = 0;
-    // int mk_w_d_um = 405;
-    // int mk_h_d_um = 405;
-    // int mk_w_um = 50;
-    // int mk_h_um = 50;
     auto pb_mk_path = nucleona::test::data_dir() / "banff_rc" / "pat_CY5.tsv";
     auto db_path = nucleona::test::data_dir() / "aruco_db.json";
     std::vector<boost::filesystem::path> img_paths({
@@ -455,9 +413,11 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
     );
     {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
+        auto cell = multi_warped_mat.make_at_result();
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i, j + 162).mean / 64;
+                EXPECT_TRUE(multi_warped_mat.at_cell(cell, i, j + 162));
+                first_marker(i, j) = cell.mean / 64;
             }
         }
         // first_marker = binarize(first_marker);
@@ -483,9 +443,11 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
     }
     {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
+        auto cell = multi_warped_mat.make_at_result();
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                first_marker(i, j) = multi_warped_mat.at_cell(i, j + 324).mean / 64;
+                EXPECT_TRUE(multi_warped_mat.at_cell(cell, i, j + 324));
+                first_marker(i, j) = cell.mean / 64;
             }
         }
         first_marker = binarize(first_marker);
@@ -510,11 +472,11 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
     }
     {
         cv::Mat_<std::uint8_t> first_marker(10, 10);
+        auto cell = multi_warped_mat.make_at_result();
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
-                auto&& cell = multi_warped_mat.at_cell(i + 162, j + 162);
+                EXPECT_TRUE(multi_warped_mat.at_cell(cell, i + 162, j + 162));
                 first_marker(i, j) = cell.mean / 64;
-                std::cout << cell.real_p << std::endl;
             }
         }
         // first_marker = binarize(first_marker);

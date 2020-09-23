@@ -27,6 +27,7 @@ struct WarpedMat
         Float,
         warped_mat::Patch
     >;
+    using AtResult = warped_mat::Patch;
 
     WarpedMat() = default;
 

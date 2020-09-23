@@ -15,15 +15,19 @@ template<
 struct MultiWarpedMat 
 : public multi_warped_mat::MultiRegMatHelper<
     MultiWarpedMat<FOV, is_reg_mat>,
-    is_reg_mat
+    is_reg_mat,
+    typename FOV::AtResult
 >
 {
     using Reducer = ReducerTpl<FOV>;
     using Base = multi_warped_mat::MultiRegMatHelper<
         MultiWarpedMat<FOV, is_reg_mat>,
-        is_reg_mat
+        is_reg_mat,
+        typename FOV::AtResult
     >;
     friend Base;
+    using FOVAtResult = typename FOV::AtResult; 
+    using AtResult = warped_mat::Patch;
 
     MultiWarpedMat() = default;
 
@@ -46,35 +50,29 @@ struct MultiWarpedMat
     }
 protected:
     template<class Func>
-    auto at_each_fov(Func&& access) const {
-        using CellType = decltype(access(std::size_t()));
-        std::vector<CellType> patches;
+    bool at_each_fov(AtResult& res, Func&& access) const {
+        // using CellType = decltype(access(std::size_t()));
+        std::vector<FOVAtResult> patches;
+        FOVAtResult tmp;
         for(std::size_t i = 0; i < mats_.size(); i ++) {
-            try {
-                patches.emplace_back(access(i));
-            } catch(...) {
-            }
+            if(!access(tmp, i)) continue;
+            patches.emplace_back(tmp);
         }
         if(patches.empty()) {
-            throw std::out_of_range("point out of boundary");
+            return false;
         }
-        return reducer_(patches);
+        res = reducer_(patches);
+        return true;
     }
 public:
-    auto at_real(double r, double c, cv::Size patch_size) const {
-        try {
-            return at_each_fov([&](std::size_t fov_i){
-                auto& fov = mats_.at(fov_i);
-                auto& stp = st_pts_.at(fov_i);
-                auto fov_r = r - stp.y;
-                auto fov_c = c - stp.x;
-                return fov.at_real(fov_r, fov_c, patch_size);
-            });
-        } catch(const std::out_of_range& e) {
-            throw std::out_of_range(fmt::format("at_real({},{},[{},{}])", 
-                r, c, patch_size.width, patch_size.height
-            ));
-        }
+    bool at_real(AtResult& res, double r, double c, cv::Size patch_size) const {
+        return at_each_fov(res, [&](FOVAtResult& tmp, std::size_t fov_i){
+            auto& fov = mats_.at(fov_i);
+            auto& stp = st_pts_.at(fov_i);
+            auto fov_r = r - stp.y;
+            auto fov_c = c - stp.x;
+            return fov.at_real(tmp, fov_r, fov_c, patch_size);
+        });
     }
     std::vector<cv::Mat> warp_mats() const {
         std::vector<cv::Mat> res;
@@ -82,6 +80,9 @@ public:
             res.push_back(m.warp_mat().clone());
         }
         return res;
+    }
+    static AtResult make_at_result() {
+        return {};
     }
 private:
     std::vector<FOV>            mats_       ;

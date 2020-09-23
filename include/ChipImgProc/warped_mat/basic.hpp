@@ -22,6 +22,7 @@ struct Basic
         is_reg_mat,
         RawPatch
     >;
+    using AtResult = RawPatch;
 
     Basic() = default;
 
