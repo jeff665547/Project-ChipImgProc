@@ -12,13 +12,14 @@ constexpr struct LocationMarkCreator {
       , const std::int32_t padding
       , const std::int32_t margin
       , double scale = 1.0
+	  , std::uint8_t bg_color = 0
     ) const {
         using matrix_t = cv::Mat_<std::uint8_t>;
 
         std::int32_t m = margin, b = (outer_width - inner_width) / 2;
-        matrix_t templ = matrix_t::zeros(inner_width, inner_width);
+        matrix_t templ = matrix_t(inner_width, inner_width, bg_color);
         cv::copyMakeBorder(templ, templ, b, b, b, b, cv::BORDER_CONSTANT, 255);
-        cv::copyMakeBorder(templ, templ, m, m, m, m, cv::BORDER_CONSTANT, 0);
+        cv::copyMakeBorder(templ, templ, m, m, m, m, cv::BORDER_CONSTANT, bg_color);
         chipimgproc::aruco::Utils::resize(templ, templ, scale, scale);
 
         b += padding + margin;

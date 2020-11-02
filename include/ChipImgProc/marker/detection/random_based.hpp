@@ -8,6 +8,9 @@
 #include <opencv2/video/tracking.hpp>
 #include <ChipImgProc/utils.h>
 #include <Nucleona/language.hpp>
+
+#include <iostream>
+
 namespace chipimgproc::marker::detection {
 
 struct RndMkId {
@@ -110,8 +113,12 @@ public:
         
         for (auto i = 0; i != nms_count_; ++i) {
             // pixel-level roughly search
+            // std::cout << i + 1 << " / " << nms_count_ << '\n';
             cv::Point loc;
+            // double tmp_score;
+            // cv::minMaxLoc(match1, nullptr, &tmp_score, nullptr, &loc);
             cv::minMaxLoc(match1, nullptr, nullptr, nullptr, &loc);
+            // std::cout << "roughly search: score=" << tmp_score << ", loc=(" << loc.x << "," << loc.y << ")\n";
             cv::circle(match1, loc, nms_radius_, 0, -1);
 
             // pixel-level finely search
@@ -121,11 +128,18 @@ public:
                 auto y = loc.y * s_;
                 auto h = templ_.rows + (2 * s_);
                 auto w = templ_.cols + (2 * s_);
+                if (x + w >= image.cols || y + h >= image.rows) {
+                    std::cerr << "**************************************\n"
+                                 "Rect range out of image size. Continue\n"
+                                 "**************************************\n";
+                    continue;
+                }
                 auto patch = image(cv::Rect(x, y, w, h));
                 auto match2 = chipimgproc::match_template(patch, templ_, method_, mask_);
 
                 cv::Point dxy;
                 cv::minMaxLoc(match2, nullptr, &score, nullptr, &dxy);
+                // std::cout << "finely search: score=" << score << ", loc=(" << dxy.x << "," << dxy.y << "), glo_loc=(" << dxy.x + x << "," << dxy.y + y << ")\n";
                 locations.push_back(cv::Point(dxy.x + x, dxy.y + y));
 
                 // filter bad identifications out
@@ -156,6 +170,7 @@ public:
             // decoding
             auto [index, distance] = derived()->identify(view, anchors, FWD(identify_args)...);
 
+            // std::cout << "index: " << index << "\t distance: " << distance << '\n';
             // set new template and anchors for decoding
             if( index >= 0) {
                 best_score = score;
@@ -172,6 +187,7 @@ public:
         std::vector<std::tuple<int, double, cv::Point2d>> results;
         auto h = new_templ.rows;
         auto w = new_templ.cols;
+        // auto i(0);
         for(auto&& [x, y] : locations) {
     
             // subpixel-level search
@@ -180,9 +196,10 @@ public:
             double score = 0.0;
             cv::Point2d center;
             try {
-                // cv::imwrite("view.tiff", view);
-                // cv::imwrite("new_templ.tiff", new_templ);
-                // cv::imwrite("mask.tiff", mask_);
+                // std::string str("(" + std::to_string(fov_id.x) + "," + std::to_string(fov_id.y) + ")-" + std::to_string(i) + "-(" + std::to_string(x) + "," + std::to_string(y) + ").tiff");
+                // cv::imwrite("view" + str, view);
+                // cv::imwrite("new_templ" + str, new_templ);
+                // cv::imwrite("mask" + str, mask_);
                 score = cv::findTransformECC(
                     view, new_templ, wmatx, 
                     cv::MOTION_TRANSLATION, criteria_, mask_
@@ -202,6 +219,7 @@ public:
 
             // save result
             results.emplace_back(index, score, center);
+            // ++i;
         }
 
         std::sort(results.begin(), results.end(), [](auto&& r0, auto&& r1){
