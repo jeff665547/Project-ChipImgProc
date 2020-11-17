@@ -68,15 +68,34 @@ public:
         int x1 = std::ceil(_x1 + templ_center.x);
         int y1 = std::ceil(_y1 + templ_center.y);
 
-        cv::Size patch_size(image.cols - x1 + x0, image.rows - y1 + y0);
+        // Original: Scan fluor marks in all possible position (region). (*)
+        // cv::Size patch_size(image.cols - x1 + x0, image.rows - y1 + y0);
+
+        // Substitutional: Scan fluor marks only in the estimated position (region) with high likelihood (99.75% up). (*)
+        cv::Size patch_size;
+        cv::Size2d basic_cover(20.6*7.74, 20.6*7.74);
+        double high_P_cover_extend_ratio = 2.2;
+        patch_size.width = std::max(high_P_cover_extend_ratio*w, basic_cover.width);
+        patch_size.height = std::max(high_P_cover_extend_ratio*h, basic_cover.height);
+        // std::cout << "patch width: " << patch_size.width << " , patch height: " << patch_size.height << " pixels (px)" << std::endl;
+
+        
         cv::Point2d patch_center((patch_size.width - 1) / 2.0, (patch_size.height - 1) / 2.0);
         cv::Mat scores(cv::Mat::zeros(patch_size, score_matrix.type()));
 
         for(auto&& h : hints) {
+            // Original: Original patch center (for match_template score domain) (*)
+            // cv::Point2f center(
+            //    h.x - x0 - templ_center.x + patch_center.x, 
+            //    h.y - y0 - templ_center.y + patch_center.y
+            // );
+
+            // Substitutional: Substitutional patch center (for match_template score domain) (*)
             cv::Point2f center(
-                h.x - x0 - templ_center.x + patch_center.x, 
-                h.y - y0 - templ_center.y + patch_center.y
+                h.x - templ_center.x, 
+                h.y - templ_center.y
             );
+
             cv::Mat tmp;
             cv::getRectSubPix(score_matrix,
                 patch_size, center, tmp);
@@ -110,8 +129,18 @@ public:
         double dx = (0.5 * (zx[0] - zx[2])) / (zx[2] - (2 * zx[1]) + zx[0]);
         double dy = (0.5 * (zy[0] - zy[2])) / (zy[2] - (2 * zy[1]) + zy[0]);
 
+        // Final estimation for bias correction
+        // Original: Bias correction for original case (all possible position (region)). (*)
+        // cv::Point2d bias(0 + max_score_p.x + dx - x0, 0 + max_score_p.y + dy - y0);
+
+        // Substitutional: Bias correction for Substitutional case (estimated position (region (99.75% up))). (*)
+        cv::Point2d bias(max_score_p.x + dx - patch_center.x, max_score_p.y + dy - patch_center.y);
+
+        // No adjustment.
+        // cv::Point2d bias(0, 0);
+
         return std::make_tuple(
-            cv::Point2d(max_score_p.x + dx - x0, max_score_p.y + dy - y0), 
+            bias, 
             scores.at<float>(max_score_p.y, max_score_p.x) / hints.size()
         );
     }
