@@ -73,8 +73,8 @@ public:
 
         // Substitutional: Scan fluor marks only in the estimated position (region) with high likelihood (99.75% up). (*)
         cv::Size patch_size;
-        cv::Size2d basic_cover(20.6*7.74, 20.6*7.74);
-        double high_P_cover_extend_ratio = 2.2;
+        cv::Size2d basic_cover(20.2*7.74, 20.2*7.74);
+        double high_P_cover_extend_ratio = 2.3;
         patch_size.width = std::max(high_P_cover_extend_ratio*w, basic_cover.width);
         patch_size.height = std::max(high_P_cover_extend_ratio*h, basic_cover.height);
         // std::cout << "patch width: " << patch_size.width << " , patch height: " << patch_size.height << " pixels (px)" << std::endl;
