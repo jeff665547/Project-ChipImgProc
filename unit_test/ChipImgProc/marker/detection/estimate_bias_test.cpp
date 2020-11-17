@@ -58,12 +58,12 @@ TEST(estimate_bias_test, simultaion_shift) {
     chipimgproc::info(std::cout, green_templ);
     chipimgproc::info(std::cout, green_mask);
 
-    // simulate bias between aruco and probe channel
+    // simulate bias between aruco and probe channel, Original is pos.x + 200, pos.y + 250 (*)
     std::vector<cv::Point2d> aruco_mk_pos;
     for(auto&& [mid, score, pos] : aruco_mk) {
         aruco_mk_pos.push_back(cv::Point2d(
-            pos.x + 200,
-            pos.y + 250
+            pos.x + 50,
+            pos.y + 60
         ));
     }
 
@@ -72,6 +72,6 @@ TEST(estimate_bias_test, simultaion_shift) {
         green_img, green_templ, green_mask, aruco_mk_pos, 0.42558601126675694
     );
     std::cout << bias << std::endl;
-    EXPECT_LT(std::abs(bias.x + 200), 3);
-    EXPECT_LT(std::abs(bias.y + 250), 3);
+    EXPECT_LT(std::abs(bias.x + 50), 3);
+    EXPECT_LT(std::abs(bias.y + 60), 3);
 }
