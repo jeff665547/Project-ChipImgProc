@@ -75,12 +75,10 @@ public:
         cv::Size2d cover_size;
         bool default_cover = false;
         if(high_P_cover_size != cv::Size2d(0.0, 0.0)){
-            std::cout << "use input" << std::endl;
             // Substitutional: Scan fluor marks only in the estimated position (region) with high likelihood (99.5% up). (*)
             cover_size.width = std::max(high_P_cover_size.width, basic_cover_size.width);
             cover_size.height = std::max(high_P_cover_size.height, basic_cover_size.height);
         }else{
-            std::cout << "use default" << std::endl;
             // Original: Scan fluor marks in all possible position (region).
             cover_size = cv::Size2d(image.cols - x1 + x0, image.rows - y1 + y0);
             default_cover = true;
