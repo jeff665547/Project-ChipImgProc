@@ -8,6 +8,7 @@
 #include <opencv2/video/tracking.hpp>
 #include <ChipImgProc/utils.h>
 #include <Nucleona/language.hpp>
+#include <ChipImgProc/logger.hpp>
 
 #include <iostream>
 
