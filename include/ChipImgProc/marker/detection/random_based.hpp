@@ -129,9 +129,9 @@ public:
                 auto h = templ_.rows + (2 * s_);
                 auto w = templ_.cols + (2 * s_);
                 if (x + w >= image.cols || y + h >= image.rows) {
-                    std::cerr << "**************************************\n"
-                                 "Rect range out of image size. Continue\n"
-                                 "**************************************\n";
+                    log.warn(   "**************************************\n"
+                                "Rect range out of image size. Continue\n"
+                                "**************************************\n");
                     continue;
                 }
                 auto patch = image(cv::Rect(x, y, w, h));
