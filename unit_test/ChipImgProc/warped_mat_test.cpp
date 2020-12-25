@@ -101,7 +101,8 @@ TEST(warped_mat_test, basic_test) {
         sp_w_um / rescale,
         um2px_r
     );
-    auto [bias, score] = marker::detection::estimate_bias(img1, pb_templ, pb_mask, um_pos, trans_mat);
+    bool global_search = true;
+    auto [bias, score] = marker::detection::estimate_bias(img1, pb_templ, pb_mask, um_pos, trans_mat, global_search);
     auto probe_trans_mat = trans_mat.clone();
     {
         auto _bias = bias;

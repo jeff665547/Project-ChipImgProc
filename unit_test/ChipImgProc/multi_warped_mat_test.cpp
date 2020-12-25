@@ -377,8 +377,9 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
             sp_w_um / rescale,  
             um2px_r
         );
+        bool global_search = true;
         auto [bias, score] = marker::detection::estimate_bias(
-            pb_img, pb_templ, pb_mask, um_pos, trans_mat
+            pb_img, pb_templ, pb_mask, um_pos, trans_mat, global_search
         );
         auto probe_trans_mat = trans_mat.clone();
         {
