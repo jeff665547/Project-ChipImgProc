@@ -24,6 +24,7 @@ public:
         cv::Mat         mask,
         const Hints&    hints,
         double          angle,
+        bool            global_search,
         cv::Size2d      basic_cover_size,
         cv::Size2d      high_P_cover_size,
         bool            regulation,
@@ -72,16 +73,14 @@ public:
         int x1 = std::ceil(_x1 + templ_center.x);
         int y1 = std::ceil(_y1 + templ_center.y);
 
-        cv::Size2d cover_size;
-        bool default_cover = false;
-        if(high_P_cover_size != cv::Size2d(0.0, 0.0)){
-            // Substitutional: Scan fluor marks only in the estimated position (region) with high likelihood (99.5% up). (*)
+        cv::Size2d cover_size;        
+        if(!global_search){
+            // Substitutional: Scan fluor marks only in the estimated position (region) with high likelihood (99.51% up). (*)
             cover_size.width = std::max(high_P_cover_size.width, basic_cover_size.width);
             cover_size.height = std::max(high_P_cover_size.height, basic_cover_size.height);
         }else{
             // Original: Scan fluor marks in all possible position (region).
             cover_size = cv::Size2d(image.cols - x1 + x0, image.rows - y1 + y0);
-            default_cover = true;
         }
 
 
@@ -90,14 +89,14 @@ public:
 
         for(auto&& h : hints) {
             cv::Point2f center;
-            if(default_cover){
-                // Original: Original cover center (for match_template score domain) (*)
-                center.x = h.x - x0 - templ_center.x + cover_center.x;
-                center.y = h.y - y0 - templ_center.y + cover_center.y;
-            }else{
+            if(!global_search){
                 // Substitutional: Substitutional cover center (for match_template score domain) (*)
                 center.x = h.x - templ_center.x;
                 center.y = h.y - templ_center.y;
+            }else{
+                // Original: Original cover center (for match_template score domain) (*)
+                center.x = h.x - x0 - templ_center.x + cover_center.x;
+                center.y = h.y - y0 - templ_center.y + cover_center.y;                
             }
             cv::Mat tmp, tmp2;
 
@@ -136,7 +135,7 @@ public:
         // Final estimation for bias correction
         cv::Point2d bias;
         if(regulation){
-            // Substitutional: Bias correction testing for no adjustment case & high precision case (estimated position (region (98.8% up))).
+            // Substitutional: Bias correction testing for no adjustment case & high precision case (estimated position (region (95.6% up))).
             cv::Point rel_max_score_p, abs_rel_max_score_p;
             cv::Size2d regulation_cover_radius;
             rel_max_score_p.x = max_score_p.x - cover_center.x;
@@ -153,8 +152,8 @@ public:
                 bias.x = rel_max_score_p.x + dx;
                 bias.y = rel_max_score_p.y + dy;
             }
-        }else if(!default_cover){
-            // Substitutional: Bias correction for Substitutional case (estimated position (region (99.5% up))).
+        }else if(!global_search){
+            // Substitutional: Bias correction for substitutional case (estimated position (region (99.51% up))).
             bias.x = max_score_p.x + dx - cover_center.x;
             bias.y = max_score_p.y + dy - cover_center.y;
         }else{
@@ -174,9 +173,10 @@ public:
         cv::Mat         mask,
         Hints           hints_rum,
         cv::Mat         warp_mat,
-        cv::Size2d      basic_cover_size = cv::Size2d(0.0, 0.0),
-        double          high_P_cover_extend_r = 0.0,
-        bool            regulation = false,
+        bool            global_search             = false,
+        cv::Size2d      basic_cover_size          = cv::Size2d(0.0, 0.0),
+        double          high_P_cover_extend_r     = 0.0,
+        bool            regulation                = false,
         double          regulation_cover_extend_r = 0.0
     ) const {
         for(auto& h : hints_rum) {
@@ -202,6 +202,7 @@ public:
         return this->operator()(
             _image, templ, mask,
             hints_dst, -angle,
+            global_search,
             basic_cover_size, 
             high_P_cover_size,
             regulation,

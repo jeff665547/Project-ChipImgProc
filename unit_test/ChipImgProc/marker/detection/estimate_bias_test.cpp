@@ -69,7 +69,7 @@ TEST(estimate_bias_test, simultaion_shift) {
 
 
     auto [bias, score] = chipimgproc::marker::detection::estimate_bias(
-        green_img, green_templ, green_mask, aruco_mk_pos, 0.42558601126675694, 
+        green_img, green_templ, green_mask, aruco_mk_pos, 0.42558601126675694, false,
         cv::Size2d(7.74 * 14.3, 7.74 * 14.3), cv::Size2d(2.3 * green_templ.cols, 2.3 * green_templ.rows), 
         false, cv::Size2d(0.0, 0.0)
     );
