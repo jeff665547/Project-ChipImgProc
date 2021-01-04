@@ -11,7 +11,7 @@ Win_CI:
         - rmdir build /s /q
         - mkdir build
         - cd build
-        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DINSTALL_DEPS=ON -DENABLE_LOG=OFF
+        - cmake -G "MinGW Makefiles" ../ -DCMAKE_BUILD_TYPE="Release" -DCMAKE_INSTALL_PREFIX=../stage -DBUILD_TESTS=ON -DINSTALL_DEPS=ON -DENABLE_LOG=ON
         - cmake --build . --target install
         - cd ..
         - rmdir stage /s /q
