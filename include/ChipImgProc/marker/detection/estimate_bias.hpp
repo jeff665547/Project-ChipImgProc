@@ -97,7 +97,7 @@ public:
                 cv::Mat tmp = chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
                 cv::Mat tmp2(tmp.size(), CV_8U);
                 tmp.convertTo(tmp2, CV_8U, 255);
-                cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp2);
+                // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp2);
                 scores += tmp;
                 // scores += chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
             }
@@ -116,11 +116,11 @@ public:
                 cv::getRectSubPix(score_matrix, cover_size, center, tmp);
                 cv::Mat tmp2(tmp.size(), CV_8U);
                 tmp.convertTo(tmp2, CV_8U, 255);
-                cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp2);
+                // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp2);
                 scores += tmp;
             }
         }
-        cv::imwrite("score.tiff", scores);
+        // cv::imwrite("score.tiff", scores);
 
         cv::Point max_score_p;
         cv::minMaxLoc(scores, nullptr, nullptr, nullptr, &max_score_p);
