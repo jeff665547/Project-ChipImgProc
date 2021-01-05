@@ -1,6 +1,7 @@
 #include <ChipImgProc/utils.h>
 #include <algorithm>
 #include <ChipImgProc/rotation/from_warp_mat.hpp>
+#include <cmath>
 // #include <iostream>
 namespace chipimgproc::marker::detection {
 
@@ -24,10 +25,9 @@ public:
         cv::Mat         mask,
         const Hints&    hints,
         double          angle,
-        bool            global_search,
-        cv::Size2d      basic_cover_size,
-        cv::Size2d      high_P_cover_size,
-        bool            regulation,
+        bool            global_search,  //TODO May be set as temaplte parameter
+        cv::Size2d      local_cover_size,
+        bool            regulation, //TODO May be set as temaplte parameter
         cv::Size2d      regulation_cover_size
     ) const {
         assert(!hints.empty());
@@ -48,64 +48,80 @@ public:
         // cv::imwrite("templ.tiff", templ);
         // cv::imwrite("mask.tiff", mask);
         // cv::imwrite("image.tiff", image);
-        auto score_matrix = chipimgproc::match_template(
-            image, templ, cv::TM_CCORR_NORMED, mask
-        );
         // {
         //     cv::Mat tmp(score_matrix.size(), CV_8U);
         //     score_matrix.convertTo(tmp, CV_8U, 255);
         //     cv::imwrite("score.tiff", tmp);
         // }
-        double _x0(hints.at(0).x);
-        double _y0(hints.at(0).y); 
-        double _x1(hints.at(0).x);
-        double _y1(hints.at(0).y);
 
-        for(auto&& p : hints) {
-            _x0 = std::min(_x0, p.x);
-            _y0 = std::min(_y0, p.y);
-            _x1 = std::max(_x1, p.x);
-            _y1 = std::max(_y1, p.y);
-        }
-
-        int x0 = std::floor(_x0 - templ_center.x);
-        int y0 = std::floor(_y0 - templ_center.y);
-        int x1 = std::ceil(_x1 + templ_center.x);
-        int y1 = std::ceil(_y1 + templ_center.y);
-
+        int x0, y0, x1, y1;
         cv::Size2d cover_size;        
-        if(!global_search){
+
+        if (!global_search) {
             // Substitutional: Scan fluor marks only in the estimated position (region) with high likelihood (99.51% up). (*)
-            cover_size.width = std::max(high_P_cover_size.width, basic_cover_size.width);
-            cover_size.height = std::max(high_P_cover_size.height, basic_cover_size.height);
-            cover_size.width = std::ceil(cover_size.width);
-            cover_size.height = std::ceil(cover_size.height);
-        }else{
+            cover_size.width = local_cover_size.width + w - 1;
+            cover_size.height = local_cover_size.height + h - 1;
+        }
+        else {
             // Original: Scan fluor marks in all possible position (region).
+            double _x0(hints.at(0).x);
+            double _y0(hints.at(0).y); 
+            double _x1(hints.at(0).x);
+            double _y1(hints.at(0).y);
+
+            for(auto&& p : hints) {
+                _x0 = std::min(_x0, p.x);
+                _y0 = std::min(_y0, p.y);
+                _x1 = std::max(_x1, p.x);
+                _y1 = std::max(_y1, p.y);
+            }
+
+            x0 = std::floor(_x0 - templ_center.x);
+            y0 = std::floor(_y0 - templ_center.y);
+            x1 = std::ceil(_x1 + templ_center.x);
+            y1 = std::ceil(_y1 + templ_center.y);
             cover_size = cv::Size2d(image.cols - x1 + x0, image.rows - y1 + y0);
         }
 
-
+        cv::Mat scores;
         cv::Point2d cover_center((cover_size.width - 1) / 2.0, (cover_size.height - 1) / 2.0);
-        cv::Mat scores(cv::Mat::zeros(cover_size, score_matrix.type()));
-
-        for(auto&& h : hints) {
-            cv::Point2f center;
-            if(!global_search){
-                // Substitutional: Substitutional cover center (for match_template score domain) (*)
-                center.x = h.x - templ_center.x;
-                center.y = h.y - templ_center.y;
-            }else{
-                // Original: Original cover center (for match_template score domain) (*)
-                center.x = h.x - x0 - templ_center.x + cover_center.x;
-                center.y = h.y - y0 - templ_center.y + cover_center.y;                
+        if (!global_search) {
+            scores.create(local_cover_size, cv::Mat1f().type());
+            scores = cv::Scalar(0);
+            // Substitutional: Substitutional cover center (for match_template score domain) (*)
+            cv::Point2f origin;
+            for (auto&& h : hints) {
+                origin.x = h.x - cover_center.x;
+                origin.y = h.y - cover_center.y;
+                auto cover(image(cv::Rect(origin.x, origin.y, cover_size.width, cover_size.height)));
+                cv::Mat tmp = chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
+                cv::Mat tmp2(tmp.size(), CV_8U);
+                tmp.convertTo(tmp2, CV_8U, 255);
+                // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp2);
+                scores += tmp;
+                // scores += chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
             }
-            cv::Mat tmp, tmp2;
-
-            cv::getRectSubPix(score_matrix,
-                cover_size, center, tmp);
-            scores += tmp;
         }
+        else {
+            // Original: Original cover center (for match_template score domain) (*)
+            auto score_matrix = chipimgproc::match_template(image, templ, cv::TM_CCORR_NORMED, mask);
+            cv::Point2f center;
+            scores.create(cover_size, cv::Mat1f().type());
+            scores = cv::Scalar(0);
+            for(auto&& h : hints) {
+                center.x = h.x - x0 - templ_center.x + cover_center.x;
+                center.y = h.y - y0 - templ_center.y + cover_center.y;
+                cv::Mat tmp;
+
+                cv::getRectSubPix(score_matrix, cover_size, center, tmp);
+                cv::Mat tmp2(tmp.size(), CV_8U);
+                tmp.convertTo(tmp2, CV_8U, 255);
+                // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp2);
+                scores += tmp;
+            }
+        }
+        // cv::imwrite("score.tiff", scores);
+
         cv::Point max_score_p;
         cv::minMaxLoc(scores, nullptr, nullptr, nullptr, &max_score_p);
 
@@ -191,22 +207,21 @@ public:
         
         // Use different estimate cover and regulation for different scan mode.
         cv::Size2d regulation_cover_size;
-        cv::Size2d high_P_cover_size;
+        cv::Size2d cover_size;
         
         if(regulation){
             regulation_cover_size.width = regulation_cover_extend_r * templ.cols;
             regulation_cover_size.height = regulation_cover_extend_r * templ.rows;
         }
         
-        high_P_cover_size.width = high_P_cover_extend_r * templ.cols;
-        high_P_cover_size.height = high_P_cover_extend_r * templ.rows;
+        cover_size.width = std::ceil(std::max(basic_cover_size.width, high_P_cover_extend_r * templ.cols));
+        cover_size.height = std::ceil(std::max(basic_cover_size.height, high_P_cover_extend_r * templ.rows));
 
         return this->operator()(
             _image, templ, mask,
             hints_dst, -angle,
             global_search,
-            basic_cover_size, 
-            high_P_cover_size,
+            cover_size,
             regulation,
             regulation_cover_size
         );
