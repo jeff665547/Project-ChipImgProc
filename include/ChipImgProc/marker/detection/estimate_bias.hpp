@@ -78,6 +78,8 @@ public:
             // Substitutional: Scan fluor marks only in the estimated position (region) with high likelihood (99.51% up). (*)
             cover_size.width = std::max(high_P_cover_size.width, basic_cover_size.width);
             cover_size.height = std::max(high_P_cover_size.height, basic_cover_size.height);
+            cover_size.width = std::ceil(cover_size.width);
+            cover_size.height = std::ceil(cover_size.height);
         }else{
             // Original: Scan fluor marks in all possible position (region).
             cover_size = cv::Size2d(image.cols - x1 + x0, image.rows - y1 + y0);
@@ -136,7 +138,7 @@ public:
         cv::Point2d bias;
         if(regulation){
             // Substitutional: Bias correction testing for no adjustment case & high precision case (estimated position (region (95.6% up))).
-            cv::Point rel_max_score_p, abs_rel_max_score_p;
+            cv::Point2d rel_max_score_p, abs_rel_max_score_p;
             cv::Size2d regulation_cover_radius;
             rel_max_score_p.x = max_score_p.x - cover_center.x;
             rel_max_score_p.y = max_score_p.y - cover_center.y;
