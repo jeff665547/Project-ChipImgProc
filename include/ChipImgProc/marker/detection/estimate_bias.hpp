@@ -42,17 +42,8 @@ public:
             (h - 1) / 2.0
         );
         auto rot_mat = cv::getRotationMatrix2D(templ_center, angle, 1.0);
-        // std::cout << rot_mat << '\n';
         templ = warp_affine_u8(templ, rot_mat, {w, h});
         mask = warp_affine_u8(mask, rot_mat, {w, h});
-        // cv::imwrite("templ.tiff", templ);
-        // cv::imwrite("mask.tiff", mask);
-        // cv::imwrite("image.tiff", image);
-        // {
-        //     cv::Mat tmp(score_matrix.size(), CV_8U);
-        //     score_matrix.convertTo(tmp, CV_8U, 255);
-        //     cv::imwrite("score.tiff", tmp);
-        // }
 
         int x0, y0, x1, y1;
         cv::Size2d cover_size;        
@@ -89,35 +80,38 @@ public:
             scores.create(local_cover_size, cv::Mat1f().type());
             scores = cv::Scalar(0);
             // Substitutional: Substitutional cover center (for match_template score domain) (*)
-            cv::Point2f origin;
+            cv::Point2f center;
+            cv::Mat cover;
+            // cv::Mat score;
             for (auto&& h : hints) {
-                origin.x = h.x - cover_center.x;
-                origin.y = h.y - cover_center.y;
-                auto cover(image(cv::Rect(origin.x, origin.y, cover_size.width, cover_size.height)));
-                cv::Mat tmp = chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
-                cv::Mat tmp2(tmp.size(), CV_8U);
-                tmp.convertTo(tmp2, CV_8U, 255);
-                // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp2);
-                scores += tmp;
-                // scores += chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
+                center.x = h.x - templ_center.x;
+                center.y = h.y - templ_center.y;
+                cv::getRectSubPix(image, cover_size, center, cover);
+                // score = chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
+                // cv::Mat tmp(score.size(), CV_8U);
+                // score.convertTo(tmp, CV_8U, 255);
+                // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp);
+                // scores += score;
+                scores += chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
             }
         }
         else {
             // Original: Original cover center (for match_template score domain) (*)
             auto score_matrix = chipimgproc::match_template(image, templ, cv::TM_CCORR_NORMED, mask);
             cv::Point2f center;
+
             scores.create(cover_size, cv::Mat1f().type());
             scores = cv::Scalar(0);
             for(auto&& h : hints) {
                 center.x = h.x - x0 - templ_center.x + cover_center.x;
                 center.y = h.y - y0 - templ_center.y + cover_center.y;
-                cv::Mat tmp;
 
+                cv::Mat score;
                 cv::getRectSubPix(score_matrix, cover_size, center, tmp);
-                cv::Mat tmp2(tmp.size(), CV_8U);
-                tmp.convertTo(tmp2, CV_8U, 255);
-                // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp2);
-                scores += tmp;
+                // cv::Mat tmp(score.size(), CV_8U);
+                // score.convertTo(tmp, CV_8U, 255);
+                // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp);
+                scores += score;
             }
         }
         // cv::imwrite("score.tiff", scores);
