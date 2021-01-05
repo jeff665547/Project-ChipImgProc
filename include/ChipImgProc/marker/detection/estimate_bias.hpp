@@ -107,7 +107,7 @@ public:
                 center.y = h.y - y0 - templ_center.y + cover_center.y;
 
                 cv::Mat score;
-                cv::getRectSubPix(score_matrix, cover_size, center, tmp);
+                cv::getRectSubPix(score_matrix, cover_size, center, score);
                 // cv::Mat tmp(score.size(), CV_8U);
                 // score.convertTo(tmp, CV_8U, 255);
                 // cv::imwrite("score-" + std::to_string(h.x) + "-" + std::to_string(h.y) + ".tiff", tmp);
