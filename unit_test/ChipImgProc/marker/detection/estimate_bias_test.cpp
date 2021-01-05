@@ -67,12 +67,12 @@ TEST(estimate_bias_test, simultaion_shift) {
         ));
     }
 
-
+    
+    cv::Size2d tmp1(7.74 * 14.3, 7.74 * 14.3), tmp2(2.3 * green_templ.cols, 2.3 * green_templ.rows);
     auto [bias, score] = chipimgproc::marker::detection::estimate_bias(
-        green_img, green_templ, green_mask, aruco_mk_pos, 0.42558601126675694, false,
-        cv::Size2d(7.74 * 14.3, 7.74 * 14.3), cv::Size2d(2.3 * green_templ.cols, 2.3 * green_templ.rows), 
-        false, cv::Size2d(0.0, 0.0)
-    );
+            green_img, green_templ, green_mask, aruco_mk_pos, 0.42558601126675694, false,
+            std::ceil(std::max(tmp1, tmp2)), false, cv::Size2d(0.0, 0.0)
+        );
     std::cout << bias << std::endl;
     EXPECT_LT(std::abs(bias.x + 50), 3);
     EXPECT_LT(std::abs(bias.y + 60), 3);
