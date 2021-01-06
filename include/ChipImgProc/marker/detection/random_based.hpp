@@ -114,25 +114,24 @@ public:
         
         for (auto i = 0; i != nms_count_; ++i) {
             // pixel-level roughly search
-            // std::cout << i + 1 << " / " << nms_count_ << '\n';
             cv::Point loc;
-            // double tmp_score;
-            // cv::minMaxLoc(match1, nullptr, &tmp_score, nullptr, &loc);
-            cv::minMaxLoc(match1, nullptr, nullptr, nullptr, &loc);
-            // std::cout << "roughly search: score=" << tmp_score << ", loc=(" << loc.x << "," << loc.y << ")\n";
+            double score;
+            cv::minMaxLoc(match1, nullptr, &score, nullptr, &loc);
+            log.debug("[RANDOM_BASED] #{}: roughly-search(score, loc.x, loc.y)", i, score, loc.x, loc.y);
             cv::circle(match1, loc, nms_radius_, 0, -1);
 
             // pixel-level finely search
-            double score;
             {
                 auto x = loc.x * s_;
                 auto y = loc.y * s_;
                 auto h = templ_.rows + (2 * s_);
                 auto w = templ_.cols + (2 * s_);
                 if (x + w >= image.cols || y + h >= image.rows) {
-                    log.warn(   "**************************************\n"
+                    log.warn(   "{}:{}\n"
+                                "**************************************\n"
                                 "Rect range out of image size. Continue\n"
-                                "**************************************\n");
+                                "**************************************\n", 
+                                __FILE__, __LINE__);
                     continue;
                 }
                 auto patch = image(cv::Rect(x, y, w, h));
@@ -140,7 +139,7 @@ public:
 
                 cv::Point dxy;
                 cv::minMaxLoc(match2, nullptr, &score, nullptr, &dxy);
-                // std::cout << "finely search: score=" << score << ", loc=(" << dxy.x << "," << dxy.y << "), glo_loc=(" << dxy.x + x << "," << dxy.y + y << ")\n";
+                log.debug("[RANDOM_BASED] #{}: finely-search(score, loc.x, loc.y)", i, score, loc.x, loc.y);
                 locations.push_back(cv::Point(dxy.x + x, dxy.y + y));
 
                 // filter bad identifications out
@@ -171,7 +170,6 @@ public:
             // decoding
             auto [index, distance] = derived()->identify(view, anchors, FWD(identify_args)...);
 
-            // std::cout << "index: " << index << "\t distance: " << distance << '\n';
             // set new template and anchors for decoding
             if( index >= 0) {
                 best_score = score;
@@ -188,7 +186,6 @@ public:
         std::vector<std::tuple<int, double, cv::Point2d>> results;
         auto h = new_templ.rows;
         auto w = new_templ.cols;
-        // auto i(0);
         for(auto&& [x, y] : locations) {
     
             // subpixel-level search
