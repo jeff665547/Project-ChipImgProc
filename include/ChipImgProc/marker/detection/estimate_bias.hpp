@@ -120,11 +120,13 @@ public:
         cv::minMaxLoc(scores, nullptr, nullptr, nullptr, &max_score_p);
 
         // Sub-pixel position bias estimated by Gaussian function
-        auto cover = scores(cv::Rect(
-            max_score_p.x - 1,
-            max_score_p.y - 1,
-            3, 3
-        ));
+        // auto cover = scores(cv::Rect(
+        //     max_score_p.x - 1,
+        //     max_score_p.y - 1,
+        //     3, 3
+        // ));
+        cv::Mat cover;
+        cv::getRectSubPix(scores, cv::Size2d(3.0, 3.0), max_score_p, cover);
         std::vector<double> zx(3);
         std::vector<double> zy(3);
 
