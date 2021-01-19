@@ -50,14 +50,14 @@ struct MakeStatMat {
         int swin_h_px = std::round(swin_h * um2px_r);
         int clw_px    = std::round(clw * um2px_r);
         int clh_px    = std::round(clh * um2px_r);
-        auto tmp_timer(std::chrono::steady_clock::now());
-        std::chrono::duration<double, std::milli> d;
+        // auto tmp_timer(std::chrono::steady_clock::now());
+        // std::chrono::duration<double, std::milli> d;
         auto [mean, sd] = make_large_cv_mat(mat, swin_w_px, swin_h_px);
         cv::Mat cv = sd / mean;
-        d = std::chrono::steady_clock::now() - tmp_timer;
-        std::cout << "make_large_cv_mat: " << d.count() << " ms\n";
+        // d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "make_large_cv_mat: " << d.count() << " ms\n";
 
-        tmp_timer = std::chrono::steady_clock::now();
+        // tmp_timer = std::chrono::steady_clock::now();
         auto lmask = make_large_mask(
             {
                 static_cast<int>(std::round(origin.x)), 
@@ -67,14 +67,13 @@ struct MakeStatMat {
             w, h, swin_w, swin_h, um2px_r, 
             clwn, clhn, warpmat, mat.size()
         );
-        cv::Mat test_img;
-        lmask.convertTo(test_img, CV_16U);
+        // cv::Mat test_img;
+        // lmask.convertTo(test_img, CV_16U);
         // cv::imwrite("large_mask.tiff", test_img);
-        d = std::chrono::steady_clock::now() - tmp_timer;
-        std::cout << "make_large_mask: " << d.count() << " ms\n";
+        // d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "make_large_mask: " << d.count() << " ms\n";
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());
         cv::connectedComponents(lmask, mask_cell_label);
-
         {
             cv::Mat comp_img;
             mask_cell_label.convertTo(comp_img, CV_16U);
