@@ -94,6 +94,7 @@ struct Margin {
             auto tmp = auto_min_cv(
                 *param.tiled_mat, 
                 param.seg_rate,
+                param.basic_margin_rate, 
                 param.replace_tile,
                 param.v_result
             );

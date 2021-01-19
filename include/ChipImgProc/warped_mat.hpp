@@ -110,6 +110,8 @@ constexpr struct MakeWarpedMat {
         double um2px_r,
         int clwn,   int clhn
     ) const {
+        auto tmp_timer(std::chrono::steady_clock::now());
+        std::chrono::duration<double, std::milli> d;
         warped_mat::MakeStatMat<float> make_stat_mat;
         auto [stat_mats, warped_mask] = make_stat_mat(
             mat, origin, 
@@ -121,6 +123,8 @@ constexpr struct MakeWarpedMat {
             clwn,   clhn,
             warp_mat
         );
+        d = std::chrono::steady_clock::now() - tmp_timer;
+        std::cout << "make_stat_mat: " << d.count() << " ms\n";
         return WarpedMat<true, float>(
             warp_mat, mat, 
             w, h,

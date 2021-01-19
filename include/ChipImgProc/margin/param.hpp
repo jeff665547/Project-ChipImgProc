@@ -37,6 +37,8 @@ struct Param {
      */
     float                   seg_rate       ;
 
+    float basic_margin_rate;
+
     /**
      * @brief    a pointer to the TiledMat<GLID> structure, which stores the data
      *           related to the gridding results and parameters.

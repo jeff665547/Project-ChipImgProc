@@ -46,6 +46,7 @@ struct Mats
     , cv    (cv::Mat_<FLOAT>::zeros(rows, cols))
     , bg    (cv::Mat_<FLOAT>::zeros(rows, cols))
     , num   (cv::Mat_<std::uint32_t>::zeros(rows, cols))
+    , min_cv_pos(cv::Mat_<cv::Point2d>::zeros(rows, cols))
     {}
 
     /**
@@ -98,6 +99,11 @@ struct Mats
      * @brief a matrix of pixel numbers for a cell summarization
      */
     cv::Mat_<std::uint32_t> num;
+
+    /**
+     * @brief a matrix of position of min-cv
+     **/
+    cv::Mat_<cv::Point2d> min_cv_pos;
 };
 
 }

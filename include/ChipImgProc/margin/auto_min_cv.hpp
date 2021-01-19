@@ -83,6 +83,7 @@ struct AutoMinCV
     auto operator()( 
           TiledMat<GLID>&           tiled_src
         , float                     seg_rate
+        , float                     basic_margin_rate   = 0.17
         , bool                      tile_replace        = true
         , const std::function<
             void(const cv::Mat&)
@@ -91,7 +92,6 @@ struct AutoMinCV
     {
         stat::Mats<FLOAT> res(rows(tiled_src), cols(tiled_src));
         auto& tiles = tiled_src.get_tiles();
-        float basic_margin_rate = 0.17;
         for( int y = 0; y < rows(tiled_src); y ++ ) {
             for ( int x = 0; x < cols(tiled_src); x ++ ) {
                 auto t = tiled_src.tile_at(y, x);

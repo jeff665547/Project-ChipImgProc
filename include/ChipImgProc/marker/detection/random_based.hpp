@@ -117,7 +117,7 @@ public:
             cv::Point loc;
             double score;
             cv::minMaxLoc(match1, nullptr, &score, nullptr, &loc);
-            log.debug("[RANDOM_BASED] #{}: roughly-search(score, loc.x, loc.y)", i, score, loc.x, loc.y);
+            log.debug("[Random_Based] #{}: roughly-search({}, {}, {})", i, score, loc.x, loc.y);
             cv::circle(match1, loc, nms_radius_, 0, -1);
 
             // pixel-level finely search
@@ -139,7 +139,7 @@ public:
 
                 cv::Point dxy;
                 cv::minMaxLoc(match2, nullptr, &score, nullptr, &dxy);
-                log.debug("[RANDOM_BASED] #{}: finely-search(score, loc.x, loc.y)", i, score, loc.x, loc.y);
+                log.debug("[Random_Based] #{}: finely-search({}, {}, {})", i, score, loc.x, loc.y);
                 locations.push_back(cv::Point(dxy.x + x, dxy.y + y));
 
                 // filter bad identifications out
