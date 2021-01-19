@@ -172,6 +172,7 @@ int main()
         //  Set the parameters for feature extraction. 0.6 is the segmentation rate.
         chipimgproc::margin::Param<> feature_extraction_param { 
             0.6, 
+            0.17, 
             &tile_matrix,
             true, 
             nullptr

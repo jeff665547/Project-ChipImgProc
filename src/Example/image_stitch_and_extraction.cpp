@@ -311,6 +311,7 @@ int main( int argc, char** argv )
         //  Set the parameters for feature extraction
         chipimgproc::margin::Param<> feature_extraction_param { 
             0.6,            //  Segmentation rate
+            0.17,           //  basic_margin_rate
             &tile_matrix,
             true,           //  Tile replacement
             nullptr

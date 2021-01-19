@@ -83,7 +83,7 @@ TEST(multi_tiled_mat, basic_test) {
         // Prepare margin parameter, we set segment rate=0.6 and 
         // replace the tile rectangle after margin.
         chipimgproc::margin::Param<> margin_param { 
-            0.6, &tiled_mat, true, nullptr
+            0.6, 0.17, &tiled_mat, true, nullptr
         };
 
         // Call margin use auto minimum CV search algorithm.

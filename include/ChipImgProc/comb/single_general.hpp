@@ -416,6 +416,7 @@ struct SingleGeneral {
                                 margin_method_,
                                 margin::Param<GLID> {
                                     seg_rate_, 
+                                    0.17, 
                                     &tiled_mat,
                                     disable_bg_fix_, 
                                     v_margin_res_
@@ -451,6 +452,7 @@ struct SingleGeneral {
                     margin_method_,
                     margin::Param<GLID> {
                         seg_rate_, 
+                        0.17, 
                         &tiled_mat,
                         true,
                         v_margin_res_
