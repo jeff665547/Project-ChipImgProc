@@ -2,7 +2,7 @@
 #include <ChipImgProc/utils.h>
 #include <cmath>
 namespace chipimgproc::rotation {
-struct FromWarpMat {
+struct RotDegfromWarp {
     double operator()(cv::Mat warp_mat) const {
         double res;
         typed_mat(warp_mat, [&res](auto&& mat){
@@ -12,7 +12,17 @@ struct FromWarpMat {
         return res;
     }
 };
+constexpr RotDegfromWarp rot_deg_from_warp;
 
-constexpr FromWarpMat from_warp_mat;
+struct SlopefromWarp {
+    double operator()(cv::Mat warp_mat) const {
+        double res;
+        typed_mat(warp_mat, [&res](auto&& mat){
+            res = mat(1, 0) / mat(0, 0);
+        });
+        return res;
+    }
+};
+constexpr SlopefromWarp slope_from_warp;
 
 } // namespace chipimgproc::rotation

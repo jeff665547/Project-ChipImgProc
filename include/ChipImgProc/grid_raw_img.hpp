@@ -8,6 +8,7 @@
 #include <ChipImgProc/utils.h>
 #include <Nucleona/range.hpp>
 #include <iostream>
+#include <type_traits>
 namespace chipimgproc{
 /**
  * @brief Type for storing rotated grid raw image.
@@ -16,6 +17,7 @@ namespace chipimgproc{
  */
 template<class GLID = std::uint16_t>
 struct GridRawImg {
+    bool is_float {std::is_floating_point<GLID>::value};
     /**
      * @brief Create empty GridRawImg.
      * 
@@ -46,11 +48,21 @@ struct GridRawImg {
     {
         gl_x_.reserve(glx.size());
         gl_y_.reserve(gly.size());
-        for(auto&& x : glx) {
-            gl_x_.push_back(static_cast<GLID>(std::round(x)));
-        }
-        for(auto&& y : gly) {
-            gl_y_.push_back(static_cast<GLID>(std::round(y)));
+        if (this->is_float)
+        {
+            for(auto&& x : glx) {
+                gl_x_.push_back(static_cast<GLID>(x));
+            }
+            for(auto&& y : gly) {
+                gl_y_.push_back(static_cast<GLID>(y));
+            }
+        } else {
+            for(auto&& x : glx) {
+                gl_x_.push_back(static_cast<GLID>(std::round(x)));
+            }
+            for(auto&& y : gly) {
+                gl_y_.push_back(static_cast<GLID>(std::round(y)));
+            }
         }
     }
     
@@ -130,11 +142,21 @@ struct GridRawImg {
      * @return GridRawImg the region identified.
      */
     GridRawImg  get_roi(const cv::Rect& r) const {
-        cv::Rect raw_rect(
-            gl_x_.at(r.x), gl_y_.at(r.y),
-            gl_x_.at(r.x + r.width ) - gl_x_.at(r.x),
-            gl_y_.at(r.y + r.height) - gl_y_.at(r.y)
-        );
+        cv::Rect raw_rect;
+
+        if (this->is_float)
+        {
+            raw_rect.x = std::floor(gl_x_.at(r.x));
+            raw_rect.y = std::floor(gl_y_.at(r.y));
+            raw_rect.width  = std::ceil(gl_x_.at(r.x + r.width )) - std::floor(gl_x_.at(r.x));
+            raw_rect.height = std::ceil(gl_y_.at(r.y + r.height)) - std::floor(gl_y_.at(r.y));
+        } else {
+            raw_rect.x = gl_x_.at(r.x);
+            raw_rect.y = gl_y_.at(r.y);
+            raw_rect.width  = gl_x_.at(r.x + r.width ) - gl_x_.at(r.x);
+            raw_rect.height = gl_y_.at(r.y + r.height) - gl_y_.at(r.y);
+        }
+
         // std::cerr
         // << "r = "
         // << r.x << ", "

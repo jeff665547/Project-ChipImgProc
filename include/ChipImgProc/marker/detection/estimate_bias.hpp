@@ -199,7 +199,7 @@ public:
         }
         std::vector<cv::Point2d> hints_dst(hints_rum.size());
         cv::transform(hints_rum, hints_dst, warp_mat);
-        auto angle = rotation::from_warp_mat(warp_mat);
+        auto angle = rotation::rot_deg_from_warp(warp_mat);
         
         // Use different estimate cover and regulation for different scan mode.
         cv::Size2d regulation_cover_size;
