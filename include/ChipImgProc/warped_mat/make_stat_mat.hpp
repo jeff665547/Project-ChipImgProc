@@ -101,7 +101,7 @@ struct MakeStatMat {
             }),
             origin, clwd, clhd, w, h
         );
-        ObjMat<cv::Mat, std::uint32_t> warped_mask(clhn, clwn);
+        ObjMat<cv::Mat, std::int32_t> warped_mask(clhn, clwn);
         stat::Mats<Float> stat_mats(clhn, clwn);
         auto cell = warped_agg_mat.make_at_result();
         std::vector<decltype(cell)> mats;
@@ -142,6 +142,8 @@ struct MakeStatMat {
 
                 ip_convert(sum_mask, CV_32F, 1.0 / 255);
                 warped_mask     (i, j)  = sum_mask;
+
+                mats.clear();
             }
         }
         return nucleona::make_tuple(std::move(stat_mats), std::move(warped_mask));

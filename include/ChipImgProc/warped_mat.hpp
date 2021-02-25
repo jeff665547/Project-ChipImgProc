@@ -66,7 +66,7 @@ private:
 };
 
 constexpr struct MakeWarpedMat {
-    using CellMasks = ObjMat<cv::Mat, std::uint32_t>;
+    using CellMasks = ObjMat<cv::Mat, std::int32_t>;
     template<class Float>
     auto operator()(
         cv::Mat                 warp_mat,
