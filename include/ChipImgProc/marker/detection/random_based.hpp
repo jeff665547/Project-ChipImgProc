@@ -223,8 +223,8 @@ public:
         std::sort(results.begin(), results.end(), [](auto&& r0, auto&& r1){
             auto&& [i0, s0, c0] = r0;
             auto&& [i1, s1, c1] = r1;
-            if(i0 != i1) return i0 < i1;
-            if(s0 != s1) return s0 < s1;
+            if(i0 != i1) return i0 > i1;
+            if(s0 != s1) return s0 > s1;
             return false;
         });
 

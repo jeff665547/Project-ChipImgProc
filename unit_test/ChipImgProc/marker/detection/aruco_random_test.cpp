@@ -15,11 +15,11 @@ TEST(aruco_reg_mat, basic_test) {
 
     // set sample input image path
     auto img0_path = nucleona::test::data_dir() / "aruco_test_img-0.tiff"; // in focus
-    // auto img1_path = nucleona::test::data_dir() / "aruco_test_img-1.tiff"; // out of focus
+    auto img1_path = nucleona::test::data_dir() / "aruco_test_img-1.tiff"; // out of focus
     
     // load test images
     auto img0 = cv::imread(img0_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
-    // auto img1 = cv::imread(img1_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
+    auto img1 = cv::imread(img1_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
 
     // Set candidate marker id list.
     // We hard code the Banff ArUco marker ids in this example.
@@ -70,24 +70,73 @@ TEST(aruco_reg_mat, basic_test) {
         0.75
     ));
 
+    {
+        // Call the detector
+        // Now we detect markers in pixel domain, so the matrix unit we use PX
+        std::cout << img0_path << std::endl;
+        auto mk_regs = detector(
+            static_cast<cv::Mat_<std::uint8_t>&>(img0), 
+            aruco_ids_in_image
+        );
 
-    // Call the detector
-    // Now we detect markers in pixel domain, so the matrix unit we use PX
-    auto mk_regs = detector(
-        static_cast<cv::Mat_<std::uint8_t>&>(img0), 
-        aruco_ids_in_image
-    );
+        // Print the marker region location
+        // Each output row is 
+        // (marker location)[marker height/width](marker point id)
+        std::vector<cv::Point> pos;
+        for(auto [mid, score, loc] : mk_regs) {
+            std::cout << loc << std::endl;
+            pos.push_back(loc);
+        }
 
-    // Print the marker region location
-    // Each output row is 
-    // (marker location)[marker height/width](marker point id)
-    std::vector<cv::Point> pos;
-    for(auto [mid, score, loc] : mk_regs) {
-        std::cout << loc << std::endl;
-        pos.push_back(loc);
+        auto top = std::distance(
+            mk_regs.begin()
+            , std::find_if(mk_regs.begin(), mk_regs.end(), [](auto&& tuple) {
+                return std::get<0>(tuple) == -1;
+            })
+        );
+
+        std::cout << top << " ArUco markers were identified" << std::endl;
+        
+        for( auto& tuple : mk_regs ){
+            std::cout << std::get<0>(tuple) << "\t" << std::get<1>(tuple) << std::endl;
+        }
+        cv::imwrite("img0.tiff", chipimgproc::marker::view(img0, pos, 0));
+        // Due to the image quality variant, it may not detect all markers
+        // For image gridding process, it should detect 2 marker in deferent column and row at least.
     }
-    cv::imwrite("view.tiff", chipimgproc::marker::view(img0, pos, 0));
-    // Due to the image quality variant, it may not detect all markers
-    // For image gridding process, it should detect 2 marker in deferent column and row at least.
+    {
+        // Call the detector
+        // Now we detect markers in pixel domain, so the matrix unit we use PX
+        std::cout << img1_path << std::endl;
+        auto mk_regs = detector(
+            static_cast<cv::Mat_<std::uint8_t>&>(img1), 
+            aruco_ids_in_image
+        );
+    
+        // Print the marker region location
+        // Each output row is 
+        // (marker location)[marker height/width](marker point id)
+        std::vector<cv::Point> pos;
+        for(auto [mid, score, loc] : mk_regs) {
+            std::cout << loc << std::endl;
+            pos.push_back(loc);
+        }
+    
+        auto top = std::distance(
+            mk_regs.begin()
+            , std::find_if(mk_regs.begin(), mk_regs.end(), [](auto&& tuple) {
+                return std::get<0>(tuple) == -1;
+            })
+        );
+    
+        std::cout << top << " ArUco markers were identified" << std::endl;
+
+        for( auto& tuple : mk_regs ){
+            std::cout << std::get<0>(tuple) << "\t" << std::get<1>(tuple) << std::endl;
+        }
+        cv::imwrite("img1.tiff", chipimgproc::marker::view(img1, pos, 0));
+        // Due to the image quality variant, it may not detect all markers
+        // For image gridding process, it should detect 2 marker in deferent column and row at least.
+    }
 }
 /// [usage]
