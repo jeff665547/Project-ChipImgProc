@@ -6,6 +6,11 @@
 #include "basic.hpp"
 #include <ChipImgProc/stat/mats.hpp>
 #include <ChipImgProc/obj_mat.hpp>
+#include <opencv2/core/ocl.hpp>
+#include <opencv2/gapi.hpp>
+#include <opencv2/gapi/core.hpp>
+#include <opencv2/gapi/imgproc.hpp>
+#include <opencv2/gapi/gpu/imgproc.hpp>
 
 namespace chipimgproc::warped_mat {
 
@@ -50,14 +55,14 @@ struct MakeStatMat {
         int swin_h_px = std::round(swin_h * um2px_r);
         int clw_px    = std::round(clw * um2px_r);
         int clh_px    = std::round(clh * um2px_r);
-        // auto tmp_timer(std::chrono::steady_clock::now());
-        // std::chrono::duration<double, std::milli> d;
+        auto tmp_timer(std::chrono::steady_clock::now());
+        std::chrono::duration<double, std::milli> d;
         auto [mean, sd] = make_large_cv_mat(mat, swin_w_px, swin_h_px);
         cv::Mat cv = sd / mean;
-        // d = std::chrono::steady_clock::now() - tmp_timer;
-        // std::cout << "make_large_cv_mat: " << d.count() << " ms\n";
+        d = std::chrono::steady_clock::now() - tmp_timer;
+        std::cout << "make_large_cv_mat: " << d.count() << " ms\n";
 
-        // tmp_timer = std::chrono::steady_clock::now();
+        tmp_timer = std::chrono::steady_clock::now();
         auto lmask = make_large_mask(
             {
                 static_cast<int>(std::round(origin.x)), 
@@ -70,8 +75,8 @@ struct MakeStatMat {
         // cv::Mat test_img;
         // lmask.convertTo(test_img, CV_16U);
         // cv::imwrite("large_mask.tiff", test_img);
-        // d = std::chrono::steady_clock::now() - tmp_timer;
-        // std::cout << "make_large_mask: " << d.count() << " ms\n";
+        d = std::chrono::steady_clock::now() - tmp_timer;
+        std::cout << "make_large_mask: " << d.count() << " ms\n";
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());
         cv::connectedComponents(lmask, mask_cell_label);
         {
@@ -155,17 +160,32 @@ private:
     auto make_large_cv_mat(
         cv::Mat mat, int conv_w, int conv_h
     ) const {
-        auto x_mean = mean(mat, conv_w, conv_h);
-        auto x_mean_2 = x_mean.mul(x_mean);
-        auto x_2 = mat.mul(mat);
-        auto x_2_mean = mean(x_2, conv_w, conv_h);
-        cv::Mat var = x_2_mean - x_mean_2;
-        cv::Mat sd(var.size(), var.type());
-        cv::sqrt(var, sd);
-        return nucleona::make_tuple(
-            std::move(x_mean),
-            std::move(sd)
-        );
+        cv::Mat kern(conv_h, conv_w, type_to_depth<Float>());
+        kern.setTo(1.0 / (conv_w * conv_h));
+
+        cv::GMat g_in;
+        auto g_x_mean = cv::gapi::filter2D(g_in, type_to_depth<Float>(), kern);
+        auto g_x_mean_2 = cv::gapi::mul(g_x_mean, g_x_mean);
+        auto g_x_2 = cv::gapi::mul(g_in, g_in);
+        auto g_x_2_mean = cv::gapi::filter2D(g_x_2, type_to_depth<Float>(), kern);
+        auto g_var = cv::gapi::sub(g_x_2_mean, g_x_mean_2);
+        auto g_sd = cv::gapi::sqrt(g_var);
+        cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_x_mean, g_sd));
+
+        cv::Mat x_mean, sd;
+        computation.apply(cv::gin(mat), cv::gout(x_mean, sd)/*, cv::compile_args(cv::gapi::imgproc::gpu::kernels())*/);
+        return nucleona::make_tuple(std::move(x_mean), std::move(sd));
+        // auto x_mean = mean(mat, conv_w, conv_h);
+        // auto x_mean_2 = x_mean.mul(x_mean);
+        // auto x_2 = mat.mul(mat);
+        // auto x_2_mean = mean(x_2, conv_w, conv_h);
+        // cv::Mat var = x_2_mean - x_mean_2;
+        // cv::Mat sd(var.size(), var.type());
+        // cv::sqrt(var, sd);
+        // return nucleona::make_tuple(
+        //     std::move(x_mean),
+        //     std::move(sd)
+        // );
     }
     auto mean(
         cv::Mat mat, int conv_w, int conv_h
