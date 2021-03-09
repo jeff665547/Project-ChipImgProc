@@ -6,8 +6,6 @@
 #include "basic.hpp"
 #include <ChipImgProc/stat/mats.hpp>
 #include <ChipImgProc/obj_mat.hpp>
-#include <opencv2/core/ocl.hpp>
-#include <opencv2/gapi.hpp>
 #include <opencv2/gapi/core.hpp>
 #include <opencv2/gapi/imgproc.hpp>
 #include <opencv2/gapi/gpu/imgproc.hpp>
@@ -173,7 +171,7 @@ private:
         cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_x_mean, g_sd));
 
         cv::Mat x_mean, sd;
-        computation.apply(cv::gin(mat), cv::gout(x_mean, sd)/*, cv::compile_args(cv::gapi::imgproc::gpu::kernels())*/);
+        computation.apply(cv::gin(mat), cv::gout(x_mean, sd), cv::compile_args(cv::gapi::imgproc::gpu::kernels()));
         return nucleona::make_tuple(std::move(x_mean), std::move(sd));
         // auto x_mean = mean(mat, conv_w, conv_h);
         // auto x_mean_2 = x_mean.mul(x_mean);
