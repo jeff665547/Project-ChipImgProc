@@ -154,6 +154,14 @@ public:
         };
     }
     
+    void set_wh_img_preprocessor(void) {
+        img_preprocessor_ = [](const cvMat8& mat) -> cvMat8 {
+            cvMat8 img;
+            img = cv::max(mat, cv::mean(mat)[0]);
+            return img;
+        };
+    }
+
     std::vector<
         std::tuple<cv::Point, double, cv::Point2d>
     > operator() (
@@ -196,17 +204,25 @@ public:
             double score;
             cv::Point2d mk_loc_center;
             {
-                auto x = loc.x * s_;
-                auto y = loc.y * s_;
-                auto h = templ_.rows + (2 * s_);
+                double map_buffer_r = 2.0; // 1.0 stands for no buffer area.
                 auto w = templ_.cols + (2 * s_);
+                auto h = templ_.rows + (2 * s_);
+                auto x = loc.x * s_ - std::round((map_buffer_r / 2 - 0.5) * w);
+                auto y = loc.y * s_ - std::round((map_buffer_r / 2 - 0.5) * h);
+
                 cvMat8 patch;
-                if (x + w >= target.cols || y + h >= target.rows) {
-                    log.warn("cv::Rect out of subarea range. Use the bilinear interpolation version ROI.");
-                    cv::Point2d center(x + (w - 1) / 2.0, y + (h - 1) / 2.0);
-                    cv::getRectSubPix(target, cv::Size2d(w, h), center, patch);
+                bool top_out, bottom_out, left_out, right_out;
+                left_out   = mk_r.x + x < 0;
+                top_out    = mk_r.y + y < 0;
+                right_out  = mk_r.x + x + map_buffer_r * w >= image.cols;
+                bottom_out = mk_r.y + y + map_buffer_r * h >= image.rows;
+                if (top_out || bottom_out || left_out || right_out) {
+                    log.warn("ROI out of image range. Use the bilinear interpolation version ROI.");
+                    cv::Point2d center(mk_r.x + x + (map_buffer_r * w - 1) / 2.0, mk_r.y + y + (map_buffer_r * h - 1) / 2.0);
+                    cv::getRectSubPix(image, cv::Size2d(map_buffer_r * w, map_buffer_r * h), center, patch);
+                } else {
+                    patch = image(cv::Rect(mk_r.x + x, mk_r.y + y, map_buffer_r * w, map_buffer_r * h));
                 }
-                patch = target(cv::Rect(x, y, w, h));
 
                 auto match2 = cm::match_template(patch, templ_, method_, mask_);
 
@@ -214,8 +230,7 @@ public:
                 cv::minMaxLoc(match2, nullptr, &score, nullptr, &dxy);
                 h = templ_.rows;
                 w = templ_.cols;
-                mk_loc_center = cv::Point2d(mk_r.x + dxy.x + x + ((w - 1) / 2.0), mk_r.y + dxy.y + y + ((h - 1) / 2.0));
-                cv::getRectSubPix(target, cv::Size2d(w, h), mk_loc_center, patch);
+                mk_loc_center = cv::Point2d(mk_r.x + x + dxy.x + ((w - 1) / 2.0), mk_r.y + y + dxy.y + ((h - 1) / 2.0));
 
                 // std::cout << "(" << mk_loc_center.x << ", " << mk_loc_center.y << ")" << std::endl;
             }

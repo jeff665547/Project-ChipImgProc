@@ -606,6 +606,41 @@ public:
         return mk_layout;
     }
     /**
+     * @brief Make marker layout from partial information (without marker pattern and marker mask image).
+     * 
+     * @param cell_r_um     Cell height in micron.
+     * @param cell_c_um     Cell width in micron.
+     * @param border_um     Border size between cell in micron.
+     * @param rows          Marker layout contained row number of markers.
+     * @param cols          Marker layout contained col number of markers.
+     * @param invl_x_cl     Marker interval along X direction in cell level. 
+     * @param invl_y_cl     Marker interval along Y direction in cell level. 
+     * @param um2px_r       Micron to pixel rate.
+     * @return auto 
+     */
+    auto operator()(
+        float cell_r_um,
+        float cell_c_um,
+        float border_um,
+        int rows, 
+        int cols,
+        std::uint32_t invl_x_cl, 
+        std::uint32_t invl_y_cl,
+        float um2px_r
+    ) const {
+        marker::Layout mk_layout;
+        std::uint32_t invl_x_px = std::round(invl_x_cl * (cell_c_um + border_um) * um2px_r); // can get this value from micron to pixel
+        std::uint32_t invl_y_px = std::round(invl_y_cl * (cell_r_um + border_um) * um2px_r);
+        std::uint32_t border_px = std::ceil(border_um * um2px_r);
+        mk_layout.set_reg_mat_dist(
+            rows, cols, {0,0},
+            invl_x_cl, invl_y_cl,
+            invl_x_px, invl_y_px,
+            border_px
+        );
+        return mk_layout;
+    }    
+    /**
      * @brief Set marker layout by given new marker and um to pixel rate.
      * 
      * @param mks_cl        New marker pattern in cell level.
