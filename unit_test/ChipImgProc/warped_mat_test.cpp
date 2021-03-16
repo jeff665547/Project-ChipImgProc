@@ -126,7 +126,8 @@ TEST(warped_mat_test, basic_test) {
         cl_hn * cl_hd_um,
         win_r,
         rescaled_um2px_r,
-        cl_wn, cl_hn
+        cl_wn, cl_hn,
+        nullptr
     );
     cv::Mat_<std::uint8_t> first_marker(10, 10);
     auto cell = warped_mat.make_at_result();
