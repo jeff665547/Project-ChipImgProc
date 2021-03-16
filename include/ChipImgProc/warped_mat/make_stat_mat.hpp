@@ -145,8 +145,8 @@ struct MakeStatMat {
                 stat_mats.min_cv_pos(i, j) = min_cv_pos;
 
                 if(v_margin){
-                    cv::Point pb_img_tl(std::ceil(subpix_cen.x - clw_px/2.0),
-                                        std::ceil(subpix_cen.y - clh_px/2.0));
+                    cv::Point pb_img_tl(std::ceil(subpix_cent.x - clw_px/2.0),
+                                        std::ceil(subpix_cent.y - clh_px/2.0));
                     cv::Point pb_swin_tl(pb_img_tl.x + min_cv_pos.x - swin_w_px/2,
                                          pb_img_tl.y + min_cv_pos.y - swin_h_px/2);
                     cv::Rect rect(pb_swin_tl.x, pb_swin_tl.y, swin_w_px, swin_h_px);
