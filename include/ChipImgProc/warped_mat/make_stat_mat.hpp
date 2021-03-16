@@ -21,8 +21,9 @@ struct MakeStatMat {
         double          um2px_r,
         int clwn,       int clhn,
         cv::Mat         warpmat,
-        ViewerCallback  v_comp = {},
-        ViewerCallback  v_mask = {}
+        ViewerCallback  v_margin = {},
+        ViewerCallback  v_comp   = {},
+        ViewerCallback  v_mask   = {}
     ) const {
         /*
             1.1 generate large cv matrix
@@ -91,6 +92,7 @@ struct MakeStatMat {
         ip_convert(sd,              CV_32F);
         ip_convert(mean,            CV_32F);
         ip_convert(cv,              CV_32F);
+        cv::Mat_<std::uint16_t> margin = mat.clone();
         auto warped_agg_mat = make_basic(warpmat, 
             std::vector<cv::Mat>({
                 mask_cell_label,
@@ -122,6 +124,8 @@ struct MakeStatMat {
                     );
                 }
                 auto label = cell.patch.at<float>(0, 0);
+                std::int32_t int_label = std::round(label);
+                auto& subpix_cent = mats.at(0).img_p;
                 auto& sub_lab     = mats.at(0).patch;
                 auto& sub_mask    = mats.at(1).patch;
                 auto& sub_cv      = mats.at(2).patch;
@@ -140,10 +144,26 @@ struct MakeStatMat {
                 stat_mats.num   (i, j)  = clh * clw;
                 stat_mats.min_cv_pos(i, j) = min_cv_pos;
 
+                if(v_margin){
+                    cv::Point pb_img_tl(std::ceil(subpix_cen.x - clw_px/2.0),
+                                        std::ceil(subpix_cen.y - clh_px/2.0));
+                    cv::Point pb_swin_tl(pb_img_tl.x + min_cv_pos.x - swin_w_px/2,
+                                         pb_img_tl.y + min_cv_pos.y - swin_h_px/2);
+                    cv::Rect rect(pb_swin_tl.x, pb_swin_tl.y, swin_w_px, swin_h_px);
+                    cv::rectangle(margin, rect, 65536/2);
+                }
+
                 ip_convert(sum_mask, CV_32F, 1.0 / 255);
                 warped_mask     (i, j)  = sum_mask;
+                mats.clear();
             }
         }
+
+        if(v_margin){
+            v_margin(margin);
+        }
+        margin.release();
+
         return nucleona::make_tuple(std::move(stat_mats), std::move(warped_mask));
     }
 private:

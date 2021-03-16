@@ -108,7 +108,8 @@ constexpr struct MakeWarpedMat {
         int w,      int h,
         int swin_w, int swin_h,
         double um2px_r,
-        int clwn,   int clhn
+        int clwn,   int clhn,
+        ViewerCallback v_margin
     ) const {
         // auto tmp_timer(std::chrono::steady_clock::now());
         // std::chrono::duration<double, std::milli> d;
@@ -121,7 +122,8 @@ constexpr struct MakeWarpedMat {
             swin_w, swin_h,
             um2px_r,
             clwn,   clhn,
-            warp_mat
+            warp_mat,
+            v_margin
         );
         // d = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "make_stat_mat: " << d.count() << " ms\n";
@@ -144,13 +146,14 @@ constexpr struct MakeWarpedMat {
         int w,      int h,
         double win_r,
         double um2px_r,
-        int clwn,   int clhn
+        int clwn,   int clhn,
+        ViewerCallback v_margin
     ) const {
         int swin_w = std::round(clw * win_r);
         int swin_h = std::round(clh * win_r);
         if(swin_w < 3 || swin_h < 3) throw std::invalid_argument("win_r too small, unable to generate proper filter");
         return operator()(warp_mat, mat, origin, clw, clh, clwd, 
-            clhd, w, h, swin_w, swin_h, um2px_r, clwn, clhn);
+            clhd, w, h, swin_w, swin_h, um2px_r, clwn, clhn, v_margin);
     }
 
 } make_warped_mat;
