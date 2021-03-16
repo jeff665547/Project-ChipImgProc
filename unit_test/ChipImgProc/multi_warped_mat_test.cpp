@@ -401,7 +401,8 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
             cl_hn * cl_hd_um,
             win_r,
             rescaled_um2px_r,
-            cl_wn, cl_hn
+            cl_wn, cl_hn,
+            nullptr
         );
         warped_mats.emplace_back(std::move(warped_mat));
     }
