@@ -13,7 +13,7 @@ struct Patch
     using sCell = stat::Cell<float>;
     Patch() = default;
     Patch(
-        stat::Cell<float>&& cell, 
+        stat::Cell<float> && cell, 
         cv::Mat           && pxs, 
         cv::Point2d       && img_p, 
         cv::Point2d       && real_p
