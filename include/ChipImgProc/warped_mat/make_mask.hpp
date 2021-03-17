@@ -41,6 +41,7 @@ struct MakeMask {
                 cv::Mat kern(conv_h_px, conv_w_px, CV_64F);
                 kern.setTo(1.0 / (conv_h_px * conv_w_px));
                 cv::Mat tmp = filter2D(wmat, kern);
+                tmp -= 254.49;
                 cv::Mat wcmat(tmp.size(), CV_8U);
                 tmp.convertTo(wcmat, CV_8U);
                 res += wcmat;
@@ -59,7 +60,7 @@ private:
         for(int i = 0; i < mat.rows; i += clhd) {
             for(int j = 0; j < mat.cols; j += clwd) {
                 cv::Rect clr(j + clwsp, i + clhsp, clw, clh);
-                mat(clr).setTo(1);
+                mat(clr).setTo(255);
             }
         }
     }

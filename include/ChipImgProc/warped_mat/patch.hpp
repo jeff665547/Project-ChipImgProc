@@ -9,11 +9,11 @@ struct RawPatch {
 };
 struct Patch 
 : public RawPatch
-, public stat::Cell<double>{
-    using sCell = stat::Cell<double>;
+, public stat::Cell<float>{
+    using sCell = stat::Cell<float>;
     Patch() = default;
     Patch(
-        stat::Cell<double>&& cell, 
+        stat::Cell<float>&& cell, 
         cv::Mat           && pxs, 
         cv::Point2d       && img_p, 
         cv::Point2d       && real_p
