@@ -61,11 +61,11 @@ struct Basic
         if(!is_include_pixel_impl(px_point, patch_size)) {
             return false;
         }
-        auto rect = make_roi_rect(patch_size, px_point);  // (*)
+        // auto rect = make_roi_rect(patch_size, px_point);  // (*)
         for(auto&& raw_image : raw_images_) {
             cv::Mat img_roi(patch_size, raw_image.type());
-            img_roi = raw_image(rect);                    // (*)
-            // cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
+            // img_roi = raw_image(rect);                    // (*)
+            cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
             res.push_back(RawPatch{img_roi, px_point, cv::Point2d(c, r)});
         }
         return true;
@@ -82,11 +82,11 @@ struct Basic
         if(!is_include_pixel_impl(px_point, patch_size)) {
             return false;
         }
-        auto rect = make_roi_rect(patch_size, px_point);  // (*)
+        // auto rect = make_roi_rect(patch_size, px_point);  // (*)
         auto& raw_image = raw_images_.at(i);
         cv::Mat img_roi(patch_size, raw_image.type());
-        img_roi = raw_image(rect);                        // (*)
-        // cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
+        // img_roi = raw_image(rect);                        // (*)
+        cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
         res = RawPatch {img_roi, px_point, cv::Point2d(c, r)};
         return true;
     }

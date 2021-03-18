@@ -5,12 +5,12 @@ namespace chipimgproc::warped_mat {
 struct MakeMask {
     cv::Mat_<std::uint8_t> operator()(
         cv::Point origin, 
-        int clw,    int clh,
-        int clwd,   int clhd,
-        int w,      int h,
-        int conv_w, int conv_h,
+        int clw,       int clh,
+        int clwd,      int clhd,
+        int w,         int h,
+        double conv_w, double conv_h,
         double um2px_r,
-        int clwn,   int clhn,
+        int clwn,      int clhn,
         cv::Mat warpmat,
         cv::Size dsize
     ) const {
