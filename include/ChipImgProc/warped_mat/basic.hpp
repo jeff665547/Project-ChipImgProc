@@ -61,9 +61,11 @@ struct Basic
         if(!is_include_pixel_impl(px_point, patch_size)) {
             return false;
         }
+        auto rect = make_roi_rect(patch_size, px_point);  // (*)
         for(auto&& raw_image : raw_images_) {
             cv::Mat img_roi(patch_size, raw_image.type());
-            cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
+            img_roi = raw_image(rect);                    // (*)
+            // cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
             res.push_back(RawPatch{img_roi, px_point, cv::Point2d(c, r)});
         }
         return true;
@@ -80,9 +82,11 @@ struct Basic
         if(!is_include_pixel_impl(px_point, patch_size)) {
             return false;
         }
+        auto rect = make_roi_rect(patch_size, px_point);  // (*)
         auto& raw_image = raw_images_.at(i);
         cv::Mat img_roi(patch_size, raw_image.type());
-        cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
+        img_roi = raw_image(rect);                        // (*)
+        // cv::getRectSubPix(raw_image, patch_size, px_point, img_roi);
         res = RawPatch {img_roi, px_point, cv::Point2d(c, r)};
         return true;
     }
@@ -118,6 +122,16 @@ private:
         // if(px_point.y >= raw_images_[0].rows) return false;
         return true;
     }
+    cv::Rect make_roi_rect(cv::Size patch_size, cv::Point2d center_subpix) const {// (*)
+        auto width = patch_size.width;                                            // (*)   
+        auto height = patch_size.height;                                          // (*)  
+        cv::Rect rect;                                                            // (*)     
+        rect.x = std::ceil(center_subpix.x - width/2.0);                          // (*)    
+        rect.y = std::ceil(center_subpix.y - height/2.0);                         // (*)     
+        rect.width = width;                                                       // (*)     
+        rect.height = height;                                                     // (*)   
+        return rect;                                                              // (*)  
+    }                                                                             // (*)    
     std::tuple<cv::Point2d, cv::Point2d> point_transform(double x, double y) const {
         std::vector<cv::Vec2d> src(1);
         std::vector<cv::Vec2d> dst(1);
