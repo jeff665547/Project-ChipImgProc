@@ -35,11 +35,11 @@ struct MinCVReducer {
 template<bool b>
 struct MinCVReducer<warped_mat::Basic<b>> {
     auto operator()(const std::vector<warped_mat::RawPatch>& data) const {
-        auto mincv_cell = stat::Cell<float>::make(data.at(0).patch);
+        auto mincv_cell = stat::Cell<double>::make(data.at(0).patch);
         std::size_t mincv_i = 0;
         for(std::size_t i = 1; i < data.size(); i ++) {
             auto& px = data.at(i).patch;
-            auto cell = stat::Cell<float>::make(px);
+            auto cell = stat::Cell<double>::make(px);
             if(cell.cv < mincv_cell.cv) {
                 mincv_cell = cell;
                 mincv_i = i;

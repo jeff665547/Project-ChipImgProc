@@ -17,7 +17,7 @@ struct MakeStatMat {
         int clw,        int clh,
         int clwd,       int clhd,
         int w,          int h,
-        double swin_w,  double swin_h,
+        int swin_w,     int swin_h,
         double          um2px_r,
         int clwn,       int clhn,
         cv::Mat         warpmat,
@@ -92,8 +92,7 @@ struct MakeStatMat {
         ip_convert(sd,              CV_32F);
         ip_convert(mean,            CV_32F);
         ip_convert(cv,              CV_32F);
-        ip_convert(mat,             CV_16U);
-        // cv::Mat_<std::uint16_t> margin = mat.clone();
+        cv::Mat_<std::uint16_t> margin = mat.clone();
         auto warped_agg_mat = make_basic(warpmat, 
             std::vector<cv::Mat>({
                 mask_cell_label,
@@ -125,16 +124,14 @@ struct MakeStatMat {
                     );
                 }
                 auto label = cell.patch.at<float>(0, 0);
+                std::int32_t int_label = std::round(label);
                 auto& subpix_cent = mats.at(0).img_p;
                 auto& sub_lab     = mats.at(0).patch;
                 auto& sub_mask    = mats.at(1).patch;
                 auto& sub_cv      = mats.at(2).patch;
                 auto& sub_sd      = mats.at(3).patch;
                 auto& sub_mean    = mats.at(4).patch;
-                std::int32_t int_label = std::round(label);
-                cv::Mat int_sub_lab(sub_lab.size(), CV_32S);
-                sub_lab.convertTo(int_sub_lab, CV_32S);
-                sub_lab = lab_to_mask(int_sub_lab, int_label);
+                sub_lab = lab_to_mask(sub_lab, label);
                 cv::Mat sum_mask = sub_mask & sub_lab;
                 
                 cv::Point min_cv_pos; // pixel
@@ -153,7 +150,7 @@ struct MakeStatMat {
                     cv::Point pb_swin_tl(pb_img_tl.x + min_cv_pos.x - swin_w_px/2,
                                          pb_img_tl.y + min_cv_pos.y - swin_h_px/2);
                     cv::Rect rect(pb_swin_tl.x, pb_swin_tl.y, swin_w_px, swin_h_px);
-                    cv::rectangle(mat, rect, 65536/2);
+                    cv::rectangle(margin, rect, 65536/2);
                 }
 
                 ip_convert(sum_mask, CV_32F, 1.0 / 255);
@@ -163,9 +160,9 @@ struct MakeStatMat {
         }
 
         if(v_margin){
-            v_margin(mat);
+            v_margin(margin);
         }
-        // margin.release();
+        margin.release();
 
         return nucleona::make_tuple(std::move(stat_mats), std::move(warped_mask));
     }

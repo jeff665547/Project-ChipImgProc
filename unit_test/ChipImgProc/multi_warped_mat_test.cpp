@@ -419,10 +419,8 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
         for(int i = 0; i < 10; i ++) {
             for(int j = 0; j < 10; j ++) {
                 EXPECT_TRUE(multi_warped_mat.at_cell(cell, i, j + 162));
-                std::cout << cell.mean << " ";
                 first_marker(i, j) = cell.mean / 64;
             }
-            std::cout << std::endl;
         }
         // first_marker = binarize(first_marker);
         first_marker = std::get<1>(threshold(first_marker, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU));

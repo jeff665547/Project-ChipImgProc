@@ -103,12 +103,12 @@ constexpr struct MakeWarpedMat {
         cv::Mat     mat,
         // all micron level below
         cv::Point2d origin, 
-        int clw,         int clh,
-        int clwd,        int clhd,
-        int w,           int h,
-        double swin_w,   double swin_h,
+        int clw,    int clh,
+        int clwd,   int clhd,
+        int w,      int h,
+        int swin_w, int swin_h,
         double um2px_r,
-        int clwn,        int clhn,
+        int clwn,   int clhn,
         ViewerCallback v_margin
     ) const {
         // auto tmp_timer(std::chrono::steady_clock::now());
@@ -149,10 +149,8 @@ constexpr struct MakeWarpedMat {
         int clwn,   int clhn,
         ViewerCallback v_margin
     ) const {
-        // int swin_w = std::round(clw * win_r);
-        // int swin_h = std::round(clh * win_r);
-        auto swin_w = clw * win_r;
-        auto swin_h = clh * win_r;
+        int swin_w = std::round(clw * win_r);
+        int swin_h = std::round(clh * win_r);
         if(swin_w < 3 || swin_h < 3) throw std::invalid_argument("win_r too small, unable to generate proper filter");
         return operator()(warp_mat, mat, origin, clw, clh, clwd, 
             clhd, w, h, swin_w, swin_h, um2px_r, clwn, clhn, v_margin);
