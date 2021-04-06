@@ -53,14 +53,14 @@ struct MakeStatMat {
         int swin_h_px = std::round(swin_h * um2px_r);
         int clw_px    = std::round(clw * um2px_r);
         int clh_px    = std::round(clh * um2px_r);
-        auto tmp_timer(std::chrono::steady_clock::now());
-        std::chrono::duration<double, std::milli> d;
+        // auto tmp_timer(std::chrono::steady_clock::now());
+        // std::chrono::duration<double, std::milli> d;
         auto [mean, sd] = make_large_cv_mat(mat, swin_w_px, swin_h_px);
         cv::Mat cv = sd / mean;
-        d = std::chrono::steady_clock::now() - tmp_timer;
-        std::cout << "make_large_cv_mat: " << d.count() << " ms\n";
+        // d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "make_large_cv_mat: " << d.count() << " ms\n";
 
-        tmp_timer = std::chrono::steady_clock::now();
+        // tmp_timer = std::chrono::steady_clock::now();
         auto lmask = make_large_mask(
             {
                 static_cast<int>(std::round(origin.x)), 
@@ -73,10 +73,16 @@ struct MakeStatMat {
         // cv::Mat test_img;
         // lmask.convertTo(test_img, CV_16U);
         // cv::imwrite("large_mask.tiff", test_img);
-        d = std::chrono::steady_clock::now() - tmp_timer;
-        std::cout << "make_large_mask: " << d.count() << " ms\n";
+        // d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "make_large_mask: " << d.count() << " ms\n";
+
+        //tmp_timer = std::chrono::steady_clock::now();
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());
         cv::connectedComponents(lmask, mask_cell_label);
+        // d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "connectedComponents: " << d.count() << " ms\n";
+        
+        // tmp_timer = std::chrono::steady_clock::now();
         {
             cv::Mat comp_img;
             mask_cell_label.convertTo(comp_img, CV_16U);
@@ -88,12 +94,18 @@ struct MakeStatMat {
                 v_mask(lmask);
             }
         }
+		// d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "v_comp & v_mask: " << d.count() << " ms\n";
         // lmask = lmask / 255;
         // ip_convert(lmask,           CV_32F);
         ip_convert(mask_cell_label, CV_32F);
         ip_convert(sd,              CV_32F);
         ip_convert(mean,            CV_32F);
         ip_convert(cv,              CV_32F);
+		// d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "lots of ip_convert: " << d.count() << " ms\n";
+        
+		// tmp_timer = std::chrono::steady_clock::now();
         auto warped_agg_mat = make_basic(warpmat, 
             std::vector<cv::Mat>({
                 mask_cell_label,
@@ -108,6 +120,10 @@ struct MakeStatMat {
         stat::Mats<Float> stat_mats(clhn, clwn);
         auto cell = warped_agg_mat.make_at_result();
         std::vector<decltype(cell)> mats;
+		// d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "init stat_mat: " << d.count() << " ms\n";
+        
+		// tmp_timer = std::chrono::steady_clock::now();
         for(int i = 0; i < clhn; i ++) {
             for(int j = 0; j < clwn; j ++) {
                 if(!warped_agg_mat.at_cell(
@@ -149,6 +165,8 @@ struct MakeStatMat {
                 mats.clear();
             }
         }
+        // d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "calculate stat_mat: " << d.count() << " ms\n";
         return nucleona::make_tuple(std::move(stat_mats), std::move(warped_mask));
     }
 private:
@@ -173,17 +191,6 @@ private:
         cv::Mat x_mean, sd;
         computation.apply(cv::gin(mat), cv::gout(x_mean, sd), cv::compile_args(cv::gapi::imgproc::gpu::kernels()));
         return nucleona::make_tuple(std::move(x_mean), std::move(sd));
-        // auto x_mean = mean(mat, conv_w, conv_h);
-        // auto x_mean_2 = x_mean.mul(x_mean);
-        // auto x_2 = mat.mul(mat);
-        // auto x_2_mean = mean(x_2, conv_w, conv_h);
-        // cv::Mat var = x_2_mean - x_mean_2;
-        // cv::Mat sd(var.size(), var.type());
-        // cv::sqrt(var, sd);
-        // return nucleona::make_tuple(
-        //     std::move(x_mean),
-        //     std::move(sd)
-        // );
     }
     auto mean(
         cv::Mat mat, int conv_w, int conv_h

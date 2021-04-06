@@ -17,6 +17,9 @@ struct MakeMask {
         cv::Mat warpmat,
         cv::Size dsize
     ) const {
+        // auto tmp_timer(std::chrono::steady_clock::now());
+        // std::chrono::duration<double, std::milli> d, d1;
+        
         auto roiw = clwd * clwn;
         auto roih = clhd * clhn;
         int clwsp = (clwd - clw) / 2;
@@ -29,8 +32,10 @@ struct MakeMask {
         cv::GMat g_tmp = cv::gapi::warpAffine(g_in, warpmat, dsize);
         cv::GMat g_out = cv::gapi::filter2D(g_tmp, CV_8U, kern);
         cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_out));
-        auto tmp_timer(std::chrono::steady_clock::now());
-        std::chrono::duration<double, std::milli> d;
+        
+        // d1 = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "make_mask-init: " << d1.count() << " ms\n";
+        // auto tmp_timer2(std::chrono::steady_clock::now());
         for(int i = 0; i < 2; i ++) {
             for(int j = 0; j < 2; j ++) {
                 cv::Mat mat = cv::Mat::zeros(h, w, CV_8U);
@@ -46,19 +51,20 @@ struct MakeMask {
                     );
                 }
                 cv::Mat warp_mask(dsize, CV_8U);
-                tmp_timer = std::chrono::steady_clock::now();
-                computation.apply(cv::gin(mat), cv::gout(warp_mask), cv::compile_args(cv::gapi::imgproc::gpu::kernels()));
-                d += std::chrono::steady_clock::now() - tmp_timer;
+                // tmp_timer = std::chrono::steady_clock::now();
+                computation.apply(
+                    cv::gin(mat), 
+                    cv::gout(warp_mask), 
+                    cv::compile_args(cv::gapi::imgproc::gpu::kernels())
+                );
+                // d += std::chrono::steady_clock::now() - tmp_timer;
                 res += warp_mask;
-                // cv::Mat tmp = filter2D(wmat, kern);
-                // cv::Mat wcmat(tmp.size(), CV_8U);
-                // tmp.convertTo(wcmat, CV_8U);
-                // res += wcmat;
             }
         }
-        std::cout << "make_mask-computation: " << d.count() << " ms\n";
+		// d1 = std::chrono::steady_clock::now() - tmp_timer2;
+        // std::cout << "make_mask-apply: " << d.count() << " ms\n";
+        // std::cout << "make_mask-computation: " << d1.count() << " ms\n";
         return res >= 1;
-        // return res;
     } 
 private:
     void partial_mask(
