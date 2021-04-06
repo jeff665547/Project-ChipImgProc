@@ -19,7 +19,7 @@ struct StatRegMatHelper<Derived, true, Float, AtResult>
 : public RegMatHelper<Derived, true, AtResult>
 {
     using Base      = RegMatHelper<Derived, true, AtResult>;
-    using CellMasks = ObjMat<cv::Mat, std::uint32_t>;
+    using CellMasks = ObjMat<cv::Mat, std::int32_t>;
 
     StatRegMatHelper() = default;
     StatRegMatHelper(

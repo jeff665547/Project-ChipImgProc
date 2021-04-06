@@ -20,14 +20,15 @@ else()
 endif()
 hunter_config(
     OpenCV
-    VERSION "3.4.0-p0"
+    VERSION "4.5.1"
     CMAKE_ARGS 
         BUILD_SHARED_LIBS=OFF
+        WITH_PROTOBUF=OFF
         ENABLE_PRECOMPILED_HEADERS=${OpenCV_ENABLE_PRECOMPILED_HEADERS}
 )
 hunter_config(
     OpenCV-Extra
-    VERSION "3.4.0"
+    VERSION "4.5.1"
 )
 hunter_config(
     range-v3
