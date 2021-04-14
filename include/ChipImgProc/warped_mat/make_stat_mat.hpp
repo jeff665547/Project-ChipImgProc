@@ -106,7 +106,7 @@ struct MakeStatMat {
             }),
             origin, clwd, clhd, w, h
         );
-        ObjMat<cv::Mat, std::uint32_t> warped_mask(clhn, clwn);
+        ObjMat<CellPos, std::uint32_t> center_info(clhn, clwn);
         stat::Mats<Float> stat_mats(clhn, clwn);
         auto cell = warped_agg_mat.make_at_result();
         std::vector<decltype(cell)> mats;
@@ -133,7 +133,8 @@ struct MakeStatMat {
                         fmt::format("invalid cell label, index ({},{}), label: {}", i, j, int_label)
                     );
                 }
-                auto& subpix_cent = mats.at(0).img_p;
+                auto& cent_img    = mats.at(0).img_p;
+                auto& cent_rum    = mats.at(0).real_p;
                 auto& sub_lab     = mats.at(0).patch;
                 auto& sub_mask    = mats.at(1).patch;
                 // auto& sub_cv      = mats.at(2).patch;
@@ -164,16 +165,16 @@ struct MakeStatMat {
                 stat_mats.min_cv_pos(i, j) = min_cv_pos;
 
                 if(v_margin){
-                    cv::Point pb_img_tl(std::ceil(subpix_cent.x - clw_px/2.0),
-                                        std::ceil(subpix_cent.y - clh_px/2.0));
+                    cv::Point pb_img_tl(std::ceil(cent_img.x - clw_px/2.0),
+                                        std::ceil(cent_img.y - clh_px/2.0));
                     cv::Point pb_swin_tl(pb_img_tl.x + min_cv_pos.x - swin_w_px/2,
                                          pb_img_tl.y + min_cv_pos.y - swin_h_px/2);
                     cv::Rect rect(pb_swin_tl.x, pb_swin_tl.y, swin_w_px, swin_h_px);
                     cv::rectangle(mat_clone, rect, 65536/2);
                 }
 
-                ip_convert(sum_mask, CV_32F, 1.0 / 255);
-                warped_mask     (i, j)  = sum_mask;
+                // ip_convert(sum_mask, CV_32F, 1.0 / 255);
+                center_info     (i, j)  = {cent_img, cent_rum};
                 mats.clear();
             }
         }
@@ -182,7 +183,7 @@ struct MakeStatMat {
             v_margin(mat_clone);
         }
 
-        return nucleona::make_tuple(std::move(stat_mats), std::move(warped_mask));
+        return nucleona::make_tuple(std::move(stat_mats), std::move(center_info));
     }
 private:
     cv::Mat lab_to_mask(cv::Mat lab, std::int32_t i) const {

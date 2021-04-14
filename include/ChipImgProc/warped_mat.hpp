@@ -121,7 +121,7 @@ constexpr struct MakeWarpedMat {
         // auto tmp_timer(std::chrono::steady_clock::now());
         // std::chrono::duration<double, std::milli> d;
         warped_mat::MakeStatMat<float> make_stat_mat;
-        auto [stat_mats, warped_mask] = make_stat_mat(
+        auto [stat_mats, center_info] = make_stat_mat(
             mat, origin, 
             clw,    clh,
             clwd,   clhd,
@@ -138,7 +138,7 @@ constexpr struct MakeWarpedMat {
             warp_mat, mat, 
             w, h,
             std::move(stat_mats), 
-            std::move(warped_mask),
+            std::move(center_info),
             origin,
             clwd, clhd
         );
@@ -164,7 +164,6 @@ constexpr struct MakeWarpedMat {
         return operator()(warp_mat, mat, origin, clw, clh, clwd, 
             clhd, w, h, swin_w, swin_h, um2px_r, clwn, clhn, v_margin);
     }
-
 } make_warped_mat;
 
 }
