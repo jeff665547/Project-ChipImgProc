@@ -133,7 +133,7 @@ struct MakeStatMat {
                 auto& sub_mean    = mats.at(4).patch;
                 sub_lab = lab_to_mask(sub_lab, int_label);
                 cv::Mat sum_mask = sub_mask & sub_lab;
-                
+                 
                 cv::Point min_cv_pos; // pixel
                 double min_cv;
                 cv::minMaxLoc(sub_cv, &min_cv, nullptr, &min_cv_pos, nullptr, sum_mask);
