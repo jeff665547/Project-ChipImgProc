@@ -48,12 +48,12 @@ struct WarpedMat
     {}
 
     // (*)
-    bool at_real_pos(warped_mat::Patch& res, double r, double c) const {
-        if(!basic_warped_mat_.at_real_pos(res, r, c)) {
-            return false;
-        }
-        return true;
-    }
+    // bool at_real_pos(warped_mat::Patch& res, double r, double c) const {
+    //     if(!basic_warped_mat_.at_real_pos(res, r, c)) {
+    //         return false;
+    //     }
+    //     return true;
+    // }
     bool at_real(warped_mat::Patch& res, double r, double c, cv::Size patch_size = cv::Size(5, 5)) const {
         auto basic_patch = basic_warped_mat_.make_at_result();
         if(!basic_warped_mat_.at_real(basic_patch, r, c, 0, patch_size)) {

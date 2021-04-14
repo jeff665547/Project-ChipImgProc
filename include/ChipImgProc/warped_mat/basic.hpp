@@ -49,21 +49,21 @@ struct Basic
         }
     }
     // (*)
-    bool at_real_pos(
-        CellPos& res,
-        std::int32_t r,
-        std::int32_t c
-    ) const {
-        if(!is_include_real_impl(r, c)) {
-            return false;
-        }
-        auto [btr, px_point] = point_transform(c, r);
-        if(!is_include_pixel_impl(px_point, cv::Size(1, 1))) {
-            return false;
-        }
-        res = CellPos {px_point, cv::Point2d(c, r)};
-        return true;
-    }
+    // bool at_real_pos(
+    //     CellPos& res,
+    //     std::int32_t r,
+    //     std::int32_t c
+    // ) const {
+    //     if(!is_include_real_impl(r, c)) {
+    //         return false;
+    //     }
+    //     auto [btr, px_point] = point_transform(c, r);
+    //     if(!is_include_pixel_impl(px_point, cv::Size(1, 1))) {
+    //         return false;
+    //     }
+    //     res = CellPos {px_point, cv::Point2d(c, r)};
+    //     return true;
+    // }
     bool at_real_all(
         std::vector<RawPatch>& res,
         double r, 
