@@ -2,11 +2,30 @@
 #include <ChipImgProc/stat/cell.hpp>
 
 namespace chipimgproc::warped_mat {
-struct RawPatch {
-    cv::Mat patch;
+// (*) 
+struct CellPos {
     cv::Point2d img_p;
     cv::Point2d real_p;
 };
+struct RawPatch
+: public CellPos {
+    RawPatch() = default;
+    RawPatch(
+        cv::Mat           patch,
+        cv::Point2d       img_p,
+        cv::Point2d       real_p
+    )
+    : CellPos {std::move(img_p), std::move(real_p)}
+    , patch   (std::move(patch))
+    {}
+
+    cv::Mat patch;
+};
+// struct RawPatch {
+//     cv::Mat patch;
+//     cv::Point2d img_p;
+//     cv::Point2d real_p;
+// };
 struct Patch 
 : public RawPatch
 , public stat::Cell<float>{

@@ -61,7 +61,6 @@ protected:
             roi.y = roi.height * (i / coding_bits);
             cv::getRectSubPix(patch, roi.size(), anchors[i], tmp(roi));
         }
-        // cv::imwrite("debug.png", tmp);
         cv::Mat_<std::uint8_t> bw;
         cv::threshold(tmp, bw, 0, 1, cv::THRESH_BINARY | cv::THRESH_OTSU);
         std::uint64_t binary = 0ull;

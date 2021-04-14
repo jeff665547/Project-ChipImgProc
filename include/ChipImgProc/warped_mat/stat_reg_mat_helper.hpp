@@ -43,15 +43,16 @@ struct StatRegMatHelper<Derived, true, Float, AtResult>
             return false;
         auto stat = stat_mats_(r, c);
         auto mask = cell_mask_(r, c);
-        auto pxs = Derived::make_at_result();
-        if(!Base::at_cell(pxs, r, c, mask.size())) {
+        // (*)
+        auto pos = Derived::make_at_result();
+        if(!Base::at_cell_pos(pos, r, c)) {
             return false;
         }
-        auto img_p = pxs.img_p;
-        auto real_p = pxs.real_p;
-        cv::Mat tmp = pxs.patch.mul(mask);
+        auto img_p = pos.img_p;
+        auto real_p = pos.real_p;
+        // cv::Mat tmp = pxs.patch.mul(mask);
         res = AtResult(
-            std::move(stat), std::move(tmp), 
+            std::move(stat), std::move(mask), 
             std::move(img_p), std::move(real_p)
         );
         return true;
