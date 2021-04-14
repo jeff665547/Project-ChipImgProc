@@ -135,8 +135,10 @@ TEST(warped_mat_test, basic_test) {
         for(int j = 0; j < 10; j ++) {
             // first_marker(i, j) = cv::mean(warped_mat.at_cell(i, j).patch)[0] / 64;
             EXPECT_TRUE(warped_mat.at_cell(cell, i, j));
+            std::cout << cell.mean << " ";
             first_marker(i, j) = cell.mean / 64;
         }
+        std::cout << std::endl;
     }
     first_marker = binarize(first_marker);
     cv::imwrite("test.png", first_marker);

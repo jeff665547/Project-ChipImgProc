@@ -5,12 +5,12 @@ namespace chipimgproc::warped_mat {
 struct MakeMask {
     cv::Mat_<std::uint8_t> operator()(
         cv::Point origin, 
-        int clw,    int clh,
-        int clwd,   int clhd,
-        int w,      int h,
-        int conv_w, int conv_h,
+        int clw,       int clh,
+        int clwd,      int clhd,
+        int w,         int h,
+        double conv_w, double conv_h,
         double um2px_r,
-        int clwn,   int clhn,
+        int clwn,      int clhn,
         cv::Mat warpmat,
         cv::Size dsize
     ) const {
@@ -41,6 +41,7 @@ struct MakeMask {
                 cv::Mat kern(conv_h_px, conv_w_px, CV_64F);
                 kern.setTo(1.0 / (conv_h_px * conv_w_px));
                 cv::Mat tmp = filter2D(wmat, kern);
+                tmp -= 254.49;
                 cv::Mat wcmat(tmp.size(), CV_8U);
                 tmp.convertTo(wcmat, CV_8U);
                 res += wcmat;
@@ -59,7 +60,7 @@ private:
         for(int i = 0; i < mat.rows; i += clhd) {
             for(int j = 0; j < mat.cols; j += clwd) {
                 cv::Rect clr(j + clwsp, i + clhsp, clw, clh);
-                mat(clr).setTo(1);
+                mat(clr).setTo(255);
             }
         }
     }

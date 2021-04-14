@@ -51,7 +51,7 @@ struct StatRegMatHelper<Derived, true, Float, AtResult>
         auto real_p = pxs.real_p;
         cv::Mat tmp = pxs.patch.mul(mask);
         res = AtResult(
-            std::move(pxs), std::move(tmp), 
+            std::move(stat), std::move(tmp), 
             std::move(img_p), std::move(real_p)
         );
         return true;
