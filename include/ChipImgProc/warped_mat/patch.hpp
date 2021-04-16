@@ -51,6 +51,14 @@ struct Patch
     {}
 
     Patch(
+        stat::Cell<float> && cell, 
+        RawPatch          && rpatch
+    )
+    : RawPatch(std::move(rpatch))
+    , sCell(std::move(cell))
+    {}
+
+    Patch(
         RawPatch&& rpatch
     )
     : RawPatch(std::move(rpatch))

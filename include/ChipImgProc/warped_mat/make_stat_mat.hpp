@@ -106,7 +106,7 @@ struct MakeStatMat {
             }),
             origin, clwd, clhd, w, h
         );
-        ObjMat<CellPos, std::uint32_t> center_info(clhn, clwn);
+        ObjMat<RawPatch, std::uint32_t> cell_info(clhn, clwn);
         stat::Mats<Float> stat_mats(clhn, clwn);
         auto cell = warped_agg_mat.make_at_result();
         std::vector<decltype(cell)> mats;
@@ -174,7 +174,7 @@ struct MakeStatMat {
                 }
 
                 // ip_convert(sum_mask, CV_32F, 1.0 / 255);
-                center_info     (i, j)  = {cent_img, cent_rum};
+                cell_info     (i, j)  = {sub_raw, cent_img, cent_rum};
                 mats.clear();
             }
         }
@@ -183,7 +183,7 @@ struct MakeStatMat {
             v_margin(mat_clone);
         }
 
-        return nucleona::make_tuple(std::move(stat_mats), std::move(center_info));
+        return nucleona::make_tuple(std::move(stat_mats), std::move(cell_info));
     }
 private:
     cv::Mat lab_to_mask(cv::Mat lab, std::int32_t i) const {
