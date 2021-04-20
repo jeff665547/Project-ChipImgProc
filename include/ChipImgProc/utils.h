@@ -116,6 +116,7 @@ auto trim_outlier( M&& mm, int peek_threshold = 40000)
     if(hmax < hmin) hmax = hmin;
     lbound = hist.lbound + hmin * hist.bin_size;
     ubound = hist.lbound + hmax * hist.bin_size;
+    lbound *= 0.5;  // (*)
     for(auto&& v : mm) {
         if(v < lbound) v = lbound;
         if(v > ubound) v = ubound;
@@ -126,7 +127,7 @@ template<class T>
 cv::Mat_<std::uint8_t> norm_u8(const cv::Mat_<T>& m, int peek_threshold = 40000) {
     auto trimmed_m = trim_outlier(m.clone(), peek_threshold); // TODO: smarter way
     cv::Mat_<std::uint8_t> bin;
-    cv::normalize(trimmed_m, bin, 0, 255, cv::NORM_MINMAX, bin.depth());
+    cv::normalize(trimmed_m, bin, 1, 255, cv::NORM_MINMAX, bin.depth()); // (*)
     return bin;
 }
 template<class T>
