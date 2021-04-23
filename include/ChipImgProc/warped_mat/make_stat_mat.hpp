@@ -207,7 +207,7 @@ private:
         cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_x_mean, g_sd));
 
         cv::Mat x_mean, sd;
-        computation.apply(cv::gin(mat), cv::gout(x_mean, sd), cv::compile_args(cv::gapi::imgproc::gpu::kernels()));
+        computation.apply(cv::gin(mat), cv::gout(x_mean, sd)/*, cv::compile_args(cv::gapi::imgproc::gpu::kernels())*/);
         return nucleona::make_tuple(std::move(x_mean), std::move(sd));
     }
     auto mean(
