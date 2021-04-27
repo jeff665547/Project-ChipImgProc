@@ -49,9 +49,9 @@ struct MakeRandom {
         const double&           cell_c_px,
         const double&           border_px,
         const std::int32_t&     pyramid_level,
+        const double&           theor_max_val,
         const std::int32_t&     nms_count,
-        const double&           nms_radius,
-        const double&           theor_max_val
+        const double&           nms_radius
     ) const {
         std::ifstream marker_in(pat_path);
         auto [templ, mask] = Loader::from_txt(marker_in);
