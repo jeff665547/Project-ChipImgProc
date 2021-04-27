@@ -15,7 +15,7 @@ struct Random : public RandomBased<Random> {
         const std::int32_t&             nms_radius
     )
     : RandomBased(
-        templ, mask, pyramid_level, 
+        templ, mask, pyramid_level, theor_max_val,
         nms_count, nms_radius
     )
     {
