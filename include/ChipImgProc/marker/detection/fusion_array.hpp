@@ -35,6 +35,7 @@ protected:
         const cv::Mat_<cvMatT>&    templ,
         const cv::Mat_<cvMatT>&    mask,
         const std::int32_t&        pyramid_level,
+        const double&              theor_max_val,
         const int&                 img_templ_cols,
         const int&                 img_templ_rows,
         const Layout&              mk_layout, 
@@ -46,6 +47,7 @@ protected:
     , smask_             ()
     , marker_regions_    ()
     , pyramid_level_     (pyramid_level)
+    , theor_max_val_     (theor_max_val)
     , criteria_          (
         cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 300, 1e-5
     )
@@ -172,7 +174,7 @@ public:
         if (input.depth() == CV_8U)
             input.copyTo(image);
         else if (input.depth() == CV_16U)
-            input.convertTo(image, CV_8U, 255.0 / 16383.0);
+            input.convertTo(image, CV_8U, 255.0 / theor_max_val_);
         else 
             throw std::invalid_argument("Invalid input image format detected.");
 
@@ -264,6 +266,7 @@ protected:
     std::int32_t                              pyramid_level_    ;
     std::int32_t                              s_                ;
     std::function<cvMat8(const cvMat8&)>      img_preprocessor_ ;
+    double                                    theor_max_val_    ;
 };
 
 struct MakeFusionArray {
@@ -272,6 +275,7 @@ struct MakeFusionArray {
         const cvMat8&                         templ,
         const cvMat8&                         mask,
         const std::int32_t&                   pyramid_level,
+        const double                          theor_max_val,
         const int&                            img_templ_cols,
         const int&                            img_templ_rows,
         const Layout&                         mk_layout,
@@ -281,6 +285,7 @@ struct MakeFusionArray {
             templ,
             mask,
             pyramid_level,
+            theor_max_val,
             img_templ_cols,
             img_templ_rows,
             mk_layout,
@@ -291,6 +296,7 @@ struct MakeFusionArray {
         const cvMat8&                         templ,
         const cvMat8&                         mask,
         const std::int32_t&                   pyramid_level,
+        const double&                         theor_max_val,
         const cv::Mat&                        img_template,
         const Layout&                         mk_layout,
         const MatUnit&                        unit
@@ -299,6 +305,7 @@ struct MakeFusionArray {
             templ,
             mask,
             pyramid_level,
+            theor_max_val,
             img_template.cols,
             img_template.rows,
             mk_layout,
@@ -309,6 +316,7 @@ struct MakeFusionArray {
         const cvMat8&                         templ,
         const cvMat8&                         mask,
         const std::int32_t&                   pyramid_level,
+        const double&                         theor_max_val,
         const cv::Mat&                        img_template,
         const Layout&                         mk_layout
     ) const {
@@ -316,6 +324,7 @@ struct MakeFusionArray {
             templ,
             mask,
             pyramid_level,
+            theor_max_val,
             img_template,
             mk_layout,
             cm::MatUnit::PX

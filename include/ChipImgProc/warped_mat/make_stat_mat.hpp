@@ -19,6 +19,7 @@ struct MakeStatMat {
         int w,          int h,
         double swin_w,  double swin_h,
         double          um2px_r,
+        double          theor_max_val,
         int clwn,       int clhn,
         cv::Mat         warpmat,
         ViewerCallback  v_margin = {},
@@ -149,8 +150,8 @@ struct MakeStatMat {
                 sub_mask = sub_mask == 255;
                 cv::Mat sum_mask = sub_mask & sub_lab;
                 
-                cv::threshold(sub_mean, sub_mean, 16383, 0, cv::THRESH_TRUNC);
-                cv::threshold(sub_raw, sub_raw, 16383, 0, cv::THRESH_TRUNC);
+                cv::threshold(sub_mean, sub_mean, theor_max_val, 0, cv::THRESH_TRUNC);
+                cv::threshold(sub_raw,  sub_raw,  theor_max_val, 0, cv::THRESH_TRUNC);
                 auto [sub_mean_2, sub_var] = make_cell_quadratic_stats(sub_raw, sub_mean, swin_w_px, swin_h_px);
                 cv::Mat sub_cv_2           = sub_var / sub_mean_2;
                 

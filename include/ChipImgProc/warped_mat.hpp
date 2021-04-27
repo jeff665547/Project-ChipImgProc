@@ -114,7 +114,7 @@ constexpr struct MakeWarpedMat {
         int clwd,        int clhd,
         int w,           int h,
         double swin_w,   double swin_h,
-        double um2px_r,
+        double um2px_r,  double theor_max_val,
         int clwn,        int clhn,
         ViewerCallback v_margin
     ) const {
@@ -128,6 +128,7 @@ constexpr struct MakeWarpedMat {
             w,      h,
             swin_w, swin_h,
             um2px_r,
+            theor_max_val,
             clwn,   clhn,
             warp_mat,
             v_margin
@@ -153,6 +154,7 @@ constexpr struct MakeWarpedMat {
         int w,      int h,
         double win_r,
         double um2px_r,
+        double theor_max_val,
         int clwn,   int clhn,
         ViewerCallback v_margin
     ) const {
@@ -162,7 +164,8 @@ constexpr struct MakeWarpedMat {
         auto swin_h = clh * win_r;
         if(swin_w < 3 || swin_h < 3) throw std::invalid_argument("win_r too small, unable to generate proper filter");
         return operator()(warp_mat, mat, origin, clw, clh, clwd, 
-            clhd, w, h, swin_w, swin_h, um2px_r, clwn, clhn, v_margin);
+            clhd, w, h, swin_w, swin_h, um2px_r, theor_max_val, 
+            clwn, clhn, v_margin);
     }
 } make_warped_mat;
 
