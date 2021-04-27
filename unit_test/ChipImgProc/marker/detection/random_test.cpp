@@ -18,7 +18,7 @@ TEST(random_test, basic_test) {
         cell_r_um * um2px_r, 
         cell_c_um * um2px_r,
         space_um  * um2px_r, 
-        2, 9, 
+        2, 16383.0, 9, 
         50  * um2px_r
     );
     auto img = cv::imread(img_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
