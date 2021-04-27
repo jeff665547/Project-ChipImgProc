@@ -32,7 +32,7 @@ struct MakeRandom {
         const cv::Mat_<std::uint8_t>&   mask,
         const std::int32_t&             pyramid_level,
         const std::int32_t&             nms_count,
-        const std::int32_t&             nms_radius
+        const std::int32_t&             nms_radius,
         const double&                   theor_max_val
     ) const {
         return Random(
