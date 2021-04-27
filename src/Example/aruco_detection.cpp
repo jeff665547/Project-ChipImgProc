@@ -161,6 +161,7 @@ int main( int argc, char** argv )
         mask,
         30 * 2.68, 
         2, 
+        255.0,
         9, 
         50 * 2.68, 
         0.75
