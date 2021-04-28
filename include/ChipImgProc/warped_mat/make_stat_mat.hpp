@@ -56,7 +56,6 @@ struct MakeStatMat {
         // std::chrono::duration<double, std::milli> d;
         // auto [mean, sd] = make_large_cv_mat(mat, swin_w_px, swin_h_px);
         // cv::Mat cv = sd / mean;
-        auto lmean = mean(mat, swin_w_px, swin_h_px);
         // d = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "make_large_cv_mat: " << d.count() << " ms\n";
 
@@ -92,7 +91,7 @@ struct MakeStatMat {
         // ip_convert(lmask,           CV_32F);
         ip_convert(mask_cell_label, CV_32F);
         // ip_convert(sd,              CV_32F);
-        ip_convert(lmean,            CV_32F);
+        // ip_convert(lmean,            CV_32F);
         // ip_convert(cv,              CV_32F);
         // ip_convert(mat,             CV_16U);
         cv::Mat_<std::uint16_t> mat_clone = mat.clone();
@@ -102,7 +101,7 @@ struct MakeStatMat {
                 lmask,
                 // cv,
                 // sd,
-                lmean,
+                // lmean,
                 mat
             }),
             origin, clwd, clhd, w, h
@@ -140,8 +139,8 @@ struct MakeStatMat {
                 auto& sub_mask    = mats.at(1).patch;
                 // auto& sub_cv      = mats.at(2).patch;
                 // auto& sub_sd      = mats.at(3).patch;
-                auto& sub_mean    = mats.at(2).patch;
-                auto& sub_raw     = mats.at(3).patch;
+                // auto& sub_mean    = mats.at(2).patch;
+                auto& sub_raw     = mats.at(2).patch;
 
                 cv::Mat int_sub_lab(sub_lab.size(), CV_32S);
                 sub_lab -= 0.4;
@@ -149,10 +148,9 @@ struct MakeStatMat {
                 sub_lab = lab_to_mask(int_sub_lab, int_label);
                 sub_mask = sub_mask == 255;
                 cv::Mat sum_mask = sub_mask & sub_lab;
-                
-                cv::threshold(sub_mean, sub_mean, theor_max_val, 0, cv::THRESH_TRUNC);
-                cv::threshold(sub_raw,  sub_raw,  theor_max_val, 0, cv::THRESH_TRUNC);
-                auto [sub_mean_2, sub_var] = make_cell_quadratic_stats(sub_raw, sub_mean, swin_w_px, swin_h_px);
+				
+                cv::threshold(sub_raw, sub_raw, theor_max_val, 0, cv::THRESH_TRUNC);
+                auto [sub_mean, sub_mean_2, sub_var] = make_cell_stats(sub_raw, theor_max_val, swin_w_px, swin_h_px);
                 cv::Mat sub_cv_2           = sub_var / sub_mean_2;
                 
                 cv::Point min_cv_pos; // pixel domain
@@ -205,15 +203,20 @@ private:
             std::move(sd)
         );
     }
-    auto make_cell_quadratic_stats(
-        cv::Mat mat, cv::Mat x_mean, int conv_w, int conv_h
+    auto make_cell_stats(
+        cv::Mat mat, double theor_max_val, int conv_w, int conv_h
     ) const {
+        cv::Mat x_mean   = mean(mat, conv_w, conv_h);
+        cv::threshold(x_mean, x_mean, theor_max_val, 0, cv::THRESH_TRUNC);
         cv::Mat x_mean_2 = x_mean.mul(x_mean);
+        cv::threshold(x_mean_2, x_mean_2, theor_max_val*theor_max_val, 0, cv::THRESH_TRUNC);
         auto    x_2      = mat.mul(mat);
         auto    x_2_mean = mean(x_2, conv_w, conv_h);
         cv::Mat var      = x_2_mean - x_mean_2;
+        cv::threshold(var, var, 0, 0, cv::THRESH_TOZERO);
         
         return nucleona::make_tuple(
+            std::move(x_mean),
             std::move(x_mean_2),
             std::move(var)
         );
