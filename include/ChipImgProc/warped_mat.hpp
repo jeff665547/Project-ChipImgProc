@@ -47,6 +47,13 @@ struct WarpedMat
     )
     {}
 
+    // (*)
+    // bool at_real_pos(warped_mat::Patch& res, double r, double c) const {
+    //     if(!basic_warped_mat_.at_real_pos(res, r, c)) {
+    //         return false;
+    //     }
+    //     return true;
+    // }
     bool at_real(warped_mat::Patch& res, double r, double c, cv::Size patch_size = cv::Size(5, 5)) const {
         auto basic_patch = basic_warped_mat_.make_at_result();
         if(!basic_warped_mat_.at_real(basic_patch, r, c, 0, patch_size)) {
@@ -103,24 +110,25 @@ constexpr struct MakeWarpedMat {
         cv::Mat     mat,
         // all micron level below
         cv::Point2d origin, 
-        int clw,    int clh,
-        int clwd,   int clhd,
-        int w,      int h,
-        int swin_w, int swin_h,
-        double um2px_r,
-        int clwn,   int clhn,
+        int clw,         int clh,
+        int clwd,        int clhd,
+        int w,           int h,
+        double swin_w,   double swin_h,
+        double um2px_r,  double theor_max_val,
+        int clwn,        int clhn,
         ViewerCallback v_margin
     ) const {
         // auto tmp_timer(std::chrono::steady_clock::now());
         // std::chrono::duration<double, std::milli> d;
         warped_mat::MakeStatMat<float> make_stat_mat;
-        auto [stat_mats, warped_mask] = make_stat_mat(
+        auto [stat_mats, center_info] = make_stat_mat(
             mat, origin, 
             clw,    clh,
             clwd,   clhd,
             w,      h,
             swin_w, swin_h,
             um2px_r,
+            theor_max_val,
             clwn,   clhn,
             warp_mat,
             v_margin
@@ -131,7 +139,7 @@ constexpr struct MakeWarpedMat {
             warp_mat, mat, 
             w, h,
             std::move(stat_mats), 
-            std::move(warped_mask),
+            std::move(center_info),
             origin,
             clwd, clhd
         );
@@ -146,16 +154,19 @@ constexpr struct MakeWarpedMat {
         int w,      int h,
         double win_r,
         double um2px_r,
+        double theor_max_val,
         int clwn,   int clhn,
         ViewerCallback v_margin
     ) const {
-        int swin_w = std::round(clw * win_r);
-        int swin_h = std::round(clh * win_r);
+        // int swin_w = std::round(clw * win_r);
+        // int swin_h = std::round(clh * win_r);
+        auto swin_w = clw * win_r;
+        auto swin_h = clh * win_r;
         if(swin_w < 3 || swin_h < 3) throw std::invalid_argument("win_r too small, unable to generate proper filter");
         return operator()(warp_mat, mat, origin, clw, clh, clwd, 
-            clhd, w, h, swin_w, swin_h, um2px_r, clwn, clhn, v_margin);
+            clhd, w, h, swin_w, swin_h, um2px_r, theor_max_val, 
+            clwn, clhn, v_margin);
     }
-
 } make_warped_mat;
 
 }

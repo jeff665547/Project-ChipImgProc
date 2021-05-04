@@ -15,12 +15,13 @@ protected:
         const cv::Mat_<std::uint8_t>&   mask,
         const double&                   aruco_width,
         const std::int32_t&             pyramid_level,
+        const double&                   theor_max_val,
         const std::int32_t&             nms_count,
         const std::int32_t&             nms_radius,
         const double&                   ext_width
     )
     : RandomBased(
-        templ, mask, pyramid_level, 
+        templ, mask, pyramid_level, theor_max_val,
         nms_count, nms_radius
     )
     , dict_         (dict)
@@ -61,7 +62,6 @@ protected:
             roi.y = roi.height * (i / coding_bits);
             cv::getRectSubPix(patch, roi.size(), anchors[i], tmp(roi));
         }
-        // cv::imwrite("debug.png", tmp);
         cv::Mat_<std::uint8_t> bw;
         cv::threshold(tmp, bw, 0, 1, cv::THRESH_BINARY | cv::THRESH_OTSU);
         std::uint64_t binary = 0ull;
@@ -123,12 +123,14 @@ struct MakeArucoRandom {
         const std::int32_t&             nms_radius,
         const double&                   ext_width
     ) const {
+        double theor_max_val(16383);
         return ArucoRandom(
             dict, 
             templ,
             mask,
             aruco_width,
             pyramid_level,
+            theor_max_val,
             nms_count,
             nms_radius,
             ext_width
@@ -140,6 +142,7 @@ struct MakeArucoRandom {
         const cv::Mat_<std::uint8_t>&   mask,
         const double&                   aruco_width,
         const std::int32_t&             pyramid_level,
+        const double&                   theor_max_val,
         const std::int32_t&             nms_count,
         const std::int32_t&             nms_radius,
         const double&                   ext_width
@@ -151,6 +154,7 @@ struct MakeArucoRandom {
             mask,
             aruco_width,
             pyramid_level,
+            theor_max_val,
             nms_count,
             nms_radius,
             ext_width
@@ -163,6 +167,7 @@ struct MakeArucoRandom {
         const cv::Mat_<std::uint8_t>&   mask,
         const double&                   aruco_width,
         const std::int32_t&             pyramid_level,
+        const double&                   theor_max_val,
         const std::int32_t&             nms_count,
         const double&                   nms_radius,
         const double&                   ext_width
@@ -173,6 +178,7 @@ struct MakeArucoRandom {
             mask,
             aruco_width,
             pyramid_level,
+            theor_max_val,
             nms_count,
             nms_radius,
             ext_width

@@ -80,6 +80,7 @@ TEST(basic_warped_mat_test, basic_test) {
         templ, mask,
         30 * 2.4145, 
         2, 
+        255.0,
         9, 
         50 * 2.4145, 
         0.75

@@ -10,11 +10,12 @@ struct Random : public RandomBased<Random> {
         const cv::Mat_<std::uint8_t>&   templ,
         const cv::Mat_<std::uint8_t>&   mask,
         const std::int32_t&             pyramid_level,
+        const double&                   theor_max_val,
         const std::int32_t&             nms_count,
         const std::int32_t&             nms_radius
     )
     : RandomBased(
-        templ, mask, pyramid_level, 
+        templ, mask, pyramid_level, theor_max_val,
         nms_count, nms_radius
     )
     {
@@ -31,11 +32,13 @@ struct MakeRandom {
         const cv::Mat_<std::uint8_t>&   mask,
         const std::int32_t&             pyramid_level,
         const std::int32_t&             nms_count,
-        const std::int32_t&             nms_radius
+        const std::int32_t&             nms_radius,
+        const double&                   theor_max_val
     ) const {
         return Random(
             templ, mask,
             pyramid_level,
+            theor_max_val,
             nms_count,
             nms_radius
         );
@@ -46,6 +49,7 @@ struct MakeRandom {
         const double&           cell_c_px,
         const double&           border_px,
         const std::int32_t&     pyramid_level,
+        const double&           theor_max_val,
         const std::int32_t&     nms_count,
         const double&           nms_radius
     ) const {
@@ -59,6 +63,7 @@ struct MakeRandom {
         return Random(
             templ_img, mask_img,
             pyramid_level,
+            theor_max_val,
             nms_count,
             nms_radius
         );

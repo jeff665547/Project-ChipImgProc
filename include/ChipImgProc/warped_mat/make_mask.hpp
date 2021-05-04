@@ -8,12 +8,12 @@ namespace chipimgproc::warped_mat {
 struct MakeMask {
     cv::Mat operator()(
         cv::Point origin, 
-        int clw,    int clh,
-        int clwd,   int clhd,
-        int w,      int h,
-        int conv_w, int conv_h,
+        int clw,       int clh,
+        int clwd,      int clhd,
+        int w,         int h,
+        double conv_w, double conv_h,
         double um2px_r,
-        int clwn,   int clhn,
+        int clwn,      int clhn,
         cv::Mat warpmat,
         cv::Size dsize
     ) const {
@@ -29,8 +29,10 @@ struct MakeMask {
         cv::Mat res = cv::Mat::zeros(dsize, CV_8U);
         cv::Mat kern = cv::Mat(conv_h_px, conv_w_px, CV_64F, cv::Scalar(1.0 / (conv_h_px * conv_w_px)));
         cv::GMat g_in;
-        cv::GMat g_tmp = cv::gapi::warpAffine(g_in, warpmat, dsize);
-        cv::GMat g_out = cv::gapi::filter2D(g_tmp, CV_8U, kern);
+        cv::GMat g_tmp1 = cv::gapi::warpAffine(g_in, warpmat, dsize);
+        cv::GMat g_tmp2 = cv::gapi::filter2D(g_tmp1, CV_64F, kern);
+		cv::GMat g_tmp3 = g_tmp2 - 254.49;
+		cv::GMat g_out  = cv::gapi::convertTo(g_tmp3, CV_8U);
         cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_out));
         
         // d1 = std::chrono::steady_clock::now() - tmp_timer;
@@ -50,7 +52,7 @@ struct MakeMask {
                         clw, clh, clwd * 2, clhd * 2, clwsp, clhsp, tmp
                     );
                 }
-                cv::Mat warp_mask(dsize, CV_8U);
+                cv::Mat warp_mask(dsize, CV_64F);
                 // tmp_timer = std::chrono::steady_clock::now();
                 computation.apply(
                     cv::gin(mat), 
@@ -76,7 +78,7 @@ private:
         for(int i = 0; i < mat.rows; i += clhd) {
             for(int j = 0; j < mat.cols; j += clwd) {
                 cv::Rect clr(j + clwsp, i + clhsp, clw, clh);
-                mat(clr).setTo(1);
+                mat(clr).setTo(-1);
             }
         }
     }

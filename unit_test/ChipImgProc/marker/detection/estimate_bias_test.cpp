@@ -43,6 +43,7 @@ TEST(estimate_bias_test, simultaion_shift) {
         bf_templ, bf_mask,
         30 * um2px_r, 
         2, 
+        255.0,
         9, 
         50 * um2px_r, 
         0.75

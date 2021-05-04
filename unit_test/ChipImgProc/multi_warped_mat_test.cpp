@@ -87,6 +87,7 @@ TEST(multi_warped_mat_test, with_basic_test) {
         templ, mask,
         30 * um2px_r, 
         2, 
+        255.0,
         9, 
         50 * um2px_r, 
         0.75
@@ -337,6 +338,7 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
         templ, mask,
         30 * um2px_r, 
         2, 
+        255.0,
         9, 
         50 * um2px_r, 
         0.75
@@ -401,6 +403,7 @@ TEST(multi_warped_mat_test, with_mask_warped_mat_test) {
             cl_hn * cl_hd_um,
             win_r,
             rescaled_um2px_r,
+            16383.0,
             cl_wn, cl_hn,
             nullptr
         );

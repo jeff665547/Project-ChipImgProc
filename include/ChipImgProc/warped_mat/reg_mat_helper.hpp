@@ -33,6 +33,18 @@ struct RegMatHelper<Derived, true, AtResult> {
             throw std::invalid_argument("RegMatHelper: y_max must be assigned");
     }
 
+    // (*) Get the cell position in different domain.
+    // bool at_cell_pos(
+    //     AtResult& res,
+    //     std::int32_t r,
+    //     std::int32_t c
+    // ) const {
+    //     if(r >= rows()) return false;
+    //     if(c >= cols()) return false;
+    //     auto [ cent_c, cent_r ] = real_cell_cent(r, c);
+    //     return derived()->at_real_pos(res, cent_r, cent_c);
+    // }
+
     bool at_cell(
         AtResult& res,
         std::int32_t r, 

@@ -32,6 +32,7 @@ protected:
         const cv::Mat_<std::uint8_t>&   templ,
         const cv::Mat_<std::uint8_t>&   mask,
         const std::int32_t&             pyramid_level,
+        const double&                   theor_max_val,
         const std::int32_t&             nms_count,
         const std::int32_t&             nms_radius
     )
@@ -40,6 +41,7 @@ protected:
     , mask_             (mask)
     , smask_            ()
     , pyramid_level_    (pyramid_level)
+    , theor_max_val_    (theor_max_val)
     , nms_count_        (nms_count)
     , nms_radius_       (nms_radius)
     , criteria_         (
@@ -89,7 +91,7 @@ public:
         if (input.depth() == CV_8U)
             input.copyTo(image);
         else if (input.depth() == CV_16U)
-            input.convertTo(image, CV_8U, 255.0 / 16383.0);
+            input.convertTo(image, CV_8U, 255.0 / theor_max_val_);
         else // invalid input format
             throw std::invalid_argument("Invalid input format");
         
@@ -234,6 +236,7 @@ protected:
     cv::Mat_<std::uint8_t>  templ_, stempl_ ; 
     cv::Mat_<std::uint8_t>  mask_, smask_   ; 
     std::int32_t            pyramid_level_  ;
+    double                  theor_max_val_  ;
     std::int32_t            nms_count_      ;
     std::int32_t            nms_radius_     ;
     cv::TermCriteria        criteria_       ;
