@@ -234,16 +234,16 @@ private:
 
         cv::GMat g_in;
         
-        auto g_x_mean_raw     = cv::gapi::filter2D(g_in, type_to_depth<Float>(), kern);
-        auto [g_x_mean,   _1] = cv::gapi::threshold(g_x_mean_raw, theor_max_val, 0, cv::THRESH_TRUNC);
+        auto g_x_mean_raw   = cv::gapi::filter2D(g_in, type_to_depth<Float>(), kern);
+        auto g_x_mean       = cv::gapi::threshold(g_x_mean_raw, theor_max_val, 0, cv::THRESH_TRUNC);
 
-        auto g_x_mean_2_raw   = cv::gapi::mul(g_x_mean, g_x_mean);
-        auto [g_x_mean_2, _2] = cv::gapi::threshold(g_x_mean_2_raw, theor_max_val*theor_max_val, 0, cv::THRESH_TRUNC);
+        auto g_x_mean_2_raw = cv::gapi::mul(g_x_mean, g_x_mean);
+        auto g_x_mean_2     = cv::gapi::threshold(g_x_mean_2_raw, theor_max_val*theor_max_val, 0, cv::THRESH_TRUNC);
 
-        auto g_x_2       = cv::gapi::mul(g_in, g_in);
-        auto g_x_2_mean  = cv::gapi::filter2D(g_x_2, type_to_depth<Float>(), kern);
-        auto g_var_raw   = g_x_2_mean - g_x_mean_2;
-        auto [g_var,      _3] = cv::gapi::threshold(g_var_raw, 0, 0, cv::THRESH_TOZERO);
+        auto g_x_2          = cv::gapi::mul(g_in, g_in);
+        auto g_x_2_mean     = cv::gapi::filter2D(g_x_2, type_to_depth<Float>(), kern);
+        auto g_var_raw      = cv::gapi::sub(g_x_2_mean, g_x_mean_2);
+        auto g_var          = cv::gapi::threshold(g_var_raw, 0, 0, cv::THRESH_TOZERO);
 
         cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_x_mean, g_x_mean_2, g_var));
 

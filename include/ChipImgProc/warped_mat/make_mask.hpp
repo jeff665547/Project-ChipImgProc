@@ -31,7 +31,7 @@ struct MakeMask {
         cv::GMat g_in;
         cv::GMat g_tmp1 = cv::gapi::warpAffine(g_in, warpmat, dsize);
         cv::GMat g_tmp2 = cv::gapi::filter2D(g_tmp1, CV_64F, kern);
-		cv::GMat g_tmp3 = g_tmp2 - 254.49;
+		cv::GMat g_tmp3 = cv::gapi::subC(g_tmp2, cv::GScalar(254.49));
 		cv::GMat g_out  = cv::gapi::convertTo(g_tmp3, CV_8U);
         cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_out));
         
