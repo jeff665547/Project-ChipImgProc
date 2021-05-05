@@ -49,7 +49,7 @@ struct MakeMask {
                     cv::Rect mat_rect(0, 0, mat.cols, mat.rows);
                     auto tmp = mat(cv::Rect(org_off.x, org_off.y, roiw, roih) & mat_rect);
                     partial_mask(
-                        clw, clh, clwd * 2, clhd * 2, clwsp, clhsp, tmp
+                        clw, clh, clwd * 2, clhd * 2, clwsp, clhsp, 255, tmp
                     );
                 }
                 cv::Mat warp_mask(dsize, CV_64F);
@@ -73,12 +73,13 @@ private:
         int clw,  int clh,
         int clwd, int clhd,
         int clwsp, int clhsp,
+        int theor_max_val,
         cv::Mat& mat
     ) const {
         for(int i = 0; i < mat.rows; i += clhd) {
             for(int j = 0; j < mat.cols; j += clwd) {
                 cv::Rect clr(j + clwsp, i + clhsp, clw, clh);
-                mat(clr).setTo(-1);
+                mat(clr).setTo(theor_max_val);
             }
         }
     }
