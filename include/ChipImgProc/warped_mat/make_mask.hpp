@@ -31,8 +31,8 @@ struct MakeMask {
         cv::GMat g_in;
         cv::GMat g_tmp1 = cv::gapi::warpAffine(g_in, warpmat, dsize);
         cv::GMat g_tmp2 = cv::gapi::filter2D(g_tmp1, CV_64F, kern);
-		cv::GMat g_tmp3 = cv::gapi::subC(g_tmp2, cv::GScalar(254.49));
-		cv::GMat g_out  = cv::gapi::convertTo(g_tmp3, CV_8U);
+        cv::GMat g_tmp3 = cv::gapi::subC(g_tmp2, cv::GScalar(254.49));
+        cv::GMat g_out  = cv::gapi::convertTo(g_tmp3, CV_8U);
         cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_out));
         
         // d1 = std::chrono::steady_clock::now() - tmp_timer;
@@ -52,7 +52,7 @@ struct MakeMask {
                         clw, clh, clwd * 2, clhd * 2, clwsp, clhsp, 255, tmp
                     );
                 }
-                cv::Mat warp_mask(dsize, CV_64F);
+                cv::Mat warp_mask(dsize, CV_8U);
                 // tmp_timer = std::chrono::steady_clock::now();
                 computation.apply(
                     cv::gin(mat), 

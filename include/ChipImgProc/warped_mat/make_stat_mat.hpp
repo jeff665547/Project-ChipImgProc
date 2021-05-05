@@ -56,7 +56,8 @@ struct MakeStatMat {
         int clw_px    = std::round(clw * um2px_r);
         int clh_px    = std::round(clh * um2px_r);
         // auto tmp_timer(std::chrono::steady_clock::now());
-        // std::chrono::duration<double, std::milli> d;
+        // auto tmp_timer1(std::chrono::steady_clock::now());
+        // std::chrono::duration<double, std::milli> d, d1;
         // auto [mean, sd] = make_large_cv_mat(mat, swin_w_px, swin_h_px);
         // cv::Mat cv = sd / mean;
         // d = std::chrono::steady_clock::now() - tmp_timer;
@@ -78,7 +79,7 @@ struct MakeStatMat {
         // d = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "make_large_mask: " << d.count() << " ms\n";
 
-        //tmp_timer = std::chrono::steady_clock::now();
+        // tmp_timer = std::chrono::steady_clock::now();
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());
         cv::connectedComponents(lmask, mask_cell_label);
         // d = std::chrono::steady_clock::now() - tmp_timer;
@@ -167,7 +168,9 @@ struct MakeStatMat {
                 cv::Mat sum_mask = sub_mask & sub_lab;
 				
                 cv::threshold(sub_raw, sub_raw, theor_max_val, 0, cv::THRESH_TRUNC);
+                // tmp_timer1 = std::chrono::steady_clock::now();
                 auto [sub_mean, sub_mean_2, sub_var] = make_cell_stats(sub_raw, theor_max_val, swin_w_px, swin_h_px);
+                // d1 += std::chrono::steady_clock::now() - tmp_timer1;
                 cv::Mat sub_cv_2           = sub_var / sub_mean_2;
                 
                 cv::Point min_cv_pos; // pixel domain
@@ -195,6 +198,7 @@ struct MakeStatMat {
             }
         }
         // d = std::chrono::steady_clock::now() - tmp_timer;
+        // std::cout << "calculate stat_mat: " << d1.count() << " ms\n";
         // std::cout << "calculate stat_mat: " << d.count() << " ms\n";
 
         if(v_margin){
@@ -229,6 +233,7 @@ private:
     auto make_cell_stats(
         cv::Mat mat, double theor_max_val, int conv_w, int conv_h
     ) const {
+        /*
         cv::Mat kern(conv_h, conv_w, type_to_depth<Float>());
         kern.setTo(1.0 / (conv_w * conv_h));
 
@@ -249,15 +254,16 @@ private:
 
         cv::Mat x_mean, x_mean_2, var;
         computation.apply(cv::gin(mat), cv::gout(x_mean, x_mean_2, var));
+        */
 
-        // cv::Mat x_mean   = mean(mat, conv_w, conv_h);
-        // cv::threshold(x_mean, x_mean, theor_max_val, 0, cv::THRESH_TRUNC);
-        // cv::Mat x_mean_2 = x_mean.mul(x_mean);
-        // cv::threshold(x_mean_2, x_mean_2, theor_max_val*theor_max_val, 0, cv::THRESH_TRUNC);
-        // auto    x_2      = mat.mul(mat);
-        // auto    x_2_mean = mean(x_2, conv_w, conv_h);
-        // cv::Mat var      = x_2_mean - x_mean_2;
-        // cv::threshold(var, var, 0, 0, cv::THRESH_TOZERO);
+        cv::Mat x_mean   = mean(mat, conv_w, conv_h);
+        cv::threshold(x_mean, x_mean, theor_max_val, 0, cv::THRESH_TRUNC);
+        cv::Mat x_mean_2 = x_mean.mul(x_mean);
+        cv::threshold(x_mean_2, x_mean_2, theor_max_val*theor_max_val, 0, cv::THRESH_TRUNC);
+        auto    x_2      = mat.mul(mat);
+        auto    x_2_mean = mean(x_2, conv_w, conv_h);
+        cv::Mat var      = x_2_mean - x_mean_2;
+        cv::threshold(var, var, 0, 0, cv::THRESH_TOZERO);
 
         return nucleona::make_tuple(
             std::move(x_mean),
