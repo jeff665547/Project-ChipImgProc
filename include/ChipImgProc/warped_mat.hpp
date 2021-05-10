@@ -118,8 +118,8 @@ constexpr struct MakeWarpedMat {
         int clwn,        int clhn,
         ViewerCallback v_margin
     ) const {
-        // auto tmp_timer(std::chrono::steady_clock::now());
-        // std::chrono::duration<double, std::milli> d;
+        auto tmp_timer(std::chrono::steady_clock::now());
+        std::chrono::duration<double, std::milli> d;
         warped_mat::MakeStatMat<float> make_stat_mat;
         auto [stat_mats, center_info] = make_stat_mat(
             mat, origin, 
@@ -133,8 +133,9 @@ constexpr struct MakeWarpedMat {
             warp_mat,
             v_margin
         );
-        // d = std::chrono::steady_clock::now() - tmp_timer;
-        // std::cout << "make_stat_mat: " << d.count() << " ms\n";
+        d = std::chrono::steady_clock::now() - tmp_timer;
+        chipimgproc::log.error("ChipImgProc::MakeWarpedMat::operator()(...) - make_stat_mat: {} ms", d.count());
+
         return WarpedMat<true, float>(
             warp_mat, mat, 
             w, h,

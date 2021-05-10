@@ -17,8 +17,8 @@ struct MakeMask {
         cv::Mat warpmat,
         cv::Size dsize
     ) const {
-        // auto tmp_timer(std::chrono::steady_clock::now());
-        // std::chrono::duration<double, std::milli> d, d1;
+        auto tmp_timer(std::chrono::steady_clock::now());
+        std::chrono::duration<double, std::milli> d, d1;
         
         auto roiw = clwd * clwn;
         auto roih = clhd * clhn;
@@ -37,7 +37,6 @@ struct MakeMask {
         
         // d1 = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "make_mask-init: " << d1.count() << " ms\n";
-        // auto tmp_timer2(std::chrono::steady_clock::now());
         for(int i = 0; i < 2; i ++) {
             for(int j = 0; j < 2; j ++) {
                 cv::Mat mat = cv::Mat::zeros(h, w, CV_8U);
@@ -53,19 +52,17 @@ struct MakeMask {
                     );
                 }
                 cv::Mat warp_mask(dsize, CV_8U);
-                // tmp_timer = std::chrono::steady_clock::now();
                 computation.apply(
                     cv::gin(mat), 
                     cv::gout(warp_mask), 
                     cv::compile_args(cv::gapi::imgproc::gpu::kernels())
                 );
-                // d += std::chrono::steady_clock::now() - tmp_timer;
                 res += warp_mask;
             }
         }
-		// d1 = std::chrono::steady_clock::now() - tmp_timer2;
-        // std::cout << "make_mask-apply: " << d.count() << " ms\n";
-        // std::cout << "make_mask-computation: " << d1.count() << " ms\n";
+		d = std::chrono::steady_clock::now() - tmp_timer;
+        chipimgproc::log.error("chipimgproc::warped_mat::MakeMask::operator()(...) - make_mask: {} ms", d.count());
+
         return res >= 1;
     } 
 private:

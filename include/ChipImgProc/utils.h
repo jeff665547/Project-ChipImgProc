@@ -4,6 +4,7 @@
 #include <ChipImgProc/utils/less.hpp>
 #include <ChipImgProc/utils/mat.hpp>
 #include <ChipImgProc/histogram.hpp>
+#include <ChipImgProc/logger.hpp>
 namespace chipimgproc { 
 
 const double PI = std::atan(1.0)*4;

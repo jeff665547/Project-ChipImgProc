@@ -57,7 +57,7 @@ public:
         core().critical(FWD(args)...);
     }
     
-    void set_level(int n)const {
+    void set_level(int n) const {
         auto level = logger::level_trans(n);
         console_sink()->set_level(level);
         file_sink()->set_level(level);
