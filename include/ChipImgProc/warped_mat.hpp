@@ -134,7 +134,7 @@ constexpr struct MakeWarpedMat {
             v_margin
         );
         d = std::chrono::steady_clock::now() - tmp_timer;
-        chipimgproc::log.error("ChipImgProc::MakeWarpedMat::operator()(...) - make_stat_mat: {} ms", d.count());
+        chipimgproc::log.info("ChipImgProc::MakeWarpedMat::operator()(...) - make_stat_mat: {} ms", d.count());
 
         return WarpedMat<true, float>(
             warp_mat, mat, 

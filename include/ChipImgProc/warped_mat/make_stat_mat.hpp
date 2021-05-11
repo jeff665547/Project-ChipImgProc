@@ -78,7 +78,7 @@ struct MakeStatMat {
         // lmask.convertTo(test_img, CV_16U);
         // cv::imwrite("large_mask.tiff", test_img);
         d = std::chrono::steady_clock::now() - tmp_timer;
-        chipimgproc::log.error("chipimgproc::warped_mat::MakeStatMat::operator()(...) - make_large_mask: {} ms", d.count());
+        chipimgproc::log.info("chipimgproc::warped_mat::MakeStatMat::operator()(...) - make_large_mask: {} ms", d.count());
 
         // tmp_timer = std::chrono::steady_clock::now();
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());
@@ -200,7 +200,7 @@ struct MakeStatMat {
         }
         d = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "calculate stat_mat: " << d1.count() << " ms\n";
-        chipimgproc::log.error("chipimgproc::warped_mat::MakeStatMat::operator()(...) - calculate cell_mat: {} ms", d.count());
+        chipimgproc::log.info("chipimgproc::warped_mat::MakeStatMat::operator()(...) - calculate cell_mat: {} ms", d.count());
 
         if(v_margin){
             v_margin(mat_clone);

@@ -61,7 +61,7 @@ struct MakeMask {
             }
         }
 		d = std::chrono::steady_clock::now() - tmp_timer;
-        chipimgproc::log.error("chipimgproc::warped_mat::MakeMask::operator()(...) - make_mask: {} ms", d.count());
+        chipimgproc::log.info("chipimgproc::warped_mat::MakeMask::operator()(...) - make_mask: {} ms", d.count());
 
         return res >= 1;
     } 
