@@ -14,15 +14,4 @@ struct RotDegfromWarp {
 };
 constexpr RotDegfromWarp rot_deg_from_warp;
 
-struct SlopefromWarp {
-    double operator()(cv::Mat warp_mat) const {
-        double res;
-        typed_mat(warp_mat, [&res](auto&& mat){
-            res = mat(1, 0) / mat(0, 0);
-        });
-        return res;
-    }
-};
-constexpr SlopefromWarp slope_from_warp;
-
 } // namespace chipimgproc::rotation

@@ -76,6 +76,12 @@ protected:
         return {0, 0};
     }
 public:
+    const auto& templ() {
+        return templ_;
+    }
+    const auto& mask() {
+        return mask_;
+    }
     const auto& stempl() {
         return stempl_;
     }

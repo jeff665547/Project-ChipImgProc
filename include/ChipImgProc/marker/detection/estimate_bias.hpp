@@ -76,6 +76,7 @@ public:
 
         cv::Mat scores;
         cv::Point2d cover_center((cover_size.width - 1) / 2.0, (cover_size.height - 1) / 2.0);
+        cv::Point2d scores_center((local_cover_size.width - 1) / 2.0, (local_cover_size.height - 1) / 2.0);
         if (!global_search) {
             scores.create(local_cover_size, cv::Mat1f().type());
             scores = cv::Scalar(0);
@@ -84,8 +85,10 @@ public:
             cv::Mat cover;
             // cv::Mat score;
             for (auto&& h : hints) {
-                center.x = h.x - templ_center.x;
-                center.y = h.y - templ_center.y;
+                center.x = h.x;
+                center.y = h.y;
+                // center.x = h.x - templ_center.x;
+                // center.y = h.y - templ_center.y;
                 cv::getRectSubPix(image, cover_size, center, cover);
                 // score = chipimgproc::match_template(cover, templ, cv::TM_CCORR_NORMED, mask);
                 // cv::Mat tmp(score.size(), CV_8U);
@@ -152,8 +155,8 @@ public:
             // Substitutional: Bias correction testing for no adjustment case & high precision case (estimated position (region (95.6% up))).
             cv::Point2d rel_max_score_p, abs_rel_max_score_p;
             cv::Size2d regulation_cover_radius;
-            rel_max_score_p.x = max_score_p.x - cover_center.x;
-            rel_max_score_p.y = max_score_p.y - cover_center.y;
+            rel_max_score_p.x = max_score_p.x - scores_center.x;
+            rel_max_score_p.y = max_score_p.y - scores_center.y;
             abs_rel_max_score_p.x = std::abs(rel_max_score_p.x);
             abs_rel_max_score_p.y = std::abs(rel_max_score_p.y);
             regulation_cover_radius.width = regulation_cover_size.width / 2.0;
@@ -168,8 +171,8 @@ public:
             }
         }else if(!global_search){
             // Substitutional: Bias correction for substitutional case (estimated position (region (99.51% up))).
-            bias.x = max_score_p.x + dx - cover_center.x;
-            bias.y = max_score_p.y + dy - cover_center.y;
+            bias.x = max_score_p.x + dx - scores_center.x;
+            bias.y = max_score_p.y + dy - scores_center.y;
         }else{
             // Original: Bias correction for original case (all possible position (region)).
             bias.x = 0 + max_score_p.x + dx - x0;
