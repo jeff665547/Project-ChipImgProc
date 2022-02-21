@@ -1,4 +1,10 @@
+/**
+ * @file    fusion_array.hpp
+ * @author  Chi-Hsuan Ho (jeffho@centrilliontech.com.tw)
+ * @brief   @copybrief chipimgproc::marker::detection::FusionArray
+ */
 #pragma once
+
 #include <opencv2/core.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/imgproc.hpp>
@@ -25,12 +31,49 @@ namespace cm = chipimgproc;
 using cvMat8 = cv::Mat_<std::uint8_t>;
 
 struct MakeFusionArray;
-
+/**
+ * @brief The FussionArray class is used to construct the detection technique for general markers.
+ * 
+ */
 template<class cvMatT>
 struct FusionArray {
 
 friend MakeFusionArray;
 protected:
+    /**
+     * @brief     The detection technique for general markers distributed in a 
+     *            rectangular arrangement only (it will support for other arrangements
+     *            in the future).
+     * @details   This algorithm first use the chip GDS spec to generate the candidate 
+     *            marker regions to narrow down the searching area. From each candidate 
+     *            marker region of the corresponding alignment marker, use the marker 
+     *            frame template (templ) and marker frame mask (mask) to Identify the 
+     *            pixel-level marker position. To improve the efficiency, this algorithm 
+     *            first detect marker positions in the downsampled images, and use those 
+     *            rough positions to find the accurate position in the original scale image.
+     *            Finally, it will store all the information (row ID and column ID of the 
+     *            alignment markers, matching score, detected marker position) into a 
+     *            collection.
+     *            
+     *            For more information, please refer to the source code.
+     *            
+     *            Examples:
+     * 
+     *            Summit.Grid: <a href="http://gitlab.centrilliontech.com.tw:10088/centrillion/Summit.Grid/blob/1.3.x/include/summit/app/grid/probe_ch_proc_setter.hpp#L56">include/summit/app/grid/probe_ch_proc_setter.hpp: 56</a>
+     * 
+     * @image     html FusionArray-concept.png width=650px
+     * 
+     * @param templ             Template image that is used to recognize the marker.
+     * @param mask              Mask image that is used to inform the region that should be focused.
+     * @param pyramid_level     The downsampling times. This parameter is used to downsample the processed 
+     *                          input image, templ and mask.
+     * @param theor_max_val     Theoretical maximum value of the input image depth. This parameter is 
+     *                          only be used to convert the image depth of the processed input image.
+     * @param img_templ_cols    Number of column in the template image.
+     * @param img_templ_rows    Number of row in the template image.
+     * @param mk_layout         Marker layout generated from the chipimgproc::marker::Layout class.
+     * @param unit              Unit specifying the current working environment for input images, the algorithm, and the output results unit (PX, CELL).
+     */
     FusionArray(
         const cv::Mat_<cvMatT>&    templ,
         const cv::Mat_<cvMatT>&    mask,
@@ -82,6 +125,15 @@ protected:
     }
 
 public:
+    /**
+     * @brief Generation of the inference for the area where markers could appear accroding to the regular scanning process. 
+     *        This function is the same as that in the chipimgproc::marker::detection::RegMat Class.
+     * 
+     * @param img_templ_cols    Number of column in the template image.
+     * @param img_templ_rows    Number of row in the template image.
+     * @param mk_layout         Marker layout generated from the chipimgproc::marker::Layout class.
+     * @param unit              Unit specifying the current working environment for input images, the algorithm, and the output results unit (PX, CELL).
+     */
     auto generate_raw_marker_regions(
         const int&                   img_templ_cols,
         const int&                   img_templ_rows,
@@ -147,7 +199,11 @@ public:
         }
         return marker_regions;
     }
-
+    /**
+     * @brief Set the preprocessor of the fluorescent channel images.
+     * 
+     * @return void 
+     */
     void set_pb_img_preprocessor(void) {
         img_preprocessor_ = [](const cvMat8& mat) -> cvMat8 {
             cvMat8 img;
@@ -155,7 +211,11 @@ public:
             return img;
         };
     }
-    
+    /**
+     * @brief Set the preprocessor of the white channel images.
+     * 
+     * @return void 
+     */    
     void set_wh_img_preprocessor(void) {
         img_preprocessor_ = [](const cvMat8& mat) -> cvMat8 {
             cvMat8 img;
@@ -163,7 +223,13 @@ public:
             return img;
         };
     }
-
+    /**
+     * @brief     This function perform the FusionArray detection technique algorithm 
+     *            to recognize the positions of each general marker.
+     * @param     input Input images with general markers.
+     * @return    A collection of detected marker ID with their matching scores and
+     *            xy-positions in the corresponding images.
+     */
     std::vector<
         std::tuple<cv::Point, double, cv::Point2d>
     > operator() (

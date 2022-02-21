@@ -27,4 +27,16 @@ Finally, the intensity of a feature probe can be determined by the most represen
 @image html tutorial-flowchart.png width=600px
 @image latex tutorial-flowchart.png
 
-Figure 4 A demonstrative workflow of the ChipImgProc library
+Figure 4 The overall workflow of the Grid1 algorithm in the ChipImgProc library
+
+The above workflow is the concept for the old gridding algorithm (grid 1 algorithm) which rotates and corrects the input images before the probe intensity extraction. However, to provide a more accurate gridding result, instead of rotating images, in the new gridding algorithm (grid 2 algorithm) design, we map and align the coordinate system with the raw images and break the framework of the traditional pixel concept by introducing the [affine transformation](https://docs.opencv.org/3.4/d4/d61/tutorial_warp_affine.html) and the sub-pixel domain compuation respectively. In other words, we extract the probe intensity from the raw images directly to deliver a more realistic probe intensity data. After changing the the core perspective of the algorithm, the new workflow will omit the "Image Rotation", "Image Cropping", and "Image Gridding" three steps and replace the "Rotation Angle Estimation" with the "Warp Matrix Estimation" for each FOV (Figure 5). 
+
+@image html Grid2-workflow.png width=600px
+
+Figure 5 The overall workflow of the Grid2 algorithm in the ChipImgProc library.
+
+In the new design, the ArUco alignment markers will be recognized through the [random based](@ref chipimgproc::marker::detection::RandomBased) algorithm, and other kinds of alignment markers will be recognized through the [fusion array](@ref chipimgproc::marker::detection::FusionArray) algorithm. After we get the position of each marker, we will estimate and fine-tune the warp matrix through the [estimate transformation matrix](@ref chipimgproc::warped_mat::EstimateTransformMat) algorithm and the [estimate bias](@ref chipimgproc::marker::detection::EstimateBias) algorithm respectively. The [estimate bias](@ref chipimgproc::marker::detection::EstimateBias) algorithm is used to deal with the random movement caused by the switching channel process from SUMMIT Reader. After estimating the warp matrix, we use the [make statistics matrix](@ref chipimgproc::warped_mat::MakeStatMat) algorithm to interpolate and compute the intensity for each probe. It's worth noting that if users dive under the hood of the sub-pixel domain computation, they will discover a shift is needed whenever transforming between the pixel domain and the sub-pixel domain computation, just like the relationship demonstrated below (Figure 6). For more information on the algorithm details, please refer to the documents of each algorithm.
+
+@image html Grid2-concept.png width=600px
+
+Figure 6 The transformation between the pixel domain (black) and the sub-pixel domain (blue). (From the pixel domain to the sub-pixel domain: x-=0.5, y-=0.5)

@@ -1,10 +1,18 @@
+/**
+ * @file    estimate_bias.hpp
+ * @author  Chi-Hsuan Ho (jeffho@centrilliontech.com.tw)
+ * @brief   @copybrief chipimgproc::marker::detection::EstimateBias
+ */
 #include <ChipImgProc/utils.h>
 #include <algorithm>
 #include <ChipImgProc/rotation/from_warp_mat.hpp>
 #include <cmath>
 // #include <iostream>
 namespace chipimgproc::marker::detection {
-
+/**
+ * @brief The EstimateBias class is used to estimate the bias between the given marker positions and the true marker positions.
+ * 
+ */
 struct EstimateBias {
 private:
     using Hints = std::vector<cv::Point2d>;
@@ -19,6 +27,61 @@ private:
         return res;
     }
 public:
+    /**
+     * @brief       Estimate the bias between the given marker positions and the true marker positions.
+     * @details     The main purpose of this algorithm is going to find the relative displacement (bias)
+     *              between the given marker positions (hints) and the true marker positions (marker 
+     *              positions in the _image). This algorithm provides two searching modes (the local search 
+     *              mode and the global search mode) to estimate the bias. Users can switch between the two 
+     *              modes through the global_search parameter. For the local search mode, users should 
+     *              provide a local cover (local_cover_size) to help the algorithm narrow down the searching 
+     *              area for each marker. For the global search mode, the algorithm will automatically 
+     *              compute the searching area (all possible position) for each marker once the global_search
+     *              parameter is set to true. However, due to the efficiency and the accuracy, the default 
+     *              mode is set to the local search mode.
+     * 
+     *              In the both modes, to find the marker position more accurately, the algorithm will use
+     *              the given angle to rotate the template (templ) and mask to recognize the marker position 
+     *              in the specified searching area whose center is the given candidate marker position. Since 
+     *              the relationship among the alignment markers would not be changed after some rotation or 
+     *              shifts, the bias from the candidate marker position to the true marker position should 
+     *              be the same for every alignment markers theoretically. Thus, the algorithm will average 
+     *              all the recognized results and finds the relative bias with the highest matching score. 
+     *              To take the subpixel-level bias into account, the algorithm will estimate the 
+     *              subpixel-level bias through the Gaussian function.
+     *              
+     *              Whichever scan mode is used, if the regulation is not set to true, this algorithm will 
+     *              compute the bias and return the results directly. Otherwise, the algorithm will 
+     *              examine the rationality of the bias. If the estimated bias is smaller than the threshold 
+     *              user specified (regulation_cover_size), the algorithm will return all the results (bias, 
+     *              corresponding averaged matching score) and update the parameters in the original warp 
+     *              matrix. However, if it is larger than the threshold, the bias will be set to 0, and the 
+     *              parameters in the original warp matrix will remain the same.
+     * 
+     *              For more information, please refer to the source code.
+     * 
+     *              Examples:
+     * 
+     *              Summit.Grid: <a href="http://gitlab.centrilliontech.com.tw:10088/centrillion/Summit.Grid/blob/1.3.x/include/summit/app/grid/pipeline/fov_ag.hpp#L239">include/summit/app/grid/pipeline/fov_ag.hpp :239</a>
+     * 
+     * @image html EstimateBias-concept.png width=650px
+     * 
+     * @param _image                Input images.
+     * @param templ                 Template image that is used to recognized the marker.
+     * @param mask                  Mask image that is used to inform the region that should be focused.
+     * @param hints                 Theoretical marker positions from the GDS file. These positions are used to generate
+     *                              the given marker positions via the transformation of the warp_mat.
+     * @param angle                 The given angle that is used to perform the affine transformation.
+     * @param global_search         A Boolean value specifying the searching region. When it is set to true, all the
+     *                              possible region will be used to search.
+     * @param local_cover_size      A cv::Size specifying the size of the local cover region representing the random 
+     *                              movement caused from the SUMMIT hardware.
+     * @param regulation            A Boolean value specifying the judgement for the rationality of the relative bias 
+     *                              from the true marker position.
+     * @param regulation_cover_size A cv::Size (relative to the templ size) specifying the cover region that is used to 
+     *                              judge the rationality of the relative bias from the true marker position.
+     * @return auto
+     */
     auto operator()(
         const cv::Mat&  _image,
         cv::Mat         templ,
@@ -184,6 +247,37 @@ public:
             scores.at<float>(max_score_p.y, max_score_p.x) / hints.size()
         );
     }
+    /**
+     * @brief                       This is an overloaded member function, provided for convenience. 
+     *                              This overloaded function will first use the warp_mat and hints_rum to generate the 
+     *                              candidate marker positions. After that, it will derive the rotation angle from the 
+     *                              warp_mat and compute the size of the local cover by taking the maximum of the 
+     *                              basic_cover_size and the high_P_cover_extend_r and compute the regulation cover 
+     *                              from the regulation_cover_extend_r. For the purpose of passing these parameters to
+     *                              the above function, please see the above explanation of this algorithm for more 
+     *                              information.
+     * @param _image                Input images.
+     * @param templ                 Template image that is used to recognized the marker.
+     * @param mask                  Mask image that is used to inform the region that should be focused.
+     * @param hints_rum             Hints from rescaled um. Theoretical marker positions from the GDS file. These 
+     *                              positions are used to generate the given marker positions via the transformation 
+     *                              of the warp_mat.
+     * @param warp_mat              Warp matrix. The given transformation matrix (warp matrix) that is used to 
+     *                              generate the given marker positions through transforming the hints_rum.
+     * @param global_search         A Boolean value specifying the searching region. When it is set to true, all the 
+     *                              possible region will be used to search. The default value is false.
+     * @param basic_cover_size      A cv::Size specifying the size of the basic cover region representing the random 
+     *                              movement caused from the SUMMIT hardware. The default value is cv::Size2d(0.0, 0.0).
+     * @param high_P_cover_extend_r The extended ratio of the high probability cover. A ratio (relative to the templ 
+     *                              size) specifying the cover region with the higher probability of the appearance 
+     *                              of the marker. The default value is 0.0.
+     * @param regulation            A Boolean value specifying the judgement for the rationality of the relative bias 
+     *                              from the true marker position. The default value is false.
+     * @param regulation_cover_extend_r A ratio (relative to the templ size) specifying the cover region that is used 
+     *                              to judge the rationality of the relative bias from the true marker position.
+     * @return auto                 The bias between the given marker positions and the true marker positions and its 
+     *                              corresponding matching score. The default value is 0.0.
+     */
     auto operator()(
         const cv::Mat&  _image,
         cv::Mat         templ,

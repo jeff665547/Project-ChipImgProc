@@ -1,3 +1,8 @@
+/**
+ * @file    random_based.hpp
+ * @author  Chi-Hsuan Ho (jeffho@centrilliontech.com.tw)
+ * @brief   @copybrief chipimgproc::marker::detection::RandomBased
+ */
 #pragma once
 
 #include <opencv2/core.hpp>
@@ -18,6 +23,10 @@ struct RndMkId {
     int index;
     int distance;
 };
+/**
+ * @brief The RandomBased class is used to construct the detection technique for ArUco Markers.
+ * 
+ */
 template<class Derived>
 struct RandomBased {
 private:
@@ -28,6 +37,49 @@ private:
         return static_cast<const Derived*>(this);
     }
 protected:
+    /**
+     * @brief The detection technique for ArUco markers.
+     * @details   This searching procedure can be classified into two stages further 
+     *            (pixel-level search & subpixel-level correction). It will repeat the 
+     *            following pixel-level search procedure nms_count times to detect all 
+     *            the possible markers positions:
+     *              1. Identify the most similar region to the marker frame in an FOV 
+     *                 by using marker frame template (templ) and marker frame mask (mask), 
+     *                 and take that region as the true marker position.
+     *              2. (For some markers,) Decode the ArUco code in the marker frame found 
+     *                 in the previous step to make sure the detected object is the ArUco 
+     *                 marker.
+     *              3. To find the position of the next marker frame more accurately, we 
+     *                 take the current marker as the center, and exclude an user-defined 
+     *                 circular region (nms_radius) indicating the non-optimal matching 
+     *                 locations.
+     * 
+     *            After the above procedure, this algorithm will pick the marker image with 
+     *            the highest matching score as the new template from the above procedure, 
+     *            and use that new template to correct the subpixel-level bias and estimate 
+     *            the new corresponding matching score. Finally, It will decode all the 
+     *            detected ArUco markers, and store all the information (ArUco ID, matching 
+     *            score, detected marker position) into a sorted collection (sorted by the 
+     *            ArUco ID and matching score).
+     * 
+     *            For more information, please refer to the source code.
+     * 
+     *            Examples:
+     *            
+     *            Summit.Grid: <a href="http://gitlab.centrilliontech.com.tw:10088/centrillion/Summit.Grid/blob/1.3.x/include/summit/app/grid/aruco_setter.hpp#L81">include/summit/app/grid/aruco_setter.hpp:81</a>
+     * 
+     * @image     html RandomBased-concept.png width=650px
+     * 
+     * @param templ             Template image that is used to recognized the marker.
+     * @param mask              Mask image that is used to inform the region that should be focused.
+     * @param pyramid_level     The downsampling times. This parameter is used to downsample the processed 
+     *                          input image, templ and mask.
+     * @param theor_max_val     Theoretical maximum value of the input image depth. This parameter is 
+     *                          only be used to convert the image depth of the processed input image.
+     * @param nms_count         The maximum number of counts of ArUco markers in an FOV. For example, the 
+     *                          number of marker counts is nine for the YZ01 and Banff chip.
+     * @param nms_radius        The minimum distance (pixel) between each ArUco markers.
+     */
     RandomBased(
         const cv::Mat_<std::uint8_t>&   templ,
         const cv::Mat_<std::uint8_t>&   mask,
@@ -76,18 +128,48 @@ protected:
         return {0, 0};
     }
 public:
+    /**
+     * @brief Provide the template information of the template matching algorithm used in this class.
+     * 
+     * @return auto 
+     */
     const auto& templ() {
         return templ_;
     }
+    /**
+     * @brief Provide the mask information of the template matching algorithm used in this class.
+     * 
+     * @return auto 
+     */
     const auto& mask() {
         return mask_;
     }
+    /**
+     * @brief Provide the scaled template information of the template matching algorithm used in this class.
+     * 
+     * @return auto 
+     */
     const auto& stempl() {
         return stempl_;
     }
+    /**
+     * @brief Set the termination criteria of the ECC algorithm (in OpenCV) used in this class.
+     * 
+     * @param templ     Template image that is used to recognized the marker.
+     * @return auto 
+     */
     void set_term_criteria(cv::TermCriteria tc) {
         criteria_ = tc;
     }
+    /**
+     * @brief     This function perform the RandomBased detection technique algorithm 
+     *            to recognize the positions of each ArUco marker.
+     * 
+     * @param     input Input images with ArUco markers.
+     * @return    A sorted collection of detected ArUco IDs with their matching scores 
+     *            and xy-positions in the corresponding images. (Use sorted ArUco IDs 
+     *            to filter the unreasonable ArUco IDs)
+     */
     template<class... Args>
     std::vector<
         std::tuple<int, double, cv::Point2d>

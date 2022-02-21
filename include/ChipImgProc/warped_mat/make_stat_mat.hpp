@@ -1,3 +1,8 @@
+/**
+ * @file    make_stat_mat.hpp
+ * @author  Chi-Hsuan Ho (jeffho@centrilliontech.com.tw)
+ * @brief   @copybrief chipimgproc::warped_mat::MakeStatMat
+ */
 #pragma once
 #include <cstdint>
 #include <ChipImgProc/utils.h>
@@ -11,9 +16,89 @@
 #include <opencv2/gapi/gpu/imgproc.hpp>
 
 namespace chipimgproc::warped_mat {
-
+/**
+ * @brief The MakeStatMat class is used to compute the extracted intensity from the fluorescent raw image of each probe.
+ * 
+ */
 template<class Float>
 struct MakeStatMat {
+    /**
+     * @brief       Compute the representative intensity for each probe.
+     * @details     This algorithm first use the following procedure to generate the large warped mask 
+     *              (Figure 4) to identify the pure probe convolution region of each probe in the 
+     *              convolutional fluorescent images:
+     *                  1. Generate the standard mask from the parameters users specified (origin, clw, 
+     *                     clh, clwd, clhd, w, h, clwn, clhn). These parameters should be infered from 
+     *                     the GDS spec.
+     *                  2. Transform the generated standard mask to simulate the real probe position and 
+     *                     its range for each probe through the given warpmat parameter (Figure 1).
+     *                     @image html MakeStatisticsMatrix-affinetransform-concept.png       width=650px
+     *                     Figure 1 Affine Transformation for simulating the real probe position.
+     *                  3. Identify the pure probe convolution region for each probe under the convolution 
+     *                     operation with the given small window (swin_w, swin_h, um2px_r) (Figure 2).
+     *                     @image html MakeStatisticsMatrix-convolution-concept.png           width=650px
+     *                     Figure 2 Convolution operation for identifying the pure signal region.
+     *                  4. Remove the polluted area (pixels) for each probe to get the binarized mask 
+     *                     representing the pure probe convolution region of each probe (Figure 3).
+     *                     @image html MakeStatisticsMatrix-makewarpedmask-concept.png        width=650px
+     *                     Figure 3 Binarized mask for removing the polluted area (pixels) for each probe.
+     * 
+     *              After that, this algorithm labels the pure probe convolution region of each probe 
+     *              with the natural number (Figure 4). 
+     *              @image html MakeStatisticsMatrix-largewarpedmask-concept.png   width=650px
+     *              Figure 4 Large warped mask for indicating the pure probe convolution region of each probe.
+     *              
+     *              It then creates containers for storing the computed information of each probe. For more 
+     *              details on extracting the desired inforamtion for each probe, please refer to 
+     *              the procedure and the demonstrated image (Figure 5) below.
+     *                  1. Get the label ID from the corresponding large warped mask and compute the 
+     *                     subpixel-level information (positions, pure probe convolution region, 
+     *                     ROI raw image) for that probe.
+     *                  2. Remove the influence from other probes and the interpolation bias under the
+     *                     subpixel-level domain by using the given theor_max_val.
+     *                  3. Use the given small window (swin_w, swin_h) to compute the desired statistics for 
+     *                     that window.
+     *                  4. Stack up the above information and extract the intensity that is the most 
+     *                     robust in this pure probe convolution region as the representative of that probe.
+     *                  5. Store all the information for the downstream analysis and summary.
+     *                     @image html MakeStatisticsMatrix-intensityextraction-concept.png   width=650px
+     *                     Figure 5 Stack up all the useful information and extract the desired statistics that is the 
+     *                     most robust in this pure probe convolution region of each probe.
+     *              
+     *              For more information, please refer to the source code.
+     *              
+     *              Examples:
+     * 
+     *              ChipImgProc: include/ChipImgProc/warped_mat.hpp:123
+     * 
+     * 
+     * @param mat                Input fluorescent images.
+     * @param origin             The origin of the coordinate system for the algorithm operation. It is usually set to (0, 0).
+     * @param clw                The probe width in the rescaled um domain.
+     * @param clh                The probe height in the rescaled um domain.
+     * @param clwd               The probe width (includes an x-axis gap between two adjacent probes) in the rescaled um domain.
+     * @param clhd               The probe height (includes a y-axis gap between two adjacent probes) in the rescaled um domain.
+     * @param w                  The FOV width in the rescaled um domain.
+     * @param h                  The FOV height in the rescaled um domain.
+     * @param swin_w             The width (px domain) of the small window used to compute the statistics of the probe. It will 
+     *                           be rounded up in the algorithm. 
+     * @param swin_h             The height (px domain) of the small window used to compute the statistics of the probe. It will 
+     *                           be rounded up in the algorithm.
+     * @param um2px_r            um to pixel rate. The transformation rate for transforming the algorithm operating coordinate 
+     *                           from um domain to pixel domain.
+     * @param theor_max_val      Theoretical maximum value of the input image depth.
+     * @param clwn               Number of cell (probe) in the row of an FOV.
+     * @param clhn               Number of cell (probe) in the column of an FOV.
+     * @param warpmat            The given transformation matrix that is used to inform the exact probe position in the 
+     *                           fluorescent image.
+     * @param v_margin           Debug viewer for outputting and viewing the final intensity-extracting area in the fluorescent 
+     *                           images.
+     * @param v_comp             Debug viewer for outputting and viewing the masking label (component) in the fluorescent image.
+     * @param v_mask             Debug viewer for outputting and viewing the masking area in the fluorescent image.
+     * 
+     * @return auto A collection of computed statistics and other information (e.g. position, raw image) for each probe.
+
+     */
     auto operator()(
         cv::Mat     mat,
         cv::Point2d     origin, 
@@ -29,42 +114,18 @@ struct MakeStatMat {
         ViewerCallback  v_comp   = {},
         ViewerCallback  v_mask   = {}
     ) const {
-        /*
-            1.1 generate large cv matrix
-            1.2 generate mask
-
-            2.1 warp mask
-
-            2.2 mask convolution
-
-            2.3 mask thresholding
-
-                repeat 2.1 *4
-
-            2.4 combine mask
-
-            3. labeling mask object
-
-            4. warp point subpixel cell roi to labeled mask & binarize
-            5. warp point subpixel cell roi to large cv matrix & minmaxloc with mask
-            6. for each cell do 7,8
-
-            7. make warped matrix
-        */
+        
+        /* Prepare parameters for the downstream analysis (the large waped mask generation and the probe intensity extraction) */
         int swin_w_px = std::round(swin_w * um2px_r);
         int swin_h_px = std::round(swin_h * um2px_r);
         int clw_px    = std::round(clw * um2px_r);
         int clh_px    = std::round(clh * um2px_r);
 
-        auto tmp_timer(std::chrono::steady_clock::now());
-        // auto tmp_timer1(std::chrono::steady_clock::now());
-        std::chrono::duration<double, std::milli> d, d1;
-        // auto [mean, sd] = make_large_cv_mat(mat, swin_w_px, swin_h_px);
-        // cv::Mat cv = sd / mean;
-        // d = std::chrono::steady_clock::now() - tmp_timer;
-        // std::cout << "make_large_cv_mat: " << d.count() << " ms\n";
+        // auto tmp_timer(std::chrono::steady_clock::now());
+        // std::chrono::duration<double, std::milli> d, d1;
 
-        tmp_timer = std::chrono::steady_clock::now();
+        /* Generate the large waped mask to identify the pure probe convolution region of each probe. */
+        // tmp_timer = std::chrono::steady_clock::now();
         auto lmask = make_large_mask(
             {
                 static_cast<int>(std::round(origin.x)), 
@@ -77,15 +138,18 @@ struct MakeStatMat {
         // cv::Mat test_img;
         // lmask.convertTo(test_img, CV_16U);
         // cv::imwrite("large_mask.tiff", test_img);
-        d = std::chrono::steady_clock::now() - tmp_timer;
-        chipimgproc::log.info("chipimgproc::warped_mat::MakeStatMat::operator()(...) - make_large_mask: {} ms", d.count());
+        // d = std::chrono::steady_clock::now() - tmp_timer;
+        // chipimgproc::log.info("chipimgproc::warped_mat::MakeStatMat::operator()(...) - make_large_mask: {} ms", d.count());
 
+        /* Label the pure probe convolution region of each probe with the natrual number. */
         // tmp_timer = std::chrono::steady_clock::now();
         cv::Mat_<std::int32_t> mask_cell_label(lmask.size());
         cv::connectedComponents(lmask, mask_cell_label);
         // d = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "connectedComponents: " << d.count() << " ms\n";
         
+        /* Convert the format of the labeled mask image (mask_cell_label) and output the 
+           related debug images. */
         // tmp_timer = std::chrono::steady_clock::now();
         {
             cv::Mat comp_img;
@@ -100,23 +164,16 @@ struct MakeStatMat {
         }
 		// d = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "v_comp & v_mask: " << d.count() << " ms\n";
-        // lmask = lmask / 255;
-        // ip_convert(lmask,           CV_32F);
+
+        /* Stack up all the useful information above and creates containers (stat_mats, 
+           cell_info) for storing the computed information of each probe. */
         ip_convert(mask_cell_label, CV_32F);
-        // ip_convert(sd,              CV_32F);
-        // ip_convert(lmean,            CV_32F);
-        // ip_convert(cv,              CV_32F);
-        // ip_convert(mat,             CV_16U);
         cv::Mat mat_clone;
         mat.convertTo(mat_clone, CV_16U);
-        // cv::Mat_<std::uint16_t> mat_clone = mat.clone();
         auto warped_agg_mat = make_basic(warpmat, 
             std::vector<cv::Mat>({
                 mask_cell_label,
                 lmask,
-                // cv,
-                // sd,
-                // lmean,
                 mat
             }),
             origin, clwd, clhd, w, h
@@ -128,9 +185,15 @@ struct MakeStatMat {
 		// d = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "init stat_mat: " << d.count() << " ms\n";
         
-		tmp_timer = std::chrono::steady_clock::now();
+		// tmp_timer = std::chrono::steady_clock::now();
+
+        /* Compute and extract the desired inforamtion for each probe. */
         for(int i = 0; i < clhn; i ++) {
             for(int j = 0; j < clwn; j ++) {
+                /* Get the label ID from the corresponding large warped mask and compute the 
+                   subpixel-level information (positions (cent_img, cent_rum), pure probe 
+                   convolution region (sub_lab, sub_mask), ROI raw image (sub_raw)) for that 
+                   probe. */
                 if(!warped_agg_mat.at_cell(
                     cell, i, j, cv::Size(1, 1)
                 )) {
@@ -156,11 +219,10 @@ struct MakeStatMat {
                 auto& cent_rum    = mats.at(0).real_p;
                 auto& sub_lab     = mats.at(0).patch;
                 auto& sub_mask    = mats.at(1).patch;
-                // auto& sub_cv      = mats.at(2).patch;
-                // auto& sub_sd      = mats.at(3).patch;
-                // auto& sub_mean    = mats.at(2).patch;
                 auto& sub_raw     = mats.at(2).patch;
 
+                /* Remove the influence from other probes and the interpolation bias under
+                   the subpixel-level domain. */
                 cv::Mat int_sub_lab(sub_lab.size(), CV_32S);
                 sub_lab -= 0.4;
                 sub_lab.convertTo(int_sub_lab, CV_32S);
@@ -170,10 +232,17 @@ struct MakeStatMat {
 				
                 cv::threshold(sub_raw, sub_raw, theor_max_val, 0, cv::THRESH_TRUNC);
                 // tmp_timer1 = std::chrono::steady_clock::now();
+
+                /* Use the given small window (swin_w_px, swin_h_px) to compute the desired 
+                   statistics (sub_mean, sub_mean_2, sub_var) for that probe.*/
                 auto [sub_mean, sub_mean_2, sub_var] = make_cell_stats(sub_raw, theor_max_val, swin_w_px, swin_h_px);
                 // d1 += std::chrono::steady_clock::now() - tmp_timer1;
                 cv::Mat sub_cv_2           = sub_var / sub_mean_2;
                 
+                /* Stack up the information, extract the intensity that is the most robust 
+                   (min_cv_pos) in this pure probe convolution region as the representative
+                   of this probe and store the information (stat_mats, cell_info) for the 
+                   downstream analysis and summary. */
                 cv::Point min_cv_pos; // pixel domain
                 double min_cv_2;
                 cv::minMaxLoc(sub_cv_2, &min_cv_2, nullptr, &min_cv_pos, nullptr, sum_mask);
@@ -184,6 +253,7 @@ struct MakeStatMat {
                 stat_mats.num   (i, j)  = swin_w_px * swin_h_px;
                 stat_mats.min_cv_pos(i, j) = min_cv_pos;
 
+                /* Generate the mincv debug images. */
                 if(v_margin){
                     cv::Point pb_img_tl(std::ceil(cent_img.x - clw_px/2.0),
                                         std::ceil(cent_img.y - clh_px/2.0));
@@ -198,14 +268,16 @@ struct MakeStatMat {
                 mats.clear();
             }
         }
-        d = std::chrono::steady_clock::now() - tmp_timer;
+        // d = std::chrono::steady_clock::now() - tmp_timer;
         // std::cout << "calculate stat_mat: " << d1.count() << " ms\n";
-        chipimgproc::log.info("chipimgproc::warped_mat::MakeStatMat::operator()(...) - calculate cell_mat: {} ms", d.count());
+        // chipimgproc::log.info("chipimgproc::warped_mat::MakeStatMat::operator()(...) - calculate cell_mat: {} ms", d.count());
 
+        /* Output the mincv debug images. */
         if(v_margin){
             v_margin(mat_clone);
         }
 
+        /* Return a tuple of the created containers. */
         return nucleona::make_tuple(std::move(stat_mats), std::move(cell_info));
     }
 private:
@@ -234,28 +306,6 @@ private:
     auto make_cell_stats(
         cv::Mat mat, double theor_max_val, int conv_w, int conv_h
     ) const {
-        /*
-        cv::Mat kern(conv_h, conv_w, type_to_depth<Float>());
-        kern.setTo(1.0 / (conv_w * conv_h));
-
-        cv::GMat g_in;
-        
-        auto g_x_mean_raw   = cv::gapi::filter2D(g_in, type_to_depth<Float>(), kern);
-        auto g_x_mean       = cv::gapi::threshold(g_x_mean_raw, theor_max_val, 0, cv::THRESH_TRUNC);
-
-        auto g_x_mean_2_raw = cv::gapi::mul(g_x_mean, g_x_mean);
-        auto g_x_mean_2     = cv::gapi::threshold(g_x_mean_2_raw, theor_max_val*theor_max_val, 0, cv::THRESH_TRUNC);
-
-        auto g_x_2          = cv::gapi::mul(g_in, g_in);
-        auto g_x_2_mean     = cv::gapi::filter2D(g_x_2, type_to_depth<Float>(), kern);
-        auto g_var_raw      = cv::gapi::sub(g_x_2_mean, g_x_mean_2);
-        auto g_var          = cv::gapi::threshold(g_var_raw, 0, 0, cv::THRESH_TOZERO);
-
-        cv::GComputation computation(cv::GIn(g_in), cv::GOut(g_x_mean, g_x_mean_2, g_var));
-
-        cv::Mat x_mean, x_mean_2, var;
-        computation.apply(cv::gin(mat), cv::gout(x_mean, x_mean_2, var));
-        */
 
         cv::Mat x_mean   = mean(mat, conv_w, conv_h);
         cv::threshold(x_mean, x_mean, theor_max_val, 0, cv::THRESH_TRUNC);
