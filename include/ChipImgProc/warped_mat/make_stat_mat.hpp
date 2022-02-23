@@ -238,6 +238,7 @@ struct MakeStatMat {
                 auto [sub_mean, sub_mean_2, sub_var] = make_cell_stats(sub_raw, theor_max_val, swin_w_px, swin_h_px);
                 // d1 += std::chrono::steady_clock::now() - tmp_timer1;
                 cv::Mat sub_cv_2           = sub_var / sub_mean_2;
+                cv::patchNaNs(sub_cv_2, 0.0);
                 
                 /* Stack up the information, extract the intensity that is the most robust 
                    (min_cv_pos) in this pure probe convolution region as the representative
@@ -308,11 +309,12 @@ private:
     ) const {
 
         cv::Mat x_mean   = mean(mat, conv_w, conv_h);
-        cv::threshold(x_mean, x_mean, theor_max_val, 0, cv::THRESH_TRUNC);
+        trim_zero_maximum(x_mean, x_mean, theor_max_val);
         cv::Mat x_mean_2 = x_mean.mul(x_mean);
         cv::threshold(x_mean_2, x_mean_2, theor_max_val*theor_max_val, 0, cv::THRESH_TRUNC);
         auto    x_2      = mat.mul(mat);
         auto    x_2_mean = mean(x_2, conv_w, conv_h);
+        trim_zero_maximum(x_2_mean, x_2_mean, theor_max_val*theor_max_val);
         cv::Mat var      = x_2_mean - x_mean_2;
         cv::threshold(var, var, 0, 0, cv::THRESH_TOZERO);
 
@@ -321,6 +323,10 @@ private:
             std::move(x_mean_2),
             std::move(var)
         );
+    }
+    void trim_zero_maximum(cv::InputArray src,cv::OutputArray dst, double theor_max_value) const {
+        cv::threshold(src, dst, theor_max_value, 0, cv::THRESH_TRUNC);
+        cv::threshold(dst, dst, 0, 0, cv::THRESH_TOZERO);
     }
     auto mean(
         cv::Mat mat, int conv_w, int conv_h
