@@ -44,6 +44,8 @@ TEST(multi_tiled_mat, basic_test) {
         nucleona::test::data_dir() / "C018_2017_11_30_18_14_23" / "1-1-2.tiff"
     });
 
+    std::cout << nucleona::test::data_dir().string() << std::endl;
+
     for(std::size_t i = 0; i < test_img_paths.size(); i ++ ) {
         // Read FOV image
         auto& img_path = test_img_paths[i];
