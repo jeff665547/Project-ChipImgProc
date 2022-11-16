@@ -57,4 +57,4 @@ CentOS_CI:
         - v0.7.x
         - v0.9.x
     tags:
-        - CENTOS
+        - CentOS7
