@@ -48,57 +48,56 @@ TEST(multi_tiled_mat, basic_test) {
     for(std::size_t i = 0; i < test_img_paths.size(); i ++ ) {
         // Read FOV image
         auto& img_path = test_img_paths[i];
-        std::cout << img_path.string() << std::endl;
+        
         cv::Mat_<std::uint16_t>img = cv::imread(
             img_path.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH
         );
-        std::cout << 0 << std::endl;
+        
         // Create ZION marker layout and set the micron to pixel rate to 2.68
         // In real application, the marker layout generation is depend on chip and reader specification, 
         // which is application level staff and the ChipImgProc would not collect such parameters.
         // In example code, we just hard code everything. 
         // The hard code marker layout generation process can be found in unit_test/ChipImgProc/multi_tiled_mat_test.cpp
         auto mk_layout = make_zion_layout(2.68);
-        std::cout << 1 << std::endl;
+        
         // Detect markers
         auto mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
-        std::cout << 2 << std::endl;
+        
         // Evaluate the rotation degree
         auto theta = marker_fit(mk_regs, std::cout);
-        std::cout << 3 << std::endl;
+        
         // Rotation calibrate image
         rot_cali(img, theta);
-        std::cout << 4 << std::endl;
+        
         // Re-detect the markers, 
         // because after the image rotation, the marker position is changed.
         mk_regs = reg_mat(img, mk_layout, chipimgproc::MatUnit::PX, 0, std::cout);
-        std::cout << 5 << std::endl;
+        
         // Inference the missing marker and standardize the marker position.
         mk_regs = chipimgproc::marker::detection::reg_mat_infer(mk_regs, 0, 0, img);
-        std::cout << 6 << std::endl;
+        
         // Do the gridding, and pass the debug viewer into algorithm. 
         auto gl_res = gridding(img, mk_layout, mk_regs, std::cout);
-        std::cout << 7 << std::endl;
+        
         // Make tiled matrix from gridding result.
         auto tiled_mat = chipimgproc::TiledMat<>::make_from_grid_res(gl_res, img, mk_layout);
-        std::cout << 8 << std::endl;
+        
         // Prepare margin parameter, we set segment rate=0.6 and 
         // replace the tile rectangle after margin.
         chipimgproc::margin::Param<> margin_param { 
             0.6, 0.17, &tiled_mat, true, nullptr
         };
-        std::cout << 9 << std::endl;
+        
         // Call margin use auto minimum CV search algorithm.
         chipimgproc::margin::Result<double> margin_res = margin(
             "auto_min_cv", margin_param
         );
-        std::cout << 10 << std::endl;
+        
         // Save the gridding result
         tiled_mats.push_back(tiled_mat);
-        std::cout << 11 << std::endl;
+        
         // Save the margin result
         stat_mats_s.push_back(margin_res.stat_mats);
-        std::cout << 12 << std::endl;
     }
     
     // Set the logical cell level stitch position.
